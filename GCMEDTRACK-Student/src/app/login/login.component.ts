@@ -32,7 +32,7 @@ export class LoginComponent {
           if (token) {
             this.authService.saveToken(token); // Save token first
             localStorage.setItem('id', response.payload?.id); // Store id
-            this.router.navigate(['/sidenav']); // Navigate to user component
+            this.router.navigate(['/home']); // Navigate to user component
           } else {
             console.error('Invalid response payload:', response);
           }

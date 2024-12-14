@@ -81,6 +81,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($get->getAllUserProfiles());
                 break;
 
+            
+                case 'getAllClinicStaff':
+                    $get = new Get($pdo);
+                    echo json_encode($get->getAllClinicStaff());
+                    break;
+
             default:
                 echo json_encode(["status" => "error", "message" => "Invalid GET request"]);
                 http_response_code(404);
@@ -93,6 +99,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $data = json_decode(file_get_contents("php://input"));
         switch ($request[0]) {
 
+///////////////////////////STUDENT SIDE/////////////////////////////////////////////////////////////
+
             // User login route
             case 'userLogin':
                 echo json_encode($post->loginUser($data));
@@ -102,6 +110,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
             case 'userRegister':
                 echo json_encode($post->registerUser($data));
                 break;
+
+///////////////////////////CLINIC SIDE/////////////////////////////////////////////////////////////
+
+            case 'clinicLogin':
+                echo json_encode($post->clinicLogin($data));
+                break;
+                  
+        
+            case 'addClinicStaff':
+                echo json_encode($post->addClinicStaff($data));
+                break;
+                        
+            case 'deleteClinicStaff':
+                 if (isset($request[1])) {
+                 echo json_encode($post->deleteClinicStaff($request[1]));}
+                break;
+                
 
             default:
                 echo json_encode(["status" => "error", "message" => "Forbidden"]);

@@ -32,7 +32,7 @@ export class AuthService {
                 if (response.status.remarks === 'success') {
                     this.saveToken(response.payload.token);
                     localStorage.setItem('domain_account', domain_account);
-                    this.router.navigate(['/sidenav']);
+                    this.router.navigate(['/home']);
                     return response;
                 } else {
                     throw new Error(response.status.message);

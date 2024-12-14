@@ -1,0 +1,142 @@
+<div class="body">
+  <h1>User Management</h1>
+<div class="controls">
+  <button class="add-clinic-btn" (click)="openModal()">
+    <i class="fas fa-hospital-user"></i>
+    Add Clinic
+  </button>
+  <div class="search-container">
+    <input type="text" 
+           placeholder="Search" 
+           class="search-input" 
+           (input)="onSearch($event)">
+    <button class="search-btn">
+      <i class="fas fa-search"></i>
+    </button>
+  </div>
+</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Clinic Name</th>
+        <th>Email</th>
+        <th>Address</th>
+        <th>Contact Number</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let clinic of filteredClinics; let i = index">
+        <td [innerHTML]="highlightText(clinic.firstName + ' ' + clinic.lastName)"></td>
+        <td>{{ clinic.email }}</td>
+        <td>{{ clinic.address || 'N/A' }}</td>
+        <td>{{ clinic.contactNumber || 'N/A' }}</td>
+        <td>
+          <button class="action-btn edit-btn" (click)="editClinic(i)">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="action-btn delete-btn" (click)="deleteClinic(i)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="clinics.length === 0">
+        <td colspan="5" class="no-data">No clinics found</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Add Modal -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add New Clinic</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="firstName">First Name:</label>
+          <input type="text" id="firstName" [(ngModel)]="newClinic.firstName" name="firstName" required>
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name:</label>
+          <input type="text" id="lastName" [(ngModel)]="newClinic.lastName" name="lastName" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" [(ngModel)]="newClinic.email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" [(ngModel)]="newClinic.password" name="password">
+        </div>
+        <div class="form-group">
+          <label for="address">Address:</label>
+          <input type="text" id="address" [(ngModel)]="newClinic.address" name="address" required>
+        </div>
+        <div class="form-group">
+          <label for="contactNumber">Contact Number:</label>
+          <input type="tel" id="contactNumber" [(ngModel)]="newClinic.contactNumber" name="contactNumber" required>
+        </div>
+        <p class="note">*if blank, a random password will be generated and emailed to the new member</p>
+        <div class="modal-footer">
+          <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="submit-btn">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" *ngIf="showEditModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit Clinic Information</h2>
+      <button class="close-btn" (click)="closeEditModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="onEditSubmit()">
+        <div class="form-group">
+          <label for="editFirstName">First Name:</label>
+          <input type="text" id="editFirstName" [(ngModel)]="editingClinic.firstName" name="firstName" required>
+        </div>
+        <div class="form-group">
+          <label for="editLastName">Last Name:</label>
+          <input type="text" id="editLastName" [(ngModel)]="editingClinic.lastName" name="lastName" required>
+        </div>
+        <div class="form-group">
+          <label for="editEmail">Email:</label>
+          <input type="email" id="editEmail" [(ngModel)]="editingClinic.email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="editPassword">Change Password:</label>
+          <input type="password" id="editPassword" [(ngModel)]="editingClinic.password" name="password" 
+                 placeholder="Leave blank to keep current password">
+        </div>
+        <div class="form-group">
+          <label for="editAddress">Address:</label>
+          <input type="text" id="editAddress" [(ngModel)]="editingClinic.address" name="address" required>
+        </div>
+        <div class="form-group">
+          <label for="editContactNumber">Contact Number:</label>
+          <input type="tel" id="editContactNumber" [(ngModel)]="editingClinic.contactNumber" name="contactNumber" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="cancel-btn" (click)="closeEditModal()">Cancel</button>
+          <button type="submit" class="submit-btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>

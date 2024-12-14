@@ -1,25 +1,71 @@
-<p>sidenav works!</p>
-<nav class="navbar1">
-  <div class="burger-icon" (click)="toggleSidebar()">
-    <img src="../../../assets/gear-solid.svg" alt="Menu" />
-  </div>
-  </nav>
-<div class="overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #snav 
+               [mode]="mobileQuery.matches ? 'over' : 'side'" 
+               class="sidenav" 
+               [opened]="!mobileQuery.matches"
+               [ngClass]="collapsed ? 'sidenav-collapsed': ''">    
+    <div class="logo-container">
+      <img src="assets/gcmedtrack.png" class="logo" (click)="toggleCollapse()" alt="Logo">
+      <button class="btn-close" *ngIf="collapsed" 
+              [@rotate]="collapsed ? 'rotated' : 'default'"
+              (click)="closeSidenav()">
+        <i class="fas fa-times close-icon"></i>
+      </button>
+    </div>
+    
+    <div class="user-info-container">
+      <i class="fas fa-circle-user user-icon"></i>
+      <div class="user-details">
+        <span class="user-name" @fadeInOut>{{ userName }}</span>
+        <span class="user-role" @fadeInOut>{{ userRole }}</span>
+      </div>
+    </div>
 
-<!-- Side Navigation -->
-<div class="side-nav" [ngClass]="{'active': isSidebarOpen}">
-  <!-- <div class="logo-container">
-    <div class="circle-logo"></div>
-    <h1>EventSnap</h1>
-    <p>Course</p>
-  </div> -->
-  <ul class="nav-links">
-    <li routerLink="/dashboard"><a routerLink="/dashboard">Dashboard</a></li>
-    <li routerLink="/event"><a routerLink="/event">Events</a></li>
-    <li routerLink="/students"><a routerLink="/students">Students</a></li>
-    <li routerLink="/users-attended-events"><a routerLink="/users-attended-events">Records</a></li>
-  </ul>
-  <div class="log-out" (click)="logout()">
-    <img src="../../../assets/arrow-right.svg" alt="Log Out">
-  </div>
-</div>
+    <div class="profile-section">
+      <mat-list-item 
+        class="nav-list-item" 
+        (click)="navigateToProfile()" 
+        [class.active]="selectedNavItem === 'profile'">
+        <i class="sidenav-link-icon fas fa-user"></i>
+        <span class="sidenav-link-text" *ngIf="collapsed">Profile</span>
+      </mat-list-item>
+    </div>
+
+    <div class="scrollwrap scrollwrap_delayed">
+      <mat-list class="sidenav-nav">
+        <mat-list-item 
+          *ngFor="let item of navData"
+          class="sidenav-nav-item"
+          [routerLink]="['/user/' + item.routeLink]"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}"
+          (click)="selectedNavItem = item.routeLink">
+          <i class="sidenav-link-icon" [class]="item.icon"></i>
+          <span class="sidenav-link-text" @fadeInOut *ngIf="collapsed">{{ item.label }}</span>
+        </mat-list-item>
+      </mat-list>
+    </div>
+
+    <div class="log-out">
+      <mat-list-item class="nav-list-item logout" (click)="logout()">
+        <i class="sidenav-link-icon fas fa-right-from-bracket"></i>
+        <span class="sidenav-link-text" *ngIf="collapsed">Log Out</span>
+      </mat-list-item>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="toolbar">
+      <button mat-icon-button (click)="snav.toggle()" class="toggle-button">
+        <i class="fas fa-bars"></i>
+      </button>  
+      
+      <div class="datetime-container">
+        <i class="far fa-calendar"></i>
+        <span>{{ currentDateTime | date: 'EEEE, MMM d, y, h:mm a' }}</span>
+      </div>
+    </mat-toolbar>
+
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

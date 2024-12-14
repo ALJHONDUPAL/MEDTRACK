@@ -85,5 +85,44 @@ class Get extends GlobalMethods {
             'code' => $code
         ];
     }
+    
+    public function getAllClinicStaff() {
+        $sql = "SELECT 
+            staff_id,
+            first_name as firstName,
+            last_name as lastName,
+            email,
+            domain_account,
+            address,
+            contact_number as contactNumber,
+            role
+        FROM clinicstaff 
+        WHERE is_active = 1";
+    
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $clinicStaff = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            return $this->sendPayload($clinicStaff, "success", "Clinic staff retrieved successfully", 200);
+        } catch (\PDOException $e) {
+            return $this->sendPayload(null, "error", $e->getMessage(), 400);
+        }
+    }
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 ?>
