@@ -1,0 +1,814 @@
+:host {
+    background-color: #E6E6E6;
+    min-height: 100vh;
+    display: block;
+    padding: 20px;
+    margin: 0;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    position: relative;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 10px;
+}
+
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.profile-header .department {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.profile-header .id-number {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.edit-profile-btn {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Documents Table */
+.documents-table {
+    background: #FAFAFA;
+    border-radius: 10px;
+    margin: 0 auto 30px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1400px;  
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 20px 25px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+th {
+    background-color: #fff;
+    font-weight: 500;
+}
+
+.status-cleared {
+    color: #4CAF50;
+}
+
+.status-pending {
+    color: #FF4444;
+}
+
+/* Expandable Document Sections */
+.document-item {
+    background: #FAFAFA;
+    border-radius: 10px;
+    margin: 0 auto 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1400px;
+    position: relative;
+}
+
+.document-header {
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.document-content {
+    background: #FAFAFA;
+    padding: 25px;
+    border-top: 1px solid #eee;
+}
+
+.document-content h3 {
+    margin-top: 0;
+    color: #666;
+    font-weight: normal;
+}
+
+.xray-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+/* If you have any other card elements, add their selectors here with the same background color */
+.card {
+    background-color: #FAFAFA;
+}
+
+/* Add styles for the dropdown icon on the left */
+.dropdown-icon {
+    margin-right: 15px;
+}
+
+/* Add styles for the plus icon on the right */
+.plus-icon {
+    margin-left: auto;
+    cursor: pointer;
+    float: right;
+    padding: 5px;
+}
+
+.plus-icon:hover {
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+/* Add the bottom line */
+.document-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #E0E0E0;
+}
+
+/* Information section styling */
+.information-title {
+    color: #4a6741;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.info-label {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Add these new styles after your existing styles */
+.document-image-container {
+    width: 100%;
+    margin-top: 15px;
+    position: relative;
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.document-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.document-image:hover {
+    opacity: 0.9;
+}
+
+.image-upload {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Title styling */
+.modal-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #546e7a;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+/* Upload button styling */
+.document-upload-container {
+    margin-top: 15px;
+    padding: 15px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.document-upload-container:hover {
+    border-color: #4CAF50;
+    background-color: #f1f8e9;
+}
+
+.upload-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.upload-text {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Action buttons */
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.cancel-btn, .save-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.cancel-btn {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
+.save-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.save-btn:hover {
+    background-color: #43a047;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Upload area styling */
+.document-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.upload-text {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* File input styling */
+input[type="file"] {
+    display: none;
+}
+
+.image-preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.preview-image {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: #bbb;
+}
+
+.delete-image-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.delete-image-btn:hover {
+    background-color: #ff0000;
+}
+
+.image-preview {
+    margin-bottom: 15px;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Container for the dropdown section */
+.section-content {
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Image container styles */
+.document-image-container {
+    width: 100%;
+    margin: 10px 0;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Image styles */
+.document-image {
+    width: 100%;
+    height: 150px; /* Reduced height */
+    object-fit: contain; /* This maintains aspect ratio */
+    display: block;
+    background-color: #f5f5f5;
+}
+
+/* Optional: Add a border to make the image container more visible */
+.document-image-wrapper {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 5px;
+    margin: 10px 0;
+}
+
+.profile-image-upload {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-image-upload img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 3px solid #e0e0e0;
+}
+
+.upload-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+    background-color: #e0e0e0;
+}
+
+.file-input {
+    display: none;
+}
+
+.preview-image {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.department-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 1em;
+}
+
+.department-select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.department-select:hover {
+    border-color: #4CAF50;
+}
+
+.department-select option {
+    padding: 8px;
+}
+
+/* Date inputs specific styling */
+input[type="date"] {
+    height: 36px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+}
+
+.vaccination-info {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.info-group {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-group:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #4a6741;
+    min-width: 150px;
+    margin-right: 10px;
+}
+
+.info-value {
+    color: #666;
+}
+
+.information-title {
+    color: #4a6741;
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+    .info-row {
+        flex-direction: column;
+    }
+
+    .info-label {
+        margin-bottom: 4px;
+    }
+}
+
+/* Department and Year Level row styling */
+.department-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.department-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.required {
+    color: #ff0000;
+    margin-left: 3px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-group input.ng-invalid.ng-touched,
+.form-group select.ng-invalid.ng-touched {
+    border-color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .department-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .department-row .form-group {
+        margin-bottom: 15px;
+    }
+}
+
+/* Enhanced Edit Profile modal styles */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+input, select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+input.error, select.error {
+    border-color: #ff0000;
+    background-color: #fff8f8;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancel-btn {
+    background: #f5f5f5;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Add styles for the modal content */
+.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Style for the error message */
+.error-message {
+    color: #dc3545; /* Red color for error messages */
+    font-size: 0.875rem;
+    margin-top: 10px;
+}
+
+/* Enhanced button styles */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancel-btn {
+    background: #f5f5f5;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Add these styles to your existing CSS */
+.validation-error {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.form-group input.ng-invalid.ng-touched,
+.form-group select.ng-invalid.ng-touched {
+    border-color: #dc3545;
+}
+
+.form-group {
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.form-group input.error,
+.form-group select.error {
+    border-color: #dc3545;
+}
+
+.form-group input.error:focus,
+.form-group select.error:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+}

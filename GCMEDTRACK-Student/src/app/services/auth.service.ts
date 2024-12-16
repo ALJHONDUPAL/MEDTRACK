@@ -47,41 +47,35 @@ export class AuthService {
 }
 
 
-  // Save token to local storage
-  saveToken(token: string): void {
-    localStorage.setItem('authToken', token);
-  }
+saveToken(token: string): void {
+  localStorage.setItem('authToken', token);
+}
 
-  // Get token from local storage
-  getToken(): string | null {
-    return localStorage.getItem('authToken');
-  }
+// Get token from local storage
+getToken(): string | null {
+  return localStorage.getItem('authToken');
+}
 
-  // Check if user is authenticated
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    return token !== null && token !== undefined;
-  }
+// Check if user is authenticated
+isAuthenticated(): boolean {
+  const token = this.getToken();
+  return token !== null && token !== undefined;
+}
 
-  // Log out user
-  // user(): void {
-  //   localStorage.clear(); // Clear all user data
-  //   this.router.navigate(['/login']); // Redirect to login
-  // }
   
   isLoggedIn(): boolean {
     return !!localStorage.getItem('authToken');
   }
   userLogout() {
     localStorage.removeItem('userToken');
-    localStorage.removeItem('id');
+    localStorage.removeItem('user_id');
     localStorage.removeItem('domain_account');
     localStorage.removeItem('password');
     this.router.navigate(['/login']);
 }
-getUserId(): string | null {
-  const user = JSON.parse(localStorage.getItem('user') || 'null');  // Assuming the user is saved as a JSON object
-  return user ? user.id : null;  // Return the user ID if available
-}
+// getUserId(): string | null {
+//   const user = JSON.parse(localStorage.getItem('user') || 'null');  // Assuming the user is saved as a JSON object
+//   return user ? user.id : null;  // Return the user ID if available
+// }
   
 }

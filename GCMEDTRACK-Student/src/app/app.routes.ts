@@ -3,6 +3,8 @@ import { LoginComponent } from './login/login.component';
 import { SidenavComponent } from './sidenav/sidenav.component'; 
 import { AuthGuard } from './services/auth.guard';
 import { HomeComponent } from './home/home.component';
+import { ProfileComponent } from './profile/profile.component';
+import { BookingComponent } from './booking/booking.component';
 
 export const routes: Routes = [
   { 
@@ -23,6 +25,16 @@ export const routes: Routes = [
         path: 'home', 
         component: HomeComponent,
         canActivate: [AuthGuard],
+      },
+      { 
+        path: 'profile', 
+        component: ProfileComponent,
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'booking',
+        component: BookingComponent,
+        canActivate: [AuthGuard]
       },
     ]
   },

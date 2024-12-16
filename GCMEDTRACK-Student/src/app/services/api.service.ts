@@ -9,6 +9,8 @@ import { catchError } from 'rxjs/operators';
 export class ApiService {
   private baseUrl = 'http://localhost/MEDTRACK/backend_php/api/';
 
+
+
   constructor(private http: HttpClient) {}
 
   // User login method
@@ -58,4 +60,23 @@ export class ApiService {
     }
     return throwError(() => new Error(errorMessage));
   }
+
+
+  //get the firtsname and lastname in student side
+  // Get user fullname by user ID
+// Method to get the user's full name (firstname + lastname) by userId
+getUserFullNameByUsername(username: string): Observable<any> {
+  return this.http.get<any>(`${this.baseUrl}getUserFullNameByUsername?username=${username}`).pipe(
+    catchError(this.handleError)
+  );
+}
+
+// Method to create a user profile
+
+
+
+
+
+
+
 }

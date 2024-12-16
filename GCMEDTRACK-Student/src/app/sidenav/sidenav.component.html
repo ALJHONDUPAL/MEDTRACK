@@ -30,6 +30,17 @@
         <span class="sidenav-link-text" *ngIf="collapsed">Profile</span>
       </mat-list-item>
     </div>
+    
+    <div class="profile-section">
+      <mat-list-item 
+        class="nav-list-item" 
+        (click)="navigateToBooking()" 
+        [class.active]="selectedNavItem === 'booking'">
+        <i class="sidenav-link-icon fas fa-calendar-check"></i>
+        <span class="sidenav-link-text" *ngIf="collapsed">Booking</span>
+      </mat-list-item>
+    </div>
+    
 
     <div class="scrollwrap scrollwrap_delayed">
       <mat-list class="sidenav-nav">

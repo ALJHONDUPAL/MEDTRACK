@@ -31,24 +31,24 @@ class Get extends GlobalMethods {
         return array("code" => $code, "errmsg" => $errmsg, "data" => $data);
     }
 
-    // Method to get the profile of a specific user by their ID
-    public function getUserProfile($user_id) {
-        $sql = "SELECT * FROM user_profiles WHERE user_id = :user_id";
+    // // Method to get the profile of a specific user by their ID
+    // public function getUserProfile($user_id) {
+    //     $sql = "SELECT * FROM user_profiles WHERE user_id = :user_id";
 
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['user_id' => $user_id]);
-            $profile = $stmt->fetch();
+    //     try {
+    //         $stmt = $this->pdo->prepare($sql);
+    //         $stmt->execute(['user_id' => $user_id]);
+    //         $profile = $stmt->fetch();
             
-            if ($profile) {
-                return $this->sendPayload($profile, "success", "User profile fetched successfully", 200);
-            } else {
-                return $this->sendPayload(null, "error", "Profile not found", 404);
-            }
-        } catch (\PDOException $e) {
-            return $this->sendPayload(null, "error", $e->getMessage(), 403);
-        }
-    }
+    //         if ($profile) {
+    //             return $this->sendPayload($profile, "success", "User profile fetched successfully", 200);
+    //         } else {
+    //             return $this->sendPayload(null, "error", "Profile not found", 404);
+    //         }
+    //     } catch (\PDOException $e) {
+    //         return $this->sendPayload(null, "error", $e->getMessage(), 403);
+    //     }
+    // }
 
     // Method to get all user profiles (optional, depending on your needs)
     public function getAllUserProfiles() {
@@ -115,10 +115,24 @@ class Get extends GlobalMethods {
 
 
 
+//student side getting the firstname and lastname
+public function getUserFullNameByUsername($username) {
+    $sql = "SELECT firstname, lastname FROM users WHERE domain_account = :username"; // Adjust as per your column name
 
+    try {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['username' => $username]); 
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-
-
+        if ($user) {
+            return $this->sendPayload($user, "success", "User full name retrieved successfully", 200);
+        } else {
+            return $this->sendPayload(null, "error", "User not found", 404);
+        }
+    } catch (\PDOException $e) {
+        return $this->sendPayload(null, "error", $e->getMessage(), 403);
+    }
+}
 
 
 

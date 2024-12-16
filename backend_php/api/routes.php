@@ -55,15 +55,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         switch ($request[0]) {
             // Get user profile by user ID
-            case 'getUserProfile':
-                if (isset($request[1])) {
-                    $user_id = (int) $request[1];
-                    echo json_encode($get->getUserProfile($user_id));
-                } else {
-                    echo json_encode(["status" => "error", "message" => "User ID is required"]);
-                    http_response_code(400);
-                }
-                break;
+            // case 'getUserProfile':
+            //     if (isset($request[1])) {
+            //         $user_id = (int) $request[1];
+            //         echo json_encode($get->getUserProfile($user_id));
+            //     } else {
+            //         echo json_encode(["status" => "error", "message" => "User ID is required"]);
+            //         http_response_code(400);
+            //     }
+            //     break;
 
             // Get user profile by domain account (email or username)
             case 'getProfileByDomainAccount':
@@ -87,6 +87,29 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo json_encode($get->getAllClinicStaff());
                     break;
 
+
+            // get the firstname and lastname
+
+            // Fetch the firstname and lastname of a user
+           // Route to get user's firstname and lastname by userId
+           // Route to get user's firstname and lastname by id
+           case 'getUserFullNameByUsername':
+            if (isset($_GET['username'])) {
+                $username = $_GET['username']; // Get the username from the query parameter
+                echo json_encode($get->getUserFullNameByUsername($username));
+            } else {
+                echo json_encode(["status" => "error", "message" => "Username is required"]);
+                http_response_code(400);
+            }
+            break;
+        
+        
+        
+    break;
+
+
+
+            
             default:
                 echo json_encode(["status" => "error", "message" => "Invalid GET request"]);
                 http_response_code(404);
@@ -110,6 +133,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
             case 'userRegister':
                 echo json_encode($post->registerUser($data));
                 break;
+
+       
+
 
 ///////////////////////////CLINIC SIDE/////////////////////////////////////////////////////////////
 

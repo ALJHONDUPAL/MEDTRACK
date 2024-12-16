@@ -31,7 +31,7 @@ export class LoginComponent {
           const token = response.payload?.token;
           if (token) {
             this.authService.saveToken(token); // Save token first
-            localStorage.setItem('id', response.payload?.id); // Store id
+            localStorage.setItem('user_id', response.payload?.id); // Store id
             this.router.navigate(['/home']); // Navigate to user component
           } else {
             console.error('Invalid response payload:', response);

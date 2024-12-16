@@ -24,7 +24,7 @@ class Post extends GlobalMethods {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['firstname' => $firstname, 'lastname' => $lastname, 'domain_account' => $domain_account, 'password' => $password]);
-            return $this->sendPayload(null, "success", "User registered successfully", 201);
+            return $this->sendPayload(null           , "success", "User registered successfully", 201);
         } catch (\PDOException $e) {
             return $this->sendPayload(null, "error", $e->getMessage(), 400);
         }
@@ -47,7 +47,7 @@ class Post extends GlobalMethods {
                     'aud' => "http://example.com", 
                     'iat' => time(), 
                     'exp' => time() + 3600, 
-                    'uid' => $user['id']  // Corrected field name from 'userID' to 'id'
+                    'uid' => $user['user_id']  // Corrected field name from 'userID' to 'id'
                 ];
                 $jwt = JWT::encode($payload, $this->key, 'HS256');
                 return $this->sendPayload(['token' => $jwt], "success", "Login successful", 200);
@@ -59,33 +59,8 @@ class Post extends GlobalMethods {
         }
     }
 
-
-    public function createUserProfile($data) {
-        $user_id = $data->user_id; // Assuming you pass the user ID
-        $name = $data->name;
-        $department = $data->department;
-        $year_level = $data->year_level;
-        $id_number = $data->id_number;
-        $profile_image = isset($data->profile_image) ? base64_decode($data->profile_image) : null;
     
-        $sql = "INSERT INTO user_profiles (user_id, name, department, year_level, id_number, profile_image) 
-                VALUES (:user_id, :name, :department, :year_level, :id_number, :profile_image)";
-        
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                'user_id' => $user_id,
-                'name' => $name,
-                'department' => $department,
-                'year_level' => $year_level,
-                'id_number' => $id_number,
-                'profile_image' => $profile_image
-            ]);
-            return $this->sendPayload(null, "success", "Profile created successfully", 201);
-        } catch (\PDOException $e) {
-            return $this->sendPayload(null, "error", $e->getMessage(), 400);
-        }
-    }
+    
     
 
 ///////////////////////////////////////////CLINIC SIDE///////////////////////////////////////////////////////////////////////////////////////////////

@@ -77,6 +77,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
       icon: 'fas fa-users',
       label: 'Feedback'
     },
+
     {
       routeLink: 'about-us',
       icon: 'fas fa-circle-info',
@@ -134,7 +135,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   navigateToProfile(): void {
     this.selectedNavItem = 'profile';
-    this.router.navigate(['/user/profile']);
+    this.router.navigate(['/profile']);
+  }
+  navigateToBooking(): void {
+    this.selectedNavItem = 'booking';
+    this.router.navigate(['/booking']);
   }
 
   logout(): void {
