@@ -32,10 +32,10 @@ class Post extends GlobalMethods {
     
 
     public function loginUser($data) {
-        $domain_account = $data->domain_account;  // Updated to match the new column name
+        $domain_account = $data->domain_account;
         $password = $data->password;
         
-        $sql = "SELECT * FROM users WHERE domain_account = :domain_account";  // Changed 'username' to 'domain_account'
+        $sql = "SELECT * FROM users WHERE domain_account = :domain_account";
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['domain_account' => $domain_account]);
@@ -43,14 +43,24 @@ class Post extends GlobalMethods {
         
             if ($user && password_verify($password, $user['password'])) {
                 $payload = [
-                    'iss' => "http://example.org", 
-                    'aud' => "http://example.com", 
-                    'iat' => time(), 
-                    'exp' => time() + 3600, 
-                    'uid' => $user['user_id']  // Corrected field name from 'userID' to 'id'
+                    'iss' => 'localhost',
+                    'aud' => 'localhost',
+                    'iat' => time(),
+                    'exp' => time() + (60 * 60), // 1 hour expiration
+                    'data' => [
+                        'user_id' => $user['user_id'],
+                        'domain_account' => $user['domain_account']
+                    ]
                 ];
+                
                 $jwt = JWT::encode($payload, $this->key, 'HS256');
-                return $this->sendPayload(['token' => $jwt], "success", "Login successful", 200);
+                return $this->sendPayload([
+                    'token' => $jwt,
+                    'user' => [
+                        'user_id' => $user['user_id'],
+                        'domain_account' => $user['domain_account']
+                    ]
+                ], "success", "Login successful", 200);
             } else {
                 return $this->sendPayload(null, "error", "Invalid credentials", 401);
             }
@@ -59,7 +69,222 @@ class Post extends GlobalMethods {
         }
     }
 
+    public function updateUserProfile() {
+        header('Content-Type: application/json');
+        
+        $requiredFields = ['user_id', 'department', 'year_level', 'id_number'];
+        foreach ($requiredFields as $field) {
+            if (!isset($_POST[$field])) {
+                return [
+                    "status" => "error",
+                    "message" => "Missing required field: $field"
+                ];
+            }
+        }
     
+        $userId = $_POST['user_id'];
+
+        // First verify that the user exists
+        try {
+            $stmt = $this->pdo->prepare("SELECT user_id FROM users WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            if (!$stmt->fetch()) {
+                return [
+                    "status" => "error",
+                    "message" => "User not found"
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                "status" => "error",
+                "message" => "Database error: " . $e->getMessage()
+            ];
+        }
+    
+        $name = $_POST['name'];
+        $department = $_POST['department'];
+        $yearLevel = $_POST['year_level'];
+        $idNumber = $_POST['id_number'];
+    
+        // Handle profile image upload if present
+        $profileImagePath = null;
+        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+            $profileImagePath = $this->handleFileUpload(
+                $_FILES['profile_image'],
+                $userId,
+                'profile_images'
+            );
+            
+            if (!$profileImagePath) {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to upload profile image"
+                ];
+            }
+        }
+    
+        try {
+            $this->pdo->beginTransaction();
+    
+            // Check if profile exists
+            $stmt = $this->pdo->prepare("SELECT id FROM user_profiles WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            $profile = $stmt->fetch();
+    
+            if ($profile) {
+                // Update existing profile
+                $sql = "UPDATE user_profiles SET 
+                        name = ?,
+                        department = ?, 
+                        year_level = ?, 
+                        id_number = ?
+                        " . ($profileImagePath ? ", profile_image_path = ?" : "") . "
+                        WHERE user_id = ?";
+    
+                $params = [$name, $department, $yearLevel, $idNumber];
+                if ($profileImagePath) {
+                    $params[] = $profileImagePath;
+                }
+                $params[] = $userId;
+            } else {
+                // Insert new profile
+                $sql = "INSERT INTO user_profiles (user_id, name, department, year_level, id_number" . 
+                       ($profileImagePath ? ", profile_image_path" : "") . ") 
+                       VALUES (?, ?, ?, ?, ?" . ($profileImagePath ? ", ?" : "") . ")";
+    
+                $params = [$userId, $name, $department, $yearLevel, $idNumber];
+                if ($profileImagePath) {
+                    $params[] = $profileImagePath;
+                }
+            }
+    
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            $this->pdo->commit();
+    
+            return [
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'data' => ['profile_image_path' => $profileImagePath]
+            ];
+    
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            return [
+                "status" => "error",
+                "message" => "Database error: " . $e->getMessage()
+            ];
+        }
+    }
+
+    // Method to handle medical document uploads
+    public function uploadMedicalDocument() {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->sendErrorResponse('Invalid request method');
+            return;
+        }
+
+        $requiredFields = ['user_id', 'document_type'];
+        foreach ($requiredFields as $field) {
+            if (!isset($_POST[$field])) {
+                $this->sendErrorResponse("Missing required field: $field");
+                return;
+            }
+        }
+
+        if (!isset($_FILES['document'])) {
+            $this->sendErrorResponse('No document file uploaded');
+            return;
+        }
+
+        $userId = $_POST['user_id'];
+        $documentType = $_POST['document_type'];
+        
+        // Get user's ID number for folder structure
+        $stmt = $this->pdo->prepare("SELECT id_number FROM user_profiles WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $userProfile = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$userProfile) {
+            $this->sendErrorResponse('User profile not found');
+            return;
+        }
+
+        $documentPath = $this->handleFileUpload(
+            $_FILES['document'],
+            $userProfile['id_number'],
+            'medical_documents/' . $documentType
+        );
+
+        if (!$documentPath) {
+            $this->sendErrorResponse('Failed to upload document');
+            return;
+        }
+
+        try {
+            $sql = "INSERT INTO medical_documents (user_id, document_type, file_path, status) 
+                    VALUES (?, ?, ?, 'Submitted')
+                    ON DUPLICATE KEY UPDATE 
+                    file_path = VALUES(file_path),
+                    status = 'Submitted',
+                    uploaded_at = CURRENT_TIMESTAMP";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$userId, $documentType, $documentPath]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Document uploaded successfully',
+                'data' => ['file_path' => $documentPath]
+            ]);
+
+        } catch (Exception $e) {
+            $this->sendErrorResponse('Database error: ' . $e->getMessage());
+        }
+    }
+
+    // Helper method to handle file uploads
+    private function handleFileUpload($file, $identifier, $subDirectory) {
+        $baseUploadDir = "uploads/";
+        $targetDir = $baseUploadDir . $identifier . "/" . $subDirectory . "/";
+        
+        // Create directories if they don't exist
+        if (!file_exists($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $newFileName = time() . '_' . uniqid() . '.' . $fileExtension;
+        $targetPath = $targetDir . $newFileName;
+
+        // Validate file size (10MB limit)
+        if ($file['size'] > 10000000) {
+            return false;
+        }
+
+        // Validate file type
+        $allowedTypes = ['pdf', 'jpg', 'jpeg', 'png'];
+        if (!in_array($fileExtension, $allowedTypes)) {
+            return false;
+        }
+
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            return $targetPath;
+        }
+
+        return false;
+    }
+
+    private function sendErrorResponse($message) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => $message
+        ]);
+    }
+
+
     
     
 

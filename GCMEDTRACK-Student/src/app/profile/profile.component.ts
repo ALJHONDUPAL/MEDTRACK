@@ -3,6 +3,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -148,10 +150,45 @@ export class ProfileComponent implements OnInit {
     location?: string;
   } = {};
   antiHAVImage: string | null = null;
+  
 
-  constructor() { }
+  userId: string | null = null;
+
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.userId = this.authService.getUserId();
+    console.log('Initial userId:', this.userId);
+    
+    if (!this.userId) {
+      console.error('No user ID found');
+      this.router.navigate(['/login']);
+      return;
+    }
+    
+    this.loadProfileData();
+  }
+
+  loadProfileData() {
+    if (!this.userId) return;
+
+    this.apiService.getUserProfile(this.userId).subscribe({
+      next: (response: any) => {
+        console.log('Profile data response:', response);
+        if (response.status === 'success') {
+          this.profileData = response.data;
+        } else {
+          console.error('Failed to load profile:', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading profile:', error);
+      }
+    });
   }
 
   toggleSection(section: string): void {
@@ -186,70 +223,83 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  openModal(): void {
-    this.tempProfileImage = this.profileData.profileImage; // Store the current image in case user cancels
+  openModal() {
     this.showModal = true;
-  }
-  closeModal() {
-    this.showModal = false;
     this.showErrors = false;
-    this.tempProfileImage = null;
-  }
-
-  saveProfile(formData: any): void {
-    this.showErrors = true;
-  
-    // Reset all error flags
     this.nameError = false;
     this.departmentError = false;
     this.yearLevelError = false;
     this.idNumberError = false;
-  
-    let hasError = false;
-  
-    // Validate name
-    if (!formData.name || formData.name.trim() === '') {
-      this.nameError = true;
-      hasError = true;
-    }
-  
-    // Validate department
-    if (!formData.department) {
-      this.departmentError = true;
-      hasError = true;
-    }
-  
-    // Validate year level
-    if (!formData.yearLevel) {
-      this.yearLevelError = true;
-      hasError = true;
-    }
-  
-    // Validate ID number
-    if (!formData.idNumber || formData.idNumber.trim() === '') {
-      this.idNumberError = true;
-      this.idNumberErrorMessage = 'Please enter your ID number';
-      hasError = true;
-    } else if (!/^\d+$/.test(formData.idNumber)) {
-      this.idNumberError = true;
-      this.idNumberErrorMessage = 'ID Number must contain only numbers';
-      hasError = true;
-    }
-  
-    // Stop here if there are errors
-    if (hasError) {
+    this.tempProfileImage = null;
+  }
+  closeModal() {
+    this.showModal = false;
+    this.showErrors = false;
+  }
+
+  saveProfile(formValue: any) {
+    this.showErrors = true;
+    
+    const userId = this.authService.getUserId();
+    if (!userId) {
+      console.error('No user ID available');
+      alert('Error: User ID not found. Please try logging in again.');
+      this.router.navigate(['/login']);
       return;
     }
-  
-    // Update the profile data
-    this.profileData = {
-      ...this.profileData,
-      ...formData,
-      profileImage: this.tempProfileImage || this.profileData.profileImage,
-    };
-  
-    this.showModal = false; // Close the modal
-    this.showErrors = false; // Reset error visibility
+
+    console.log('Current userId:', userId); // Debug log
+    
+    // Create FormData object
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    formData.append('name', formValue.name);
+    formData.append('department', formValue.department);
+    formData.append('year_level', formValue.yearLevel);
+    formData.append('id_number', formValue.idNumber);
+
+    // Debug log
+    for (const pair of formData.entries()) {
+      console.log('FormData:', pair[0], pair[1]);
+    }
+
+    if (this.tempProfileImage) {
+      fetch(this.tempProfileImage)
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+          formData.append('profile_image', file);
+          this.sendUpdateRequest(formData);
+        });
+    } else {
+      this.sendUpdateRequest(formData);
+    }
+  }
+
+  private sendUpdateRequest(formData: FormData) {
+    this.apiService.updateUserProfile(formData).subscribe({
+      next: (response: any) => {
+        if (response.status === 'success') {
+          this.profileData = {
+            ...this.profileData,
+            name: formData.get('name'),
+            department: formData.get('department'),
+            yearLevel: formData.get('year_level'),
+            idNumber: formData.get('id_number'),
+            profileImage: response.data?.profile_image_path || this.profileData.profileImage
+          };
+          
+          this.closeModal();
+          alert('Profile updated successfully');
+        } else {
+          alert('Failed to update profile: ' + response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error updating profile:', error);
+        alert('Failed to update profile. Please try again.');
+      }
+    });
   }
 
   isProfileComplete(): boolean {
@@ -268,7 +318,7 @@ export class ProfileComponent implements OnInit {
     alert('Please complete all profile information: Name, Department, Year Level, and ID Number');
   }
 
-  onProfileImageUpload(event: any): void {
+  onProfileImageUpload(event: any) {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -351,13 +401,19 @@ export class ProfileComponent implements OnInit {
     this.closeUrinalysisModal();
   }
 
-  onIdNumberInput(event: any): void {
-    const input = event.target;
-    // Remove any non-numeric characters
-    input.value = input.value.replace(/[^0-9]/g, '');
-    this.idNumberError = !/^\d+$/.test(input.value);
+  onIdNumberInput(event: any) {
+    const input = event.target.value;
+    if (!/^\d*$/.test(input)) {
+      this.idNumberError = true;
+      this.idNumberErrorMessage = 'ID number must contain only numbers';
+    } else if (input.length > 10) {
+      this.idNumberError = true;
+      this.idNumberErrorMessage = 'ID number cannot exceed 10 digits';
+    } else {
+      this.idNumberError = false;
+      this.idNumberErrorMessage = '';
+    }
   }
-
   openVaccinationModal(event: Event) {
     event.stopPropagation();
     this.showVaccinationModal = true;

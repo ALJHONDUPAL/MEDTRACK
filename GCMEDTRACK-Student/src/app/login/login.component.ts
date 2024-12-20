@@ -8,40 +8,42 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, NgIf, MatInputModule, MatButtonModule,CommonModule,],
+  imports: [FormsModule, NgIf, MatInputModule, MatButtonModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
   isLoginMode: boolean = true;
   showRegister = false;
-  // Bind form fields to database fields
-  domain_account: string = ''; // Matches `domain_account` in database
+  domain_account: string = '';
   password: string = '';
-  firstname: string = ''; // Required for registration
-  lastname: string = ''; // Required for registration
+  firstname: string = '';
+  lastname: string = '';
+  errorMessage: string = '';
 
   constructor(private authService: AuthService, private router: Router) {}
+
   onSubmit() {
     if (this.isLoginMode) {
-      // Login logic
-      this.authService.login(this.domain_account, this.password).subscribe(
-        response => {
-          console.log('Login response:', response);
-          const token = response.payload?.token;
-          if (token) {
-            this.authService.saveToken(token); // Save token first
-            localStorage.setItem('user_id', response.payload?.id); // Store id
-            this.router.navigate(['/home']); // Navigate to user component
+      console.log('Attempting login with:', { domain_account: this.domain_account });
+      
+      this.authService.login(this.domain_account, this.password).subscribe({
+        next: (response) => {
+          console.log('Login response received:', response);
+          
+          if (response.status?.remarks === 'success' || response.status === 'success') {
+            console.log('Login successful, navigating to home');
+            this.router.navigate(['/home']);
           } else {
-            console.error('Invalid response payload:', response);
+            this.errorMessage = response.message || 'Login failed';
+            console.error('Login failed:', this.errorMessage);
           }
         },
-      
-        error => {
+        error: (error) => {
+          this.errorMessage = error.message || 'An error occurred during login';
           console.error('Login error:', error);
         }
-      );
+      });
     } else {
       // Registration logic
       const newUser = {
@@ -51,16 +53,16 @@ export class LoginComponent {
         lastname: this.lastname
       };
 
-      this.authService.register(newUser).subscribe(
-        response => {
+      this.authService.register(newUser).subscribe({
+        next: (response) => {
           console.log('Registration successful:', response);
-          this.isLoginMode = true; // Switch to login mode after successful registration
+          this.isLoginMode = true;
           this.resetForm();
         },
-        error => {
+        error: (error) => {
           console.error('Registration error:', error);
         }
-      );
+      });
     }
   }
 

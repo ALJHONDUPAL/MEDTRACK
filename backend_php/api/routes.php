@@ -133,9 +133,21 @@ switch ($_SERVER['REQUEST_METHOD']) {
             case 'userRegister':
                 echo json_encode($post->registerUser($data));
                 break;
+            
+             case 'updateUserProfile':
+                if (!empty($_FILES) || !empty($_POST)) {
+                        // Directly pass $_POST and $_FILES to the controller
+                        echo json_encode($post->updateUserProfile());
+                    } else {
+                        echo json_encode([
+                            "status" => "error", 
+                            "message" => "No data received"
+                        ]);
+                        http_response_code(400);
+                    }
+                    break;
 
-       
-
+        
 
 ///////////////////////////CLINIC SIDE/////////////////////////////////////////////////////////////
 

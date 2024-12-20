@@ -26,56 +26,54 @@ export class AuthService {
 
   // Login user
   login(domain_account: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/userLogin`, { domain_account, password }) // Correct route
-        .pipe(
-            map(response => {
-                if (response.status.remarks === 'success') {
-                    this.saveToken(response.payload.token);
-                    localStorage.setItem('domain_account', domain_account);
-                    this.router.navigate(['/home']);
-                    return response;
-                } else {
-                    throw new Error(response.status.message);
-                }
-            }),
-            catchError(error => {
-              console.error('Login error details:', error.error);
-              return of({ success: false, error: error.message || 'Login failed' });
-          }))
+    return this.http.post<any>(`${this.baseUrl}/userLogin`, { domain_account, password })
+      .pipe(
+        map(response => {
+          console.log('Raw login response:', response);
           
-        
-}
-
-
-saveToken(token: string): void {
-  localStorage.setItem('authToken', token);
-}
-
-// Get token from local storage
-getToken(): string | null {
-  return localStorage.getItem('authToken');
-}
-
-// Check if user is authenticated
-isAuthenticated(): boolean {
-  const token = this.getToken();
-  return token !== null && token !== undefined;
-}
-
-  
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('authToken');
+          // Check for success in both possible response formats
+          if (response.status?.remarks === 'success' && response.payload) {
+            // Store token
+            this.saveToken(response.payload.token);
+            
+            // Store user data
+            const userId = response.payload.user?.user_id;
+            if (userId) {
+              localStorage.setItem('user_id', userId.toString());
+              console.log('Stored user_id:', userId);
+            }
+            
+            return response;
+          } else {
+            throw new Error(response.message || 'Login failed');
+          }
+        }),
+        catchError(error => {
+          console.error('Login error in service:', error);
+          return of({ success: false, error: error.message || 'Login failed' });
+        })
+      );
   }
-  userLogout() {
-    localStorage.removeItem('userToken');
+
+  saveToken(token: string): void {
+    localStorage.setItem('authToken', token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
+
+  getUserId(): string | null {
+    return localStorage.getItem('user_id');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken() && !!this.getUserId();
+  }
+
+  logout(): void {
+    localStorage.removeItem('authToken');
     localStorage.removeItem('user_id');
-    localStorage.removeItem('domain_account');
-    localStorage.removeItem('password');
     this.router.navigate(['/login']);
-}
-// getUserId(): string | null {
-//   const user = JSON.parse(localStorage.getItem('user') || 'null');  // Assuming the user is saved as a JSON object
-//   return user ? user.id : null;  // Return the user ID if available
-// }
-  
+  }
 }
