@@ -1,0 +1,186 @@
+<div class="schedule-container">
+    <h2>Set Appointment Time and Date</h2>
+    
+    <div class="weekdays">
+      <button class="weekday-btn" 
+              *ngFor="let day of weekDays" 
+              [ngClass]="{'active': selectedDay === day}"
+              (click)="selectDay(day)">
+        {{day}}
+      </button>
+    </div>
+  
+    <div class="appointments-list" *ngIf="filteredAppointments.length > 0">
+      <div class="list-header">
+        <div class="header-cell">Information</div>
+        <div class="header-cell">Department</div>
+        <div class="header-cell">Date and Time</div>
+        <div class="header-cell">Purpose</div>
+        <div class="header-cell">Status</div>
+      </div>
+  
+      <div class="list-row" *ngFor="let appointment of filteredAppointments">
+        <div class="cell info-cell">
+          <img [src]="appointment.avatar" alt="User" class="user-avatar">
+          <div class="user-info">
+            <div class="name">{{appointment.name}}</div>
+            <div class="id">{{appointment.id}}</div>
+          </div>
+        </div>
+        <div class="cell">{{appointment.department}}</div>
+        <div class="cell">
+          <div>{{appointment.date}}</div>
+          <div class="time">{{appointment.time}}</div>
+        </div>
+        <div class="cell">{{appointment.purpose}}</div>
+        <div class="cell">
+          <span class="status-badge" [ngClass]="appointment.status.toLowerCase().replace(' ', '-')">
+            {{appointment.status}}
+          </span>
+        </div>
+      </div>
+    </div>
+  
+    <div class="no-appointments" *ngIf="filteredAppointments.length === 0">
+      No appointments scheduled for {{selectedDay.toLowerCase()}}
+    </div>
+  
+    <div class="time-slots">
+      <div class="section-header">
+        <h3>Time Slots</h3>
+        <button class="edit-btn" (click)="openScheduleModal()">
+          <i class="fas fa-edit"></i>
+          Edit
+        </button>
+      </div>
+  
+      <div class="slots-grid">
+        <div class="time-slot" *ngFor="let slot of filteredTimeSlots">
+          <div class="slot-content">
+            <div class="time">{{slot.startTime}} - {{slot.endTime}}</div>
+            <div class="date">{{slot.date}}</div>
+            <div class="limit">Limit: {{slot.studentLimit}} students</div>
+          </div>
+          <div class="slot-actions">
+            <button class="edit-slot-btn" (click)="editTimeSlot(slot)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="delete-btn" (click)="deleteTimeSlot(slot)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Schedule Modal -->
+  <div class="schedule-modal" *ngIf="showScheduleModal">
+    <div class="modal-content">
+      <h2>Set an Appointment and Time Schedule</h2>
+      
+      <div class="form-group">
+        <label>Set a Limit for Students</label>
+        <input type="number" 
+               [(ngModel)]="studentLimit" 
+               class="form-input" 
+               placeholder="Enter student limit">
+      </div>
+  
+      <div class="form-group">
+        <label>Date</label>
+        <div class="input-with-icon">
+          <mat-form-field appearance="outline">
+            <input matInput
+                   [matDatepicker]="picker"
+                   [(ngModel)]="selectedDate"
+                   placeholder="MM/DD/YYYY"
+                   readonly>
+            <mat-datepicker-toggle matSuffix [for]="picker">
+              <i class="fas fa-calendar" matDatepickerToggleIcon></i>
+            </mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label>Time</label>
+        <div class="time-inputs">
+          <div class="time-input-group">
+            <label>Start Time</label>
+            <div class="input-with-icon">
+              <input type="text" 
+                     [(ngModel)]="selectedStartTime" 
+                     class="form-input" 
+                     placeholder="Select Start Time" 
+                     readonly
+                     (click)="openTimePicker($event, true)">
+              <i class="fas fa-clock" (click)="openTimePicker($event, true)"></i>
+            </div>
+          </div>
+          <div class="time-input-group">
+            <label>End Time</label>
+            <div class="input-with-icon">
+              <input type="text" 
+                     [(ngModel)]="selectedEndTime" 
+                     class="form-input" 
+                     placeholder="Select End Time" 
+                     readonly
+                     (click)="openTimePicker($event, false)">
+              <i class="fas fa-clock" (click)="openTimePicker($event, false)"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeScheduleModal()">Cancel</button>
+        <button class="save-btn" (click)="saveSchedule()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Time Picker Dropdown -->
+  <div class="time-picker-dropdown" 
+       *ngIf="showTimePicker"
+       [style.top.px]="dropdownPosition.top"
+       [style.left.px]="dropdownPosition.left">
+    <div class="time-picker-content">
+      <div class="time-section">
+        <div class="time-label">Hours</div>
+        <div class="time-options">
+          <button *ngFor="let hour of hours" 
+                  (click)="selectHour(hour)"
+                  [class.selected]="isSettingStartTime ? hour === selectedStartHour : hour === selectedEndHour">
+            {{hour}}
+          </button>
+        </div>
+      </div>
+      <div class="time-section">
+        <div class="time-label">Minutes</div>
+        <div class="time-options">
+          <button *ngFor="let minute of minutes" 
+                  (click)="selectMinute(minute)"
+                  [class.selected]="isSettingStartTime ? minute === selectedStartMinute : minute === selectedEndMinute">
+            {{minute}}
+          </button>
+        </div>
+      </div>
+      <div class="time-section">
+        <div class="time-label">Period</div>
+        <div class="time-options">
+          <button *ngFor="let period of periods" 
+                  (click)="selectPeriod(period)"
+                  [class.selected]="isSettingStartTime ? period === selectedStartPeriod : period === selectedEndPeriod">
+            {{period}}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+  

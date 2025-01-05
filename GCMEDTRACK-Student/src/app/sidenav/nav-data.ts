@@ -3,7 +3,7 @@ import { INavbarData } from "./helper";
 export const navbarData: INavbarData[] = [
     {
         routeLink: 'home',
-        icon: 'fas fa-home',
+        icon: 'fas fa-user',
         label: 'Home'
     },
     {
@@ -17,7 +17,7 @@ export const navbarData: INavbarData[] = [
         label: 'Booking'
     },
     {
-        routeLink: 'annousancement',
+        routeLink: 'announcement',
         icon: 'fas fa-bell',
         label: 'Announcement'
     },

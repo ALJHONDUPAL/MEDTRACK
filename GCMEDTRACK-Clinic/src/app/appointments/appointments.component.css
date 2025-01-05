@@ -1,0 +1,105 @@
+.appointments-container {
+    padding: 20px;
+  }
+  
+  .header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .upcoming-btn {
+    background: #4B6455;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .student-year select {
+    padding: 4px 8px;
+    margin-left: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .slot-count {
+    background: #f5f5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+  }
+  
+  .appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .appointments-table th {
+    text-align: left;
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+  }
+  
+  .appointments-table td {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .student-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .student-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  
+  .student-info .name {
+    font-weight: 500;
+  }
+  
+  .student-info .id {
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .time {
+    color: #2196F3;
+    font-size: 0.9em;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .accept-btn {
+    background: #E8F5E9;
+    color: #4CAF50;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .cancel-btn {
+    background: #FFEBEE;
+    color: #F44336;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }

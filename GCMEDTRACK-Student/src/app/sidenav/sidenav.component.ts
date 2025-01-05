@@ -67,22 +67,27 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   // Navigation data
   navData: NavItem[] = [
-    {
-      routeLink: 'home',
-      icon: 'fas fa-home',
-      label: 'Home'
-    },
-    {
-      routeLink: 'feedback',
-      icon: 'fas fa-users',
-      label: 'Feedback'
-    },
+    // {
+    //   routeLink: 'home',
+    //   icon: 'fas fa-home',
+    //   label: 'Home'
+    // },
+    // {
+    //   routeLink: 'feedback',
+    //   icon: 'fas fa-users',
+    //   label: 'Feedback'
+    // },
 
-    {
-      routeLink: 'about-us',
-      icon: 'fas fa-circle-info',
-      label: 'About Us'
-    }
+    // {
+    //   routeLink: 'about-us',
+    //   icon: 'fas fa-circle-info',
+    //   label: 'About Us'
+    // },
+    // {
+    //   routeLink: 'about-us',
+    //   icon: 'fas fa-circle-info',
+    //   label: 'About Us'
+    // }
   ];
 
   @HostListener('window:resize', ['$event'])
@@ -133,6 +138,10 @@ export class SidenavComponent implements OnInit, OnDestroy {
     this.collapsed = false;
   }
 
+  navigateToDashboard(): void {
+    this.selectedNavItem = 'dashboard';
+    this.router.navigate(['/home']);
+  }
   navigateToProfile(): void {
     this.selectedNavItem = 'profile';
     this.router.navigate(['/profile']);
@@ -140,6 +149,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
   navigateToBooking(): void {
     this.selectedNavItem = 'booking';
     this.router.navigate(['/booking']);
+  }
+
+  navigateToAnnouncement(): void {
+    this.selectedNavItem = 'announcement';
+    this.router.navigate(['/announcement']);
   }
 
   logout(): void {

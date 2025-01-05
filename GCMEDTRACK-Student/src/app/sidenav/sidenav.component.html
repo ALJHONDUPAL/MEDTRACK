@@ -20,6 +20,16 @@
         <span class="user-role" @fadeInOut>{{ userRole }}</span>
       </div>
     </div>
+    
+    <div class="profile-section">
+      <mat-list-item 
+        class="nav-list-item" 
+        (click)="navigateToDashboard()" 
+        [class.active]="selectedNavItem === 'dashboard'">
+        <i class="sidenav-link-icon fas fa-home"></i>
+        <span class="sidenav-link-text" *ngIf="collapsed">Dashboard</span>
+      </mat-list-item>
+    </div>
 
     <div class="profile-section">
       <mat-list-item 
@@ -41,6 +51,15 @@
       </mat-list-item>
     </div>
     
+    <div class="profile-section">
+      <mat-list-item 
+        class="nav-list-item" 
+        (click)="navigateToAnnouncement()" 
+        [class.active]="selectedNavItem === 'announcement'">
+        <i class="sidenav-link-icon fas fa-bell"></i>
+        <span class="sidenav-link-text" *ngIf="collapsed">Announcement</span>
+      </mat-list-item>
+    </div>
 
     <div class="scrollwrap scrollwrap_delayed">
       <mat-list class="sidenav-nav">
