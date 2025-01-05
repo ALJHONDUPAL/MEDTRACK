@@ -1,0 +1,56 @@
+<div class="appointments-container">
+    <div class="header-controls">
+      <button class="upcoming-btn">Upcoming</button>
+      <div class="filters">
+        <div class="student-year">
+          Student Year
+          <select [(ngModel)]="selectedYear">
+            <option>1st Year</option>
+            <!-- Add other year options -->
+          </select>
+        </div>
+        <div class="student-slot">
+          Student Slot
+          <span class="slot-count">{{studentSlot}}</span>
+        </div>
+      </div>
+    </div>
+  
+    <table class="appointments-table">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Department</th>
+          <th>Add Date</th>
+          <th>Purpose</th>
+          <th>Year Level</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let appointment of appointments">
+          <td>
+            <div class="student-info">
+              <img [src]="appointment.avatar" alt="Student avatar">
+              <div>
+                <div class="name">{{appointment.studentName}}</div>
+                <div class="id">{{appointment.studentId}}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{appointment.department}}</td>
+          <td>
+            <div>{{appointment.date}}</div>
+            <div class="time">{{appointment.time}}</div>
+          </td>
+          <td>{{appointment.purpose}}</td>
+          <td>{{appointment.yearLevel}}</td>
+          <td class="action-buttons">
+            <button class="accept-btn">Accept</button>
+            <button class="cancel-btn">Cancel</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

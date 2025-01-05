@@ -52,7 +52,7 @@ export class UserManagementComponent implements OnInit {
 
   loadClinics() {
     this.apiService.getAllClinics().subscribe({
-      next: (response) => {
+      next: (response: { status: string; data: any[]; message: any; }) => {
         if (response.status === 'success' && response.data) {
           this.clinics = response.data;
           this.filteredClinics = [...this.clinics];
@@ -60,7 +60,7 @@ export class UserManagementComponent implements OnInit {
           console.error('Error:', response.message);
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading clinics:', error);
         alert('Failed to load clinic staff. Please try again later.');
       }

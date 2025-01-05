@@ -6,7 +6,7 @@ interface INavbarData {
 
 export const navbarData: INavbarData[] = [
     {
-        routeLink: 'dashboard',
+        routeLink: '/dashboard',
         icon: 'fas fa-home',
         label: 'Dashboard'
     },
@@ -16,17 +16,17 @@ export const navbarData: INavbarData[] = [
         label: 'User Management'
     },
     {
-        routeLink: 'documents',
+        routeLink: '/documents',
         icon: 'fas fa-file-medical',
         label: 'Documents'
     },
     {
-        routeLink: 'schedulebooking',
+        routeLink: '/schedulebooking',
         icon: 'fas fa-calendar-alt',
         label: 'Schedule Booking'
     },
     {
-        routeLink: 'appointments',
+        routeLink: '/appointments',
         icon: 'fas fa-calendar-check',
         label: 'Appointments'
     },

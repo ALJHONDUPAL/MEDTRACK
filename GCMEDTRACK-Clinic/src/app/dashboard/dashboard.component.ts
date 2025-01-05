@@ -1,73 +1,156 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { ClinicAuthService } from '../services/auth.service';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Chart, registerables } from 'chart.js';
+import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
-interface Activity {
-  time: string;
-  type: string;
-  details: string;
-}
-
+Chart.register(...registerables);
+Chart.register(DataLabelsPlugin);
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit {
-  userName: string = '';
-  totalPatients: number = 0;
-  todayAppointments: number = 0;
-  pendingConsultations: number = 0;
+export class DashboardComponent implements OnInit, AfterViewInit {
+  @ViewChild('appointmentsChart') appointmentsChartRef!: ElementRef;
+  @ViewChild('documentsChart') documentsChartRef!: ElementRef;
   
-  recentActivities: Activity[] = [
-    { 
-      time: '10:30 AM', 
-      type: 'Patient Registered', 
-      details: 'John Doe - New Patient' 
-    },
-    { 
-      time: '11:15 AM', 
-      type: 'Consultation', 
-      details: 'Jane Smith - Follow-up' 
-    },
-    { 
-      time: '12:00 PM', 
-      type: 'Prescription', 
-      details: 'Medication updated for Michael Brown' 
-    }
-  ];
+  appointmentsChart: Chart | undefined;
+  documentsChart: Chart | undefined;
 
-  constructor(
-    private authService: ClinicAuthService,
-    private router: Router
-  ) {}
+  // Mock data for appointments per day
+  appointmentsData = {
+    labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    data: [5, 12, 8, 15, 10, 7, 3]
+  };
 
-  ngOnInit() {
-    // Fetch user details
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.userName = `${user.first_name} ${user.last_name}`;
-    } else {
-      // Redirect to login if no user found
-      this.router.navigate(['/login']);
-    }
+  // Mock data for documents per department
+  documentsData = {
+    labels: ['CSS', 'CEAS', 'CAHS', 'CHTM', 'CBA'],
+    data: [25, 18, 22, 35, 17]
+  };
 
-    // In a real application, you would fetch these stats from your backend
-    this.fetchDashboardStats();
+  constructor() { }
+
+  ngOnInit(): void { }
+
+  ngAfterViewInit(): void {
+    this.createAppointmentsChart();
+    this.createDocumentsChart();
   }
 
-  fetchDashboardStats() {
-    // Placeholder for fetching dashboard statistics
-    // In a real app, this would be an API call to your backend
-    this.totalPatients = 150;
-    this.todayAppointments = 12;
-    this.pendingConsultations = 5;
+  private createAppointmentsChart(): void {
+    const ctx = this.appointmentsChartRef.nativeElement.getContext('2d');
+    
+    this.appointmentsChart = new Chart(ctx, {
+      type: 'bar',
+      plugins: [DataLabelsPlugin],
+      data: {
+        labels: this.appointmentsData.labels,
+        datasets: [{
+          label: 'Appointments per Day',
+          data: this.appointmentsData.data,
+          backgroundColor: '#009F6B',
+          borderColor: '#00a8e8',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Weekly Appointments Distribution',
+            font: {
+              size: 16
+            }
+          },
+          // @ts-ignore
+          datalabels: {
+            display: false
+          }
+        }
+      }
+    });
   }
 
-  logout() {
-    this.authService.logout();
+  private createDocumentsChart(): void {
+    const ctx = this.documentsChartRef.nativeElement.getContext('2d');
+    
+    this.documentsChart = new Chart(ctx, {
+      type: 'doughnut',
+      plugins: [DataLabelsPlugin],
+      data: {
+        labels: this.documentsData.labels,
+        datasets: [{
+          data: this.documentsData.data,
+          backgroundColor: [
+            '#FF9800',  // CSS - Orange
+            '#2196F3',  // CEAS - Blue
+            '#F44336',  // CAHS - Red
+            '#F8C8DC',  // CHTM - Pink 
+            '#FFEB3B'   // CBA - Yellow
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '60%',
+        plugins: {
+          title: {
+            display: true,
+            text: 'Documents Distribution by Department',
+            font: {
+              size: 16,
+              family: 'Poppins'
+            }
+          },
+          legend: {
+            position: 'right',
+            labels: {
+              font: {
+                family: 'Poppins',
+                size: 12
+              },
+              padding: 10
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context: any) => {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((acc: number, current: number) => acc + current, 0);
+                const percentage = Math.round((value * 100) / total * 10) / 10;
+                return `${label}: ${percentage}%`;
+              }
+            }
+          },
+          // @ts-ignore
+          datalabels: {
+            color: '#000',
+            font: {
+              weight: 'bold',
+              size: 14,
+              family: 'Poppins'
+            },
+            formatter: (value: number, context: any) => {
+              const total = context.dataset.data.reduce((acc: number, current: number) => acc + current, 0);
+              const percentage = Math.round((value * 100) / total * 10) / 10;
+              return percentage + '%';
+            }
+          }
+        }
+      } as any
+    });
   }
 }

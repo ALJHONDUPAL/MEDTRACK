@@ -1,0 +1,53 @@
+<div class="documents-container">
+    <h1>Student Medical Documents</h1>
+    
+    <!-- Search controls outside container -->
+    <div class="search-controls">
+      <div class="dropdown">
+        <select [(ngModel)]="selectedDepartment" (ngModelChange)="onDepartmentChange($event)" class="form-select">
+          <option value="CAHS">CAHS</option>
+          <option value="CBA">CBA</option>
+          <option value="CEAS">CEAS</option>
+          <option value="CHTM-Tourism">CHTM-Tourism</option>
+          <option value="CHTM-Hospitality">CHTM-Hospitality</option>
+          <option value="CSS">CSS</option>
+        </select>
+      </div>
+      
+      <div class="dropdown">
+        <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
+          <option value="1st">1st Year</option>
+          <option value="2nd">2nd Year</option> 
+          <option value="3rd">3rd Year</option>
+          <option value="4th">4th Year</option>
+          <!-- Add more options as needed -->
+        </select>
+      </div>
+  
+      <div class="search-box">
+        <input type="text" placeholder="Student I.D" [(ngModel)]="searchQuery">
+        <button class="search-button">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Cards container -->
+    <div class="container">
+      <!-- Card items -->
+      <div *ngFor="let student of filteredStudents">
+        <div class="card">
+          <img src="assets/student-avatar.png" alt="Student">
+          <div class="info">
+            <h3>{{student.name}}</h3>
+            <p>{{student.department}}</p>
+            <p>{{student.id}}</p>
+          </div>
+          <a class="view-medical" [routerLink]="['/medical-details', student.id]">
+            View Medical
+            <i class="fas fa-info-circle"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>

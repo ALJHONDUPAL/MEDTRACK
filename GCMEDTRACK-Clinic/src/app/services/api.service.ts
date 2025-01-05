@@ -8,6 +8,7 @@ import { catchError, tap } from 'rxjs/operators';
 })
 export class ApiService {
   private baseUrl = 'http://localhost/MEDTRACK/backend_php/api';
+  getAllClinics: any;
 
   constructor(private http: HttpClient) {}
 
