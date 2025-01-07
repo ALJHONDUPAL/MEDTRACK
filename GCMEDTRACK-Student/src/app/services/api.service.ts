@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost/MEDTRACK/backend_php/api';
+  public baseUrl = 'http://localhost/MEDTRACK/backend_php/api';
 
   constructor(private http: HttpClient) {}
 
@@ -25,14 +25,44 @@ export class ApiService {
     );
   }
 
+  uploadMedicalDocument(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/uploadMedicalDocument`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getMedicalDocuments(userId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/getMedicalDocuments`, {
+      params: { user_id: userId }
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  uploadVaccinationRecord(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/uploadVaccinationRecord`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getVaccinationRecord(userId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/getVaccinationRecords/${userId}`);
+}
+
   private handleError(error: HttpErrorResponse) {
     console.error('API Error:', error);
     let errorMessage = 'An error occurred';
+    
     if (error.error instanceof ErrorEvent) {
+      // Client-side error
       errorMessage = error.error.message;
+    } else if (error.status === 404) {
+      errorMessage = 'Requested resource not found';
     } else {
-      errorMessage = error.error?.message || error.message;
+      // Server-side error
+      errorMessage = error.error?.message || error.message || 'Server error';
     }
+    
     return throwError(() => new Error(errorMessage));
   }
 }

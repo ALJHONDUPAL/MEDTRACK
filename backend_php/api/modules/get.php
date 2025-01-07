@@ -134,9 +134,92 @@ public function getUserFullNameByUsername($username) {
     }
 }
 
+public function getUserProfile($userId) {
+    try {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                up.name,
+                up.department,
+                up.year_level as yearLevel,
+                up.id_number as idNumber,
+                CASE 
+                    WHEN up.profile_image_path IS NOT NULL 
+                    THEN up.profile_image_path
+                    ELSE 'assets/default-avatar.png'
+                END as profileImage
+            FROM user_profiles up
+            WHERE up.user_id = ?
+        ");
+        
+        $stmt->execute([$userId]);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        if ($profile) {
+            // Modify the profile image path to include the correct base URL
+            if ($profile['profileImage'] && !str_starts_with($profile['profileImage'], 'assets/')) {
+                $profile['profileImage'] = 'uploads/' . $userId . '/profile_images/' . basename($profile['profileImage']);
+            }
+            
+            return [
+                "status" => "success",
+                "data" => $profile
+            ];
+        } else {
+            return [
+                "status" => "error",
+                "message" => "Profile not found"
+            ];
+        }
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ];
+    }
+}
 
+public function getMedicalDocuments($userId) {
+    try {
+        $stmt = $this->pdo->prepare("SELECT * FROM medical_documents WHERE user_id = ? ORDER BY uploaded_at DESC");
+        $stmt->execute([$userId]);
+        $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        return [
+            "status" => "success",
+            "data" => $documents
+        ];
+    } catch (Exception $e) {
+        return [
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ];
+    }
+}
+
+public function getVaccinationRecords($userId) {
+    try {
+        $stmt = $this->pdo->prepare("SELECT * FROM vaccination_records WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($records) {
+            return [
+                "status" => "success",
+                "data" => $records
+            ];
+        } else {
+            return [
+                "status" => "error",
+                "message" => "No vaccination records found"
+            ];
+        }
+    } catch (Exception $e) {
+        return [
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ];
+    }
+}
 
 }
 ?>

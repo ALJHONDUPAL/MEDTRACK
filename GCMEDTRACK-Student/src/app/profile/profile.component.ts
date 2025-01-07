@@ -44,7 +44,7 @@ export class ProfileComponent implements OnInit {
     department: '',
     yearLevel: '',
     idNumber: '',
-    profileImage: 'assets/default-avatar.png'
+    profileImage: 'assets/default-avatar.svg'
   };
   tempProfileImage: string | null = null;
 
@@ -56,31 +56,29 @@ export class ProfileComponent implements OnInit {
   bloodCountData: {
     date?: string;
     location?: string;
+    status?: string;
+    file_path?: string;
   } = {};
 
   showUrinalysisModal = false;
   urinalysisData: {
     date?: string;
     location?: string;
+    status?: string;
+    file_path?: string;
   } = {};
 
   idNumberError: boolean = false;
   idNumberErrorMessage: string = '';
 
   showVaccinationModal = false;
-  vaccinationData: {
-    firstDoseType?: string;
-    firstDoseDate?: string;
-    secondDoseType?: string;
-    secondDoseDate?: string;
-    boosterType?: string;
-    boosterDate?: string;
-  } = {};
+  vaccinationData: any = {};
 
   showXrayModal = false;
   xrayData: {
     date?: string;
     location?: string;
+    status?: string;
   } = {};
 
   showHepaModal = false;
@@ -154,6 +152,18 @@ export class ProfileComponent implements OnInit {
 
   userId: string | null = null;
 
+  // Add this property to store the selected file
+  selectedBloodCountFile: File | null = null;
+  selectedUrinalysisFile: File | null = null;
+  selectedChestXrayFile: File | null = null;
+  chestXrayData: {
+    date?: string;
+    location?: string;
+    status?: string;
+    file_path?: string;
+  } = {};
+  selectedFile: any;
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
@@ -171,18 +181,26 @@ export class ProfileComponent implements OnInit {
     }
     
     this.loadProfileData();
+    this.loadVaccinationData();
   }
 
   loadProfileData() {
     if (!this.userId) return;
 
+    // Fetch user profile
     this.apiService.getUserProfile(this.userId).subscribe({
       next: (response: any) => {
-        console.log('Profile data response:', response);
-        if (response.status === 'success') {
-          this.profileData = response.data;
-        } else {
-          console.error('Failed to load profile:', response.message);
+        if (response && response.status === 'success') {
+          const baseUrl = 'http://localhost/MEDTRACK/backend_php';
+          this.profileData = {
+            ...response.data,
+            profileImage: response.data.profileImage?.startsWith('assets/') 
+              ? 'assets/default-avatar.svg'
+              : `${baseUrl}/${response.data.profileImage}`
+          };
+          
+          // After loading profile, fetch medical documents
+          this.loadMedicalDocuments();
         }
       },
       error: (error) => {
@@ -190,6 +208,163 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+
+  loadMedicalDocuments(): void {
+    if (!this.userId) return;
+
+    this.apiService.getMedicalDocuments(this.userId).subscribe({
+        next: (response) => {
+            if (response.status === 'success' && response.data) {
+                response.data.forEach((doc: any) => {
+                    // Dynamically assign data based on document type
+                    switch (doc.document_type) {
+                        case 'bloodCount':
+                            this.bloodCountData = {
+                                date: doc.date,
+                                location: doc.location,
+                                status: doc.status,
+                                file_path: doc.file_path
+                            };
+                            this.bloodCountImage = `${this.apiService.baseUrl}/${doc.file_path}`;
+                            break;
+                        case 'urinalysis':
+                            this.urinalysisData = {
+                                date: doc.date,
+                                location: doc.location,
+                                status: doc.status,
+                                file_path: doc.file_path
+                            };
+                            this.urinalysisImage = `${this.apiService.baseUrl}/${doc.file_path}`;
+                            break;
+                        case 'chestXray':
+                            this.chestXrayData = {
+                                date: doc.date,
+                                location: doc.location,
+                                status: doc.status,
+                                file_path: doc.file_path
+                            };
+                            this.chestXrayImage = `${this.apiService.baseUrl}/${doc.file_path}`;
+                            break;
+                        // Add more cases for other document types as needed
+                        default:
+                            console.warn(`Unknown document type: ${doc.document_type}`);
+                    }
+                });
+            }
+        },
+        error: (error) => {
+            console.error('Error loading medical documents:', error);
+        }
+    });
+}
+
+  loadVaccinationData() {
+    if (!this.userId) {
+        console.error('User ID is not available.');
+        return;
+    }
+
+    this.apiService.getVaccinationRecord(Number(this.userId)).subscribe({
+        next: (response: { status: string; data?: any }) => {
+            if (response.status === 'success' && response.data) {
+                this.vaccinationData = response.data[0]; 
+                this.vaccinationImage = this.vaccinationData.document_path;
+            } else {
+                // console.error('No vaccination data found:', response);
+            }
+        },
+        error: (error: any) => {
+            console.error('Error loading vaccination data:', error);
+        }
+    });
+}
+
+saveVaccination(formData: any): void {
+  if (!this.userId) return;
+
+  const formDataObj = new FormData();
+  formDataObj.append('user_id', this.userId);
+  formDataObj.append('firstDoseType', formData.firstDoseType);
+  formDataObj.append('firstDoseDate', formData.firstDoseDate);
+  formDataObj.append('secondDoseType', formData.secondDoseType);
+  formDataObj.append('secondDoseDate', formData.secondDoseDate);
+  formDataObj.append('boosterType', formData.boosterType);
+  formDataObj.append('boosterDate', formData.boosterDate);
+
+  if (this.selectedFile) {
+      formDataObj.append('document', this.selectedFile);
+  } else {
+      console.error('No document file selected for upload.');
+      alert('Please select a document to upload.');
+      return;
+  }
+
+  // Debugging: Log the formDataObj to check its contents
+  for (let pair of formDataObj.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+  }
+
+  this.apiService.uploadVaccinationRecord(formDataObj).subscribe({
+      next: (response: { status: string; message?: string }) => {
+          if (response.status === 'success') {
+              this.closeVaccinationModal();
+              this.loadVaccinationData();
+          } else {
+              alert(response.message || 'Failed to save vaccination record');
+          }
+      },
+      error: (error: any) => {
+          console.error('Error saving vaccination record:', error);
+          alert('Failed to save vaccination record');
+      }
+  });
+}
+
+saveDocument(formData: any, documentType: string, selectedFile: File | null): void {
+  if (!this.userId) return;
+
+  if (!selectedFile) {
+      console.error('No file selected');
+      alert('Please select a document to upload');
+      return;
+  }
+
+  const documentFormData = new FormData();
+  documentFormData.append('user_id', this.userId);
+  documentFormData.append('document_type', documentType);
+  documentFormData.append('date', formData.date);
+  documentFormData.append('location', formData.location);
+  documentFormData.append('document', selectedFile);
+
+  this.apiService.uploadMedicalDocument(documentFormData).subscribe({
+      next: (response) => {
+          if (response.status === 'success') {
+              console.log(`${documentType} saved successfully:`, response);
+              this.loadMedicalDocuments(); // Reload documents to get updated status
+              alert(`${documentType} document uploaded successfully`);
+          } else {
+              console.error(`Failed to save ${documentType}:`, response.message);
+              alert('Failed to upload document: ' + response.message);
+          }
+      },
+      error: (error) => {
+          console.error(`Error saving ${documentType}:`, error);
+          alert('Error uploading document. Please try again.');
+      }
+  });
+}
+
+saveBloodCount(formData: any): void {
+  this.saveDocument(formData, 'bloodCount', this.selectedBloodCountFile);
+}
+
+saveUrinalysis(formData: any): void {
+  this.saveDocument(formData, 'urinalysis', this.selectedUrinalysisFile);
+}
+
+saveXray(formData: any): void {
+  this.saveDocument(formData, 'Xray', this.selectedChestXrayFile);
+}
 
   toggleSection(section: string): void {
     this.expandedSections[section] = !this.expandedSections[section];
@@ -201,26 +376,89 @@ export class ProfileComponent implements OnInit {
 
   onImageUpload(event: any, type: string): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        switch(type) {
-          case 'bloodCount':
-            this.bloodCountImage = e.target.result;
-            break;
-          case 'urinalysis':
-            this.urinalysisImage = e.target.result;
-            break;
-          case 'vaccination':
-            this.vaccinationImage = e.target.result;
-            break;
-          case 'xray':
-            this.xrayImage = e.target.result;
-            break;
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+        console.error('No file selected for upload.');
+        return;
     }
+
+    if (!this.userId) {
+        console.error('User ID is not available.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('user_id', this.userId);
+    formData.append('document_type', type);
+    formData.append('document', file);
+
+    // Get the corresponding data object based on the document type
+    let documentData: any;
+    switch(type) {
+        case 'vaccination':
+            documentData = this.vaccinationData; // Ensure this is defined
+            break;
+        case 'urinalysis':
+            documentData = this.urinalysisData; // Ensure this is defined
+            break;
+        case 'chestXray':
+            documentData = this.chestXrayData; // Ensure this is defined
+            break;
+        default:
+            console.warn(`Unknown document type: ${type}`);
+            return; // Exit if the document type is not recognized
+    }
+
+    // Append vaccination-specific data if available
+    if (type === 'vaccination' && documentData) {
+        if (documentData.firstDoseType) {
+            formData.append('firstDoseType', documentData.firstDoseType);
+        }
+        if (documentData.firstDoseDate) {
+            formData.append('firstDoseDate', documentData.firstDoseDate);
+        }
+        if (documentData.secondDoseType) {
+            formData.append('secondDoseType', documentData.secondDoseType);
+        }
+        if (documentData.secondDoseDate) {
+            formData.append('secondDoseDate', documentData.secondDoseDate);
+        }
+        if (documentData.boosterType) {
+            formData.append('boosterType', documentData.boosterType);
+        }
+        if (documentData.boosterDate) {
+            formData.append('boosterDate', documentData.boosterDate);
+        }
+    }
+
+    // Append additional data for other document types if available
+    if (documentData) {
+        if (documentData.date) {
+            formData.append('date', documentData.date);
+        }
+        if (documentData.location) {
+            formData.append('location', documentData.location);
+        }
+    }
+
+    // Debugging: Log the formData to check its contents
+    for (let pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
+    // Upload the document
+    this.apiService.uploadMedicalDocument(formData).subscribe({
+        next: (response) => {
+            if (response.status === 'success') {
+                console.log(`${type} uploaded successfully:`, response);
+                this.loadMedicalDocuments(); // Reload documents to get updated status
+            } else {
+                console.error(`Failed to upload ${type}:`, response.message);
+            }
+        },
+        error: (error) => {
+            console.error(`Error uploading ${type}:`, error);
+        }
+    });
   }
 
   openModal() {
@@ -336,14 +574,7 @@ export class ProfileComponent implements OnInit {
 
   closeBloodCountModal() {
     this.showBloodCountModal = false;
-  }
-
-  saveBloodCount(formData: any) {
-    this.bloodCountData = {
-      date: formData.date,
-      location: formData.location
-    };
-    this.closeBloodCountModal();
+    this.selectedBloodCountFile = null; // Reset selected file when closing modal
   }
 
   onBloodCountImageUpload(event: any) {
@@ -376,6 +607,8 @@ export class ProfileComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      this.selectedBloodCountFile = file;
+      // Show preview
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.bloodCountImage = e.target.result;
@@ -391,14 +624,6 @@ export class ProfileComponent implements OnInit {
 
   closeUrinalysisModal() {
     this.showUrinalysisModal = false;
-  }
-
-  saveUrinalysis(formData: any) {
-    this.urinalysisData = {
-      date: formData.date,
-      location: formData.location
-    };
-    this.closeUrinalysisModal();
   }
 
   onIdNumberInput(event: any) {
@@ -421,13 +646,6 @@ export class ProfileComponent implements OnInit {
 
   closeVaccinationModal() {
     this.showVaccinationModal = false;
-  }
-
-  saveVaccination(formData: any) {
-    this.vaccinationData = {
-      ...formData
-    };
-    this.closeVaccinationModal();
   }
 
   deleteImage(type: string): void {
@@ -456,13 +674,6 @@ export class ProfileComponent implements OnInit {
     this.showXrayModal = false;
   }
 
-  saveXray(formData: any) {
-    this.xrayData = {
-      ...formData
-    };
-    this.closeXrayModal();
-  }
-
   openHepaModal(event: Event): void {
     event.stopPropagation();
     this.showHepaModal = true;
@@ -487,7 +698,10 @@ export class ProfileComponent implements OnInit {
   }
 
   saveFecalysis(data: any): void {
-    this.fecalysisData = { ...data };
+    this.fecalysisData = {
+      ...data,
+      status: 'Submitted'
+    };
     this.closeFecalysisModal();
   }
 
@@ -652,5 +866,21 @@ export class ProfileComponent implements OnInit {
   saveAntiHAV(data: any): void {
     this.antiHAVData = data;
     this.closeAntiHAVModal();
+  }
+
+  getDocumentStatus(requirement: string): string {
+    switch(requirement) {
+        case 'Complete Blood Count':
+            return this.bloodCountData?.status || 'Need Submission';
+        case 'Urinalysis':
+            return this.urinalysisData?.status || 'Need Submission';
+        case 'Chest X-ray':
+            return this.chestXrayData?.status || 'Need Submission';
+        case 'COVID-19 Vaccination Card':
+            return this.vaccinationData?.status || 'Need Submission'; 
+        // Add other cases as needed
+        default:
+            return 'Need Submission';
+    }
   }
 }

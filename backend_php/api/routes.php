@@ -55,15 +55,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         switch ($request[0]) {
             // Get user profile by user ID
-            // case 'getUserProfile':
-            //     if (isset($request[1])) {
-            //         $user_id = (int) $request[1];
-            //         echo json_encode($get->getUserProfile($user_id));
-            //     } else {
-            //         echo json_encode(["status" => "error", "message" => "User ID is required"]);
-            //         http_response_code(400);
-            //     }
-            //     break;
+            case 'getUserProfile':
+                if (isset($_GET['user_id'])) {
+                    $userId = $_GET['user_id'];
+                    echo json_encode($get->getUserProfile($userId));
+                } else {
+                    echo json_encode(["status" => "error", "message" => "User ID is required"]);
+                    http_response_code(400);
+                }
+                break;
 
             // Get user profile by domain account (email or username)
             case 'getProfileByDomainAccount':
@@ -94,7 +94,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
            // Route to get user's firstname and lastname by userId
            // Route to get user's firstname and lastname by id
            case 'getUserFullNameByUsername':
-            if (isset($_GET['username'])) {
+                 if (isset($_GET['username'])) {
                 $username = $_GET['username']; // Get the username from the query parameter
                 echo json_encode($get->getUserFullNameByUsername($username));
             } else {
@@ -102,6 +102,30 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 http_response_code(400);
             }
             break;
+        
+
+            case 'getMedicalDocuments':
+                if (isset($_GET['user_id'])) {
+                    echo json_encode($get->getMedicalDocuments($_GET['user_id']));
+                } else {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "User ID is required"
+                    ]);
+                }
+                break;
+
+            case 'getVaccinationRecords':
+                    if (isset($request[1])) {
+                        echo json_encode($get->getVaccinationRecords($request[1]));
+                    } else {
+                        echo json_encode([
+                            "status" => "error",
+                            "message" => "User ID is required"
+                        ]);
+                        http_response_code(400);
+                    }
+                    break;
         
         
         
@@ -166,10 +190,37 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
                 
 
-            default:
-                echo json_encode(["status" => "error", "message" => "Forbidden"]);
-                http_response_code(403);
+                case 'uploadMedicalDocument':
+                    if (!isset($_POST['user_id']) || !isset($_POST['document_type']) || !isset($_FILES['document'])) {
+                        echo json_encode([
+                            "status" => "error",
+                            "message" => "Missing required parameters"
+                        ]);
+                        break;
+                    }
+                    
+                    $userId = $_POST['user_id'];
+                    $documentType = $_POST['document_type'];
+                    $date = $_POST['date'] ?? null;
+                    $location = $_POST['location'] ?? null;
+                    
+                    echo json_encode($post->uploadMedicalDocument($userId, $documentType, $date, $location));
+                    break;
+
+            case 'uploadVaccinationRecord':
+                if (!isset($_POST['user_id']) || !isset($_FILES['document'])) {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "Missing required parameters"
+                    ]);
+                    break;
+                }
+
+                $userId = $_POST['user_id'];
+                echo json_encode($post->uploadVaccinationRecord($userId));
                 break;
+
+            
         }
         break;
 

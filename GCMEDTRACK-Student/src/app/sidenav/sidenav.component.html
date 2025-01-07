@@ -77,10 +77,10 @@
     </div>
 
     <div class="log-out">
-      <mat-list-item class="nav-list-item logout" (click)="logout()">
-        <i class="sidenav-link-icon fas fa-right-from-bracket"></i>
-        <span class="sidenav-link-text" *ngIf="collapsed">Log Out</span>
-      </mat-list-item>
+      <div class="sidenav-nav-item" (click)="logout()">
+        <i class="fas fa-sign-out-alt sidenav-link-icon"></i>
+        <span class="sidenav-link-text">Logout</span>
+      </div>
     </div>
   </mat-sidenav>
 

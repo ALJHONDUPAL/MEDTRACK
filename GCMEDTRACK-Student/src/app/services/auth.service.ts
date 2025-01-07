@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, map } from 'rxjs/operators';
-import { of, Observable } from 'rxjs';
+import { of, Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,45 +14,43 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
 
   // Register user
-  register(data: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/userRegister`, data) // Correct route
-      .pipe(
-        catchError(error => {
-          console.error('Registration error:', error);
-          return of({ success: false, error: error.message || 'Registration failed' });
-        })
-      );
-}
+  register(domain_account: string, password: string): Observable<any> {
+    const data = {
+      domain_account: domain_account,
+      password: password
+    };
+    
+    return this.http.post<any>(`${this.baseUrl}/userRegister`, data).pipe(
+      catchError(error => {
+        console.error('Registration error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 
   // Login user
   login(domain_account: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/userLogin`, { domain_account, password })
-      .pipe(
-        map(response => {
-          console.log('Raw login response:', response);
-          
-          // Check for success in both possible response formats
-          if (response.status?.remarks === 'success' && response.payload) {
-            // Store token
-            this.saveToken(response.payload.token);
-            
-            // Store user data
-            const userId = response.payload.user?.user_id;
-            if (userId) {
-              localStorage.setItem('user_id', userId.toString());
-              console.log('Stored user_id:', userId);
-            }
-            
-            return response;
-          } else {
-            throw new Error(response.message || 'Login failed');
+    const data = {
+      domain_account: domain_account,
+      password: password
+    };
+
+    return this.http.post<any>(`${this.baseUrl}/userLogin`, data).pipe(
+      map(response => {
+        if (response.status?.remarks === 'success' && response.payload) {
+          this.saveToken(response.payload.token);
+          if (response.payload.user?.user_id) {
+            localStorage.setItem('user_id', response.payload.user.user_id.toString());
           }
-        }),
-        catchError(error => {
-          console.error('Login error in service:', error);
-          return of({ success: false, error: error.message || 'Login failed' });
-        })
-      );
+          this.router.navigate(['/home']);
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Login error in service:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   saveToken(token: string): void {
@@ -75,5 +73,9 @@ export class AuthService {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user_id');
     this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
   }
 }

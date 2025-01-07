@@ -38,10 +38,17 @@ profile.component.html
               </tr>   
           </thead>
           <tbody>
-              <tr *ngFor="let requirement of getMedicalRequirements()">
-                  <td>{{requirement}}</td>
-                  <td><span class="status-pending">Need Submission</span></td>
-              </tr>
+            <tr *ngFor="let requirement of getMedicalRequirements()">
+                <td>{{requirement}}</td>
+                <td>
+                    <span [ngClass]="{
+                        'status-submitted': getDocumentStatus(requirement) === 'Submitted',
+                        'status-pending': getDocumentStatus(requirement) === 'Need Submission'
+                    }">
+                        {{getDocumentStatus(requirement)}}
+                    </span>
+                </td>
+            </tr>
           </tbody>
       </table>
   </div>
@@ -57,17 +64,19 @@ profile.component.html
           
           <!-- Document Content Section -->
           <div class="document-content" *ngIf="isExpanded('bloodCount')">
-              <!-- Add information display here -->
               <h3 class="information-title">Information</h3>
               <div class="info-label">Date: {{bloodCountData.date ?? 'Not provided'}}</div>
               <div class="info-label">Location: {{bloodCountData.location ?? 'Not provided'}}</div>
               
-              <!-- Existing image container -->
-              <div class="document-image-container">
-                  <img [src]="bloodCountImage ?? 'assets/placeholder.png'"
-                       class="document-image"
-                       (click)="openImagePreview(bloodCountImage ?? 'assets/placeholder.png')"
-                       alt="Blood Count Document">
+              <div class="document-upload-container">
+                  <div *ngIf="bloodCountImage" class="image-preview">
+                      <img [src]="bloodCountImage" class="document-image" (click)="openImagePreview(bloodCountImage)">
+                  </div>
+                  <label class="upload-button">
+                      <span>Change Document</span>
+                      <input type="file" accept="image/*" (change)="onFileSelected($event)">
+                  </label>
+                  <p class="upload-text">Supported formats: JPG, PNG, PDF</p>
               </div>
           </div>
       </div>
@@ -110,33 +119,33 @@ profile.component.html
                   <div class="info-group">
                       <div class="info-row">
                           <span class="info-label">First Dose:</span>
-                          <span class="info-value">{{vaccinationData.firstDoseType ?? 'Not provided'}}</span>
+                          <span class="info-value">{{vaccinationData.first_dose_type ?? 'Not provided'}}</span>
                       </div>
                       <div class="info-row">
                           <span class="info-label">First Dose Date:</span>
-                          <span class="info-value">{{vaccinationData.firstDoseDate ?? 'Not provided'}}</span>
+                          <span class="info-value">{{vaccinationData.first_dose_date ?? 'Not provided'}}</span>
                       </div>
                   </div>
 
                   <div class="info-group">
                       <div class="info-row">
                           <span class="info-label">Second Dose:</span>
-                          <span class="info-value">{{vaccinationData.secondDoseType ?? 'Not provided'}}</span>
+                          <span class="info-value">{{vaccinationData.second_dose_type ?? 'Not provided'}}</span>
                       </div>
                       <div class="info-row">
                           <span class="info-label">Second Dose Date:</span>
-                          <span class="info-value">{{vaccinationData.secondDoseDate ?? 'Not provided'}}</span>
+                          <span class="info-value">{{vaccinationData.second_dose_date ?? 'Not provided'}}</span>
                       </div>
                   </div>
 
                   <div class="info-group">
                       <div class="info-row">
                           <span class="info-label">Booster Type:</span>
-                          <span class="info-value">{{vaccinationData.boosterType ?? 'Not provided'}}</span>
+                          <span class="info-value">{{vaccinationData.booster_type ?? 'Not provided'}}</span>
                       </div>
                       <div class="info-row">
                           <span class="info-label">Booster Date:</span>
-                          <span class="info-value">{{vaccinationData.boosterDate ?? 'Not provided'}}</span>
+                          <span class="info-value">{{vaccinationData.booster_date ?? 'Not provided'}}</span>
                       </div>
                   </div>
               </div>
@@ -172,7 +181,7 @@ profile.component.html
                        class="document-image"
                        (click)="openImagePreview(xrayImage || 'assets/placeholder.png')">
                   <input type="file" 
-                         (change)="onImageUpload($event, 'xray')" 
+                         (change)="onImageUpload($event, 'chestXray')" 
                          accept="image/*" 
                          class="image-upload">
               </div>
@@ -431,7 +440,7 @@ profile.component.html
   </div>
 
   <!-- Blood count modal -->
-  <div class="modal" *ngIf="showBloodCountModal">
+  <div class="modal" *ngIf="showBloodCountModal" id="bloodCountModal">
       <div class="modal-content">
           <h2>Blood Count Information</h2>
           <form #bloodCountForm="ngForm" (ngSubmit)="saveBloodCount(bloodCountForm.value)">
@@ -522,61 +531,38 @@ profile.component.html
       <div class="modal-content">
           <h2>COVID-19 Vaccination Information</h2>
           <form #vaccinationForm="ngForm" (ngSubmit)="saveVaccination(vaccinationForm.value)">
-              <!-- First Dose Section -->
               <div class="form-group">
                   <label for="firstDoseType">First Dose Vaccine Type</label>
-                  <input type="text" id="firstDoseType" name="firstDoseType" [ngModel]="vaccinationData.firstDoseType" required>
+                  <input type="text" id="firstDoseType" name="firstDoseType" [(ngModel)]="vaccinationData.firstDoseType" required>
               </div>
-              
               <div class="form-group">
                   <label for="firstDoseDate">First Dose Date</label>
-                  <input type="date" id="firstDoseDate" name="firstDoseDate" [ngModel]="vaccinationData.firstDoseDate" required>
+                  <input type="date" id="firstDoseDate" name="firstDoseDate" [(ngModel)]="vaccinationData.firstDoseDate" required>
               </div>
-
-              <!-- Second Dose Section -->
               <div class="form-group">
                   <label for="secondDoseType">Second Dose Vaccine Type</label>
-                  <input type="text" id="secondDoseType" name="secondDoseType" [ngModel]="vaccinationData.secondDoseType" required>
+                  <input type="text" id="secondDoseType" name="secondDoseType" [(ngModel)]="vaccinationData.secondDoseType" required>
               </div>
-              
               <div class="form-group">
                   <label for="secondDoseDate">Second Dose Date</label>
-                  <input type="date" id="secondDoseDate" name="secondDoseDate" [ngModel]="vaccinationData.secondDoseDate" required>
+                  <input type="date" id="secondDoseDate" name="secondDoseDate" [(ngModel)]="vaccinationData.secondDoseDate" required>
               </div>
-
-              <!-- Booster Section -->
               <div class="form-group">
                   <label for="boosterType">Booster Type</label>
-                  <input type="text" id="boosterType" name="boosterType" [ngModel]="vaccinationData.boosterType" required>
+                  <input type="text" id="boosterType" name="boosterType" [(ngModel)]="vaccinationData.boosterType" required>
               </div>
-              
               <div class="form-group">
                   <label for="boosterDate">Booster Date</label>
-                  <input type="date" id="boosterDate" name="boosterDate" [ngModel]="vaccinationData.boosterDate" required>
+                  <input type="date" id="boosterDate" name="boosterDate" [(ngModel)]="vaccinationData.boosterDate" required>
               </div>
-              
-              <!-- Upload Section -->
               <div class="document-upload-container">
-                  <div *ngIf="vaccinationImage" class="image-preview">
-                      <span class="delete-image" (click)="deleteImage('vaccination')">&times;</span>
-                      <img [src]="vaccinationImage" class="document-image">
-                  </div>
-                  <label class="upload-button" *ngIf="!vaccinationImage">
+                  <label class="upload-button">
                       <span>Upload Vaccination Card</span>
                       <input type="file" accept="image/*" (change)="onImageUpload($event, 'vaccination')">
                   </label>
-                  <label class="upload-button" *ngIf="vaccinationImage">
-                      <span>Change Document</span>
-                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'vaccination')" style="display: block; margin-left: auto; margin-right: auto;">
-                  </label>
-                  <p class="upload-text">Supported formats: JPG, PNG, PDF</p>
-              </div>
-              
-              <!-- Buttons -->
-              <div class="modal-buttons">
-                  <button type="button" class="cancel-btn" (click)="closeVaccinationModal()">Cancel</button>
-                  <button type="submit" class="save-btn">Save</button>
-              </div>
+                </div>
+                <button type="button" class="cancel-btn" (click)="closeVaccinationModal()">Cancel</button>
+              <button type="submit" class="save-btn">Save</button>
           </form>
       </div>
   </div>
@@ -603,11 +589,11 @@ profile.component.html
                   </div>
                   <label class="upload-button" *ngIf="!xrayImage">
                       <span>Upload X-ray</span>
-                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'xray')">
+                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'chestXray')">
                   </label>
                   <label class="upload-button" *ngIf="xrayImage">
                       <span>Change Document</span>
-                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'xray')">
+                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'chestXray')">
                   </label>
                   <p class="upload-text">Supported formats: JPG, PNG, PDF</p>
               </div>

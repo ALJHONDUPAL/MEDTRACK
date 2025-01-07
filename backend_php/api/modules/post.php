@@ -15,57 +15,85 @@ class Post extends GlobalMethods {
 
  //////////////////////////////////////////////STUDENT SIDE/////////////////////////////////////////////////////////////////////////
     public function registerUser($data) {
-        $firstname = $data->firstname;
-        $lastname = $data->lastname;
-        $domain_account = $data->domain_account;  // Updated to match the new column name
+        if (!isset($data->domain_account) || !isset($data->password)) {
+            return $this->sendPayload(null, "error", "Missing required fields", 400);
+        }
+
+        $domain_account = $data->domain_account;
         $password = password_hash($data->password, PASSWORD_BCRYPT);
         
-        $sql = "INSERT INTO users (firstname, lastname, domain_account, password) VALUES (:firstname, :lastname, :domain_account, :password)";
+        if (!preg_match('/^\d{9}@gordoncollege\.edu\.ph$/', $domain_account)) {
+            return $this->sendPayload(null, "error", "Invalid email format. Must be a valid Gordon College email", 400);
+        }
+        
         try {
+            $checkSql = "SELECT domain_account FROM users WHERE domain_account = :domain_account";
+            $checkStmt = $this->pdo->prepare($checkSql);
+            $checkStmt->execute(['domain_account' => $domain_account]);
+            if ($checkStmt->fetch()) {
+                return $this->sendPayload(null, "error", "User already exists", 400);
+            }
+
+            $sql = "INSERT INTO users (domain_account, password) VALUES (:domain_account, :password)";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['firstname' => $firstname, 'lastname' => $lastname, 'domain_account' => $domain_account, 'password' => $password]);
-            return $this->sendPayload(null           , "success", "User registered successfully", 201);
+            $stmt->execute([
+                'domain_account' => $domain_account,
+                'password' => $password
+            ]);
+
+            return $this->sendPayload(null, "success", "User registered successfully", 201);
         } catch (\PDOException $e) {
-            return $this->sendPayload(null, "error", $e->getMessage(), 400);
+            return $this->sendPayload(null, "error", $e->getMessage(), 500);
         }
     }
     
 
     public function loginUser($data) {
-        $domain_account = $data->domain_account;
-        $password = $data->password;
-        
-        $sql = "SELECT * FROM users WHERE domain_account = :domain_account";
         try {
+            if (!isset($data->domain_account) || !isset($data->password)) {
+                return $this->sendPayload(null, "error", "Missing credentials", 400);
+            }
+
+            $domain_account = $data->domain_account;
+            $password = $data->password;
+            
+            // Query using the full email address
+            $sql = "SELECT * FROM users WHERE domain_account = :domain_account";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['domain_account' => $domain_account]);
-            $user = $stmt->fetch();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
-            if ($user && password_verify($password, $user['password'])) {
-                $payload = [
-                    'iss' => 'localhost',
-                    'aud' => 'localhost',
-                    'iat' => time(),
-                    'exp' => time() + (60 * 60), // 1 hour expiration
-                    'data' => [
-                        'user_id' => $user['user_id'],
-                        'domain_account' => $user['domain_account']
-                    ]
-                ];
-                
-                $jwt = JWT::encode($payload, $this->key, 'HS256');
-                return $this->sendPayload([
-                    'token' => $jwt,
-                    'user' => [
-                        'user_id' => $user['user_id'],
-                        'domain_account' => $user['domain_account']
-                    ]
-                ], "success", "Login successful", 200);
-            } else {
-                return $this->sendPayload(null, "error", "Invalid credentials", 401);
+            if (!$user) {
+                return $this->sendPayload(null, "error", "User not found", 401);
             }
+
+            if (!password_verify($password, $user['password'])) {
+                return $this->sendPayload(null, "error", "Invalid password", 401);
+            }
+
+            $payload = [
+                'iss' => 'localhost',
+                'aud' => 'localhost',
+                'iat' => time(),
+                'exp' => time() + (60 * 60),
+                'data' => [
+                    'user_id' => $user['user_id'],
+                    'domain_account' => $user['domain_account']
+                ]
+            ];
+            
+            $jwt = JWT::encode($payload, $this->key, 'HS256');
+            
+            return $this->sendPayload([
+                'token' => $jwt,
+                'user' => [
+                    'user_id' => $user['user_id'],
+                    'domain_account' => $user['domain_account']
+                ]
+            ], "success", "Login successful", 200);
+            
         } catch (\PDOException $e) {
-            return $this->sendPayload(null, "error", $e->getMessage(), 400);
+            return $this->sendPayload(null, "error", $e->getMessage(), 500);
         }
     }
 
@@ -178,72 +206,81 @@ class Post extends GlobalMethods {
     }
 
     // Method to handle medical document uploads
-    public function uploadMedicalDocument() {
-        header('Content-Type: application/json');
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->sendErrorResponse('Invalid request method');
-            return;
-        }
-
-        $requiredFields = ['user_id', 'document_type'];
-        foreach ($requiredFields as $field) {
-            if (!isset($_POST[$field])) {
-                $this->sendErrorResponse("Missing required field: $field");
-                return;
-            }
-        }
-
-        if (!isset($_FILES['document'])) {
-            $this->sendErrorResponse('No document file uploaded');
-            return;
-        }
-
-        $userId = $_POST['user_id'];
-        $documentType = $_POST['document_type'];
-        
-        // Get user's ID number for folder structure
-        $stmt = $this->pdo->prepare("SELECT id_number FROM user_profiles WHERE user_id = ?");
-        $stmt->execute([$userId]);
-        $userProfile = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$userProfile) {
-            $this->sendErrorResponse('User profile not found');
-            return;
-        }
-
-        $documentPath = $this->handleFileUpload(
-            $_FILES['document'],
-            $userProfile['id_number'],
-            'medical_documents/' . $documentType
-        );
-
-        if (!$documentPath) {
-            $this->sendErrorResponse('Failed to upload document');
-            return;
-        }
-
+    public function uploadMedicalDocument($userId, $documentType, $date = null, $location = null) {
         try {
-            $sql = "INSERT INTO medical_documents (user_id, document_type, file_path, status) 
-                    VALUES (?, ?, ?, 'Submitted')
+            if (!isset($_FILES['document']) || $_FILES['document']['error'] !== UPLOAD_ERR_OK) {
+                return [
+                    "status" => "error",
+                    "message" => "No document file uploaded or upload error"
+                ];
+            }
+    
+            // Verify user exists
+            $stmt = $this->pdo->prepare("SELECT * FROM user_profiles WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            $userProfile = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$userProfile) {
+                return [
+                    "status" => "error",
+                    "message" => "User profile not found"
+                ];
+            }
+    
+            // Create upload directory
+            $uploadDir = dirname(__FILE__) . "/../uploads/{$userId}/medical_documents/{$documentType}/";
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+    
+            $fileName = time() . '_' . uniqid() . '_' . $_FILES['document']['name'];
+            $filePath = $uploadDir . $fileName;
+            $relativePath = "uploads/{$userId}/medical_documents/{$documentType}/" . $fileName;
+    
+            if (!move_uploaded_file($_FILES['document']['tmp_name'], $filePath)) {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to move uploaded file"
+                ];
+            }
+    
+            $this->pdo->beginTransaction();
+            
+            $sql = "INSERT INTO medical_documents (user_id, document_type, file_path, date, location, status) 
+                    VALUES (?, ?, ?, ?, ?, 'Submitted')
                     ON DUPLICATE KEY UPDATE 
                     file_path = VALUES(file_path),
+                    date = VALUES(date),
+                    location = VALUES(location),
                     status = 'Submitted',
                     uploaded_at = CURRENT_TIMESTAMP";
-            
+    
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$userId, $documentType, $documentPath]);
-
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Document uploaded successfully',
-                'data' => ['file_path' => $documentPath]
-            ]);
-
+            $stmt->execute([$userId, $documentType, $relativePath, $date, $location]);
+            $this->pdo->commit();
+    
+            return [
+                "status" => "success",
+                "message" => "Document uploaded successfully",
+                "data" => [
+                    "file_path" => $relativePath,
+                    "document_type" => $documentType,
+                    "date" => $date,
+                    "location" => $location
+                ]
+            ];
+    
         } catch (Exception $e) {
-            $this->sendErrorResponse('Database error: ' . $e->getMessage());
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return [
+                "status" => "error",
+                "message" => "Database error: " . $e->getMessage()
+            ];
         }
     }
+
 
     // Helper method to handle file uploads
     private function handleFileUpload($file, $identifier, $subDirectory) {
@@ -381,8 +418,62 @@ class Post extends GlobalMethods {
     }
     
 
-
     
+
+    public function uploadVaccinationRecord($userId) {
+        try {
+            if (!isset($_POST['firstDoseType']) || !isset($_POST['firstDoseDate']) || 
+                !isset($_POST['secondDoseType']) || !isset($_POST['secondDoseDate']) || 
+                !isset($_FILES['document'])) {
+                return [
+                    "status" => "error",
+                    "message" => "Missing required parameters"
+                ];
+            }
+
+            // Create upload directory
+            $uploadDir = dirname(__FILE__) . "/../uploads/{$userId}/vaccination_records/";
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $fileName = time() . '_' . uniqid() . '_' . $_FILES['document']['name'];
+            $filePath = $uploadDir . $fileName;
+            $relativePath = "uploads/{$userId}/vaccination_records/" . $fileName;
+
+            if (!move_uploaded_file($_FILES['document']['tmp_name'], $filePath)) {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to move uploaded file"
+                ];
+            }
+
+            // Prepare data for database insertion
+            $firstDoseType = $_POST['firstDoseType'];
+            $firstDoseDate = $_POST['firstDoseDate'];
+            $secondDoseType = $_POST['secondDoseType'];
+            $secondDoseDate = $_POST['secondDoseDate'];
+            $boosterType = $_POST['boosterType'] ?? null;
+            $boosterDate = $_POST['boosterDate'] ?? null;
+
+            $sql = "INSERT INTO vaccination_records (user_id, first_dose_type, first_dose_date, second_dose_type, second_dose_date, booster_type, booster_date, document_path, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Submitted')";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$userId, $firstDoseType, $firstDoseDate, $secondDoseType, $secondDoseDate, $boosterType, $boosterDate, $relativePath]);
+
+            return [
+                "status" => "success",
+                "message" => "Vaccination record uploaded successfully"
+            ];
+        } catch (Exception $e) {
+            return [
+                "status" => "error",
+                "message" => "Database error: " . $e->getMessage()
+            ];
+        }
+    }
+
+
 }
 
 
