@@ -214,7 +214,7 @@ class Post extends GlobalMethods {
                     "message" => "No document file uploaded or upload error"
                 ];
             }
-    
+
             // Verify user exists
             $stmt = $this->pdo->prepare("SELECT * FROM user_profiles WHERE user_id = ?");
             $stmt->execute([$userId]);
@@ -226,24 +226,24 @@ class Post extends GlobalMethods {
                     "message" => "User profile not found"
                 ];
             }
-    
+
             // Create upload directory
             $uploadDir = dirname(__FILE__) . "/../uploads/{$userId}/medical_documents/{$documentType}/";
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-    
+
             $fileName = time() . '_' . uniqid() . '_' . $_FILES['document']['name'];
             $filePath = $uploadDir . $fileName;
             $relativePath = "uploads/{$userId}/medical_documents/{$documentType}/" . $fileName;
-    
+
             if (!move_uploaded_file($_FILES['document']['tmp_name'], $filePath)) {
                 return [
                     "status" => "error",
                     "message" => "Failed to move uploaded file"
                 ];
             }
-    
+
             $this->pdo->beginTransaction();
             
             $sql = "INSERT INTO medical_documents (user_id, document_type, file_path, date, location, status) 
@@ -254,11 +254,11 @@ class Post extends GlobalMethods {
                     location = VALUES(location),
                     status = 'Submitted',
                     uploaded_at = CURRENT_TIMESTAMP";
-    
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$userId, $documentType, $relativePath, $date, $location]);
             $this->pdo->commit();
-    
+
             return [
                 "status" => "success",
                 "message" => "Document uploaded successfully",
@@ -269,11 +269,64 @@ class Post extends GlobalMethods {
                     "location" => $location
                 ]
             ];
-    
+
         } catch (Exception $e) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
+            return [
+                "status" => "error",
+                "message" => "Database error: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function uploadVaccinationRecord($userId) {
+        try {
+            if (!isset($_POST['firstDoseType']) || !isset($_POST['firstDoseDate']) || 
+                !isset($_POST['secondDoseType']) || !isset($_POST['secondDoseDate']) || 
+                !isset($_FILES['document'])) {
+                return [
+                    "status" => "error",
+                    "message" => "Missing required parameters"
+                ];
+            }
+
+            // Create upload directory
+            $uploadDir = dirname(__FILE__) . "/../uploads/{$userId}/vaccination_records/";
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $fileName = time() . '_' . uniqid() . '_' . $_FILES['document']['name'];
+            $filePath = $uploadDir . $fileName;
+            $relativePath = "uploads/{$userId}/vaccination_records/" . $fileName;
+
+            if (!move_uploaded_file($_FILES['document']['tmp_name'], $filePath)) {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to move uploaded file"
+                ];
+            }
+
+            // Prepare data for database insertion
+            $firstDoseType = $_POST['firstDoseType'];
+            $firstDoseDate = $_POST['firstDoseDate'];
+            $secondDoseType = $_POST['secondDoseType'];
+            $secondDoseDate = $_POST['secondDoseDate'];
+            $boosterType = $_POST['boosterType'] ?? null;
+            $boosterDate = $_POST['boosterDate'] ?? null;
+
+            $sql = "INSERT INTO vaccination_records (user_id, first_dose_type, first_dose_date, second_dose_type, second_dose_date, booster_type, booster_date, document_path, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Submitted')";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$userId, $firstDoseType, $firstDoseDate, $secondDoseType, $secondDoseDate, $boosterType, $boosterDate, $relativePath]);
+
+            return [
+                "status" => "success",
+                "message" => "Vaccination record uploaded successfully"
+            ];
+        } catch (Exception $e) {
             return [
                 "status" => "error",
                 "message" => "Database error: " . $e->getMessage()
@@ -416,63 +469,6 @@ class Post extends GlobalMethods {
             return $this->sendPayload(null, "error", $e->getMessage(), 400);
         }
     }
-    
-
-    
-
-    public function uploadVaccinationRecord($userId) {
-        try {
-            if (!isset($_POST['firstDoseType']) || !isset($_POST['firstDoseDate']) || 
-                !isset($_POST['secondDoseType']) || !isset($_POST['secondDoseDate']) || 
-                !isset($_FILES['document'])) {
-                return [
-                    "status" => "error",
-                    "message" => "Missing required parameters"
-                ];
-            }
-
-            // Create upload directory
-            $uploadDir = dirname(__FILE__) . "/../uploads/{$userId}/vaccination_records/";
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            $fileName = time() . '_' . uniqid() . '_' . $_FILES['document']['name'];
-            $filePath = $uploadDir . $fileName;
-            $relativePath = "uploads/{$userId}/vaccination_records/" . $fileName;
-
-            if (!move_uploaded_file($_FILES['document']['tmp_name'], $filePath)) {
-                return [
-                    "status" => "error",
-                    "message" => "Failed to move uploaded file"
-                ];
-            }
-
-            // Prepare data for database insertion
-            $firstDoseType = $_POST['firstDoseType'];
-            $firstDoseDate = $_POST['firstDoseDate'];
-            $secondDoseType = $_POST['secondDoseType'];
-            $secondDoseDate = $_POST['secondDoseDate'];
-            $boosterType = $_POST['boosterType'] ?? null;
-            $boosterDate = $_POST['boosterDate'] ?? null;
-
-            $sql = "INSERT INTO vaccination_records (user_id, first_dose_type, first_dose_date, second_dose_type, second_dose_date, booster_type, booster_date, document_path, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Submitted')";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$userId, $firstDoseType, $firstDoseDate, $secondDoseType, $secondDoseDate, $boosterType, $boosterDate, $relativePath]);
-
-            return [
-                "status" => "success",
-                "message" => "Vaccination record uploaded successfully"
-            ];
-        } catch (Exception $e) {
-            return [
-                "status" => "error",
-                "message" => "Database error: " . $e->getMessage()
-            ];
-        }
-    }
-
 
 }
 
