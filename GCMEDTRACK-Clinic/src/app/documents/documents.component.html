@@ -4,50 +4,60 @@
     <!-- Search controls outside container -->
     <div class="search-controls">
       <div class="dropdown">
-        <select [(ngModel)]="selectedDepartment" (ngModelChange)="onDepartmentChange($event)" class="form-select">
+        <select [(ngModel)]="selectedDepartment" (ngModelChange)="onDepartmentChange()" class="form-select">
+          <option value="">All Departments</option>
           <option value="CAHS">CAHS</option>
           <option value="CBA">CBA</option>
           <option value="CEAS">CEAS</option>
           <option value="CHTM-Tourism">CHTM-Tourism</option>
           <option value="CHTM-Hospitality">CHTM-Hospitality</option>
-          <option value="CSS">CSS</option>
+          <option value="CCS">CCS</option>
         </select>
       </div>
       
       <div class="dropdown">
         <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
-          <option value="1st">1st Year</option>
-          <option value="2nd">2nd Year</option> 
-          <option value="3rd">3rd Year</option>
-          <option value="4th">4th Year</option>
-          <!-- Add more options as needed -->
+          <option value="">All Years</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+          <option value="4">4th Year</option>
         </select>
       </div>
-  
+      
+    
       <div class="search-box">
-        <input type="text" placeholder="Student I.D" [(ngModel)]="searchQuery">
+        <input
+          type="text"
+          placeholder="Student I.D"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+        />
         <button class="search-button">
           <i class="fas fa-search"></i>
         </button>
       </div>
     </div>
-  
-    <!-- Cards container -->
     <div class="container">
-      <!-- Card items -->
-      <div *ngFor="let student of filteredStudents">
-        <div class="card">
-          <img src="assets/student-avatar.png" alt="Student">
-          <div class="info">
-            <h3>{{student.name}}</h3>
-            <p>{{student.department}}</p>
-            <p>{{student.id}}</p>
-          </div>
-          <a class="view-medical" [routerLink]="['/medical-details', student.id]">
-            View Medical
-            <i class="fas fa-info-circle"></i>
-          </a>
+    <!-- Display filtered results -->
+    <div *ngFor="let student of filteredStudents" class="student-card">
+      <div class="card">
+        <!-- <p><strong>Debug User ID:</strong> {{ student.user_id }}</p> -->
+        <img [src]="getImageUrl()" class="profile-img" alt="Profile Image" />
+        <div class="info">
+          <h3>{{ student.name }}</h3>
+          <p><strong>Department:</strong> {{ student.department }}</p>
+          <p><strong>Year Level:</strong> {{ student.yearLevel }}</p>
+          <p><strong>ID Number:</strong> {{ student.idNumber }}</p>
         </div>
+        <a class="view-medical" (click)="goToMedicalDetails(student.user_id)">
+          View Medical
+        </a>
       </div>
     </div>
   </div>
+    
+    
+    
+ 
+  

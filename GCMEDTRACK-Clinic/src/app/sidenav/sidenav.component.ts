@@ -72,4 +72,4 @@ export class SidenavComponent implements OnInit, OnDestroy {
   }
 
   // ... other existing methods
-}
+} 

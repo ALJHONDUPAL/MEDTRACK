@@ -65,6 +65,37 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 break;
 
+
+                case 'getAllStudentProfiles':
+                    $department = $_GET['department'] ?? null;
+                    $year = $_GET['year'] ?? null;
+                
+                    echo json_encode($get->getStudentProfiles($department, $year));
+                    break;
+                
+
+                    case 'getStudentBasicDetails':
+                        $userId = $_GET['user_id'] ?? null;
+                    
+                        if ($userId) {
+                            echo json_encode($get->getStudentBasicDetails($userId));
+                        } else {
+                            echo json_encode([
+                                "status" => "error",
+                                "message" => "Invalid or missing user ID."
+                            ]);
+                        }
+                        break;
+                    
+                    
+                    
+
+                    
+                    
+                    
+                    
+                
+
             // Get user profile by domain account (email or username)
             case 'getProfileByDomainAccount':
                 if (isset($request[1])) {
@@ -170,6 +201,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         http_response_code(400);
                     }
                     break;
+
 
         
 

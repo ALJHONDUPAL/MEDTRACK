@@ -1,5 +1,6 @@
-import { Routes } from '@angular/router';
 
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { UserManagementComponent } from './usermanagement/usermanagement.component';
 import { ClinicLoginComponent } from './login/login.component';
 import { ClinicAuthGuard } from './services/auth.guard';
@@ -20,6 +21,7 @@ export const routes: Routes = [
     path: 'login', 
     component: ClinicLoginComponent 
   },
+  
   { 
     path: '', 
     component: SidenavComponent,
@@ -38,10 +40,6 @@ export const routes: Routes = [
         component: AppointmentsComponent 
       },
       { 
-        path: 'medical-details', 
-        component: MedicalDetailsComponent
-      },
-      { 
         path: 'schedulebooking', 
         component: SchedulebookingComponent
       },
@@ -49,11 +47,26 @@ export const routes: Routes = [
         path: 'documents', 
         component: DocumentsComponent
       },
+      // { 
+      //   path: 'medical-details', 
+      //   component: MedicalDetailsComponent
+      // },
+  
+        { path: 'medical-details/:user_id', component: MedicalDetailsComponent },
+      
       // Add other protected routes here
     ]
   },
+  
   { 
     path: '**', 
     redirectTo: 'login' 
   }
 ];
+
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }

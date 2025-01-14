@@ -1,1 +1,87 @@
-<p>medical-details works!</p>
+<div class="medical-details-container">
+  <div class="header">
+    <button class="back-button" routerLink="/documents">
+      <i class="fas fa-arrow-left"></i> Back to Documents
+    </button>
+  </div>
+
+  <!-- Student Profile -->
+  <div class="student-info-card" *ngIf="student.name; else loading">
+    <img [src]="getImageUrl()"  alt="Profile Image" />
+    <div class="info">
+      <h3>{{ student.name }}</h3>
+      <p><strong>Department:</strong> {{ student.department }}</p>
+      <p><strong>Year Level:</strong> {{ student.year_level }}</p>
+      <p><strong>ID Number:</strong> {{ student.id_number }}</p>
+    </div>
+  </div>
+
+
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="th">Medical Documents</th>
+        <th class="th">STATUS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let document of medicalDocuments; let i = index">
+        <td class="td">{{ document.name }}</td>
+        <td class="td" [class]="document.color">
+          {{ document.status }} <span [class]="document.color">{{ document.icon }}</span>
+          <!-- Optional: Add a toggle button -->
+          <button (click)="toggleDocumentStatus(i)">Click to change Status</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div class="flex">
+    <button class="bg-destructive">Cancel</button>
+    <button class="bg-secondary">Save</button>
+  </div>
+  
+
+  <!-- Medical Records -->
+  <div class="documents-details">
+  <div *ngIf="student.document_id; else noMedicalRecords">
+   
+      <h4>Medical Records</h4>
+      <div class="info-box">
+      <p><strong>Document Type:</strong> {{ student.document_type }}</p>
+      <p><strong> Location:</strong> {{ student.location }}</p>
+      <p><strong>Status:</strong> {{ student.status }}</p>
+      </div>
+      <img [src]="getMedUrl()" class="image" alt="Medical docs" />
+      <!-- <a [href]="getFilePath(student.file_path)" target="_blank">View Medical Document</a> -->
+    </div>
+  </div>  
+
+
+  <ng-template #noMedicalRecords>
+    <p>No medical records available.</p>
+  </ng-template>
+
+  <div class="documents-details">
+  <!-- Vaccination Records -->
+  <div *ngIf="student.first_dose_type || student.second_dose_type || student.booster_type; else noVaccinationRecords">
+    <div class="card">
+      <h4>Vaccination Records</h4>
+      <p><strong>First Dose:</strong> {{ student.first_dose_type }} on {{ student.first_dose_date | date }}</p>
+      <p><strong>Second Dose:</strong> {{ student.second_dose_type }} on {{ student.second_dose_date | date }}</p>
+      <p><strong>Booster:</strong> {{ student.booster_type }} on {{ student.booster_date | date }}</p>
+      <img [src]="getVacUrl()" class="image" alt=" Vaccination" />
+    </div>
+  </div>
+</div>
+  <ng-template #noVaccinationRecords>
+    <p>No vaccination records available.</p>
+  </ng-template>
+
+  <!-- Loading Template -->
+  <ng-template #loading>
+    <p>Loading student details...</p>
+  </ng-template>
+</div>
+

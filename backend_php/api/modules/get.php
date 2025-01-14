@@ -221,5 +221,101 @@ public function getVaccinationRecords($userId) {
     }
 }
 
+//CLINIC SIDE  medical details component
+public function getStudentProfiles($department = null, $year = null) {
+    try {
+        // Base SQL query
+        $sql = "
+            SELECT 
+                up.user_id,
+                up.name,
+                up.department,
+                up.year_level AS yearLevel,
+                up.id_number AS idNumber,
+                up.profile_image_path AS profileImage
+            FROM user_profiles up
+            WHERE 1=1
+        ";
+
+        // Array to hold parameters
+        $params = [];
+
+        // Add filtering conditions dynamically
+        if (!empty($department)) {
+            $sql .= " AND up.department = :department";
+            $params[':department'] = $department;
+        }
+
+        if (!empty($year)) {
+            $sql .= " AND up.year_level = :year";
+            $params[':year'] = $year;
+        }
+
+        // Prepare and execute the query
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            "status" => "success",
+            "data" => $profiles
+        ];
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ];
+    }
 }
-?>
+
+//CLINIC SIDE  medical details component
+public function getStudentBasicDetails($userId)
+{
+    try {
+        // SQL query to fetch basic details for a specific student
+        $sql = "
+        SELECT s.*, m.*, v.*
+        FROM user_profiles s
+        LEFT JOIN medical_documents m ON s.user_id = m.user_id
+        LEFT JOIN vaccination_records v ON s.user_id = v.user_id
+        WHERE s.user_id = :userId
+    ";
+    
+        // Prepare and execute the query
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':userId' => $userId]);
+
+        // Fetch the profile
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Log the fetched profile for debugging
+        error_log('Fetched profile: ' . print_r($profile, true));
+
+        // If no profile is found, return an error message
+        if (!$profile) {
+            return [
+                "status" => "error",
+                "message" => "No profile found for user ID: " . $userId
+            ];
+        }
+
+        return [
+            "status" => "success",
+            "data" => $profile
+        ];
+
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ];
+    }
+}
+
+
+
+
+
+
+}
