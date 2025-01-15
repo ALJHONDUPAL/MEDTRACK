@@ -85,16 +85,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                                 "message" => "Invalid or missing user ID."
                             ]);
                         }
-                        break;
-                    
-                    
-                    
-
-                    
-                    
-                    
-                    
-                
+                        break;        
 
             // Get user profile by domain account (email or username)
             case 'getProfileByDomainAccount':
@@ -118,12 +109,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo json_encode($get->getAllClinicStaff());
                     break;
 
-
-            // get the firstname and lastname
-
-            // Fetch the firstname and lastname of a user
-           // Route to get user's firstname and lastname by userId
-           // Route to get user's firstname and lastname by id
            case 'getUserFullNameByUsername':
                  if (isset($_GET['username'])) {
                 $username = $_GET['username']; // Get the username from the query parameter
@@ -158,12 +143,21 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     }
                     break;
         
+            case 'getTimeSlots':
+                $dayOfWeek = isset($request[1]) ? $request[1] : null;
+                    echo json_encode($get->getTimeSlots($dayOfWeek));
+                        break;
+
+            case 'getAppointments':
+                echo json_encode($get->getAppointments());
+                break;
         
-        
+
+                case 'getClinicAppointments':
+                    echo json_encode($get->getClinicAppointments());
+                    break;
+
     break;
-
-
-
             
             default:
                 echo json_encode(["status" => "error", "message" => "Invalid GET request"]);
@@ -201,8 +195,27 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         http_response_code(400);
                     }
                     break;
+            
+                    case 'createAppointment':
+                        if (!isset($data->slotId) || !isset($data->userId) || !isset($data->purpose)) {
+                            echo json_encode([
+                                "status" => "error",
+                                "message" => "Missing required fields"
+                            ]);
+                            break;
+                        }
+            
+                        $appointmentData = (object)[
+                            'slot_id' => intval($data->slotId),
+                            'user_id' => intval($data->userId),
+                            'purpose' => $data->purpose,
+                            'status' => 'Pending'
+                        ];
+            
+                        echo json_encode($post->createAppointment($appointmentData));
+                        break;
 
-
+                    
         
 
 ///////////////////////////CLINIC SIDE/////////////////////////////////////////////////////////////
@@ -252,7 +265,34 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($post->uploadVaccinationRecord($userId));
                 break;
 
-            
+            case 'addTimeSlot':
+                echo json_encode($post->addTimeSlot($data));
+                break;
+
+            case 'updateTimeSlot':
+                $id = isset($request[1]) ? $request[1] : null;
+                echo json_encode($post->updateTimeSlot($id, $data));
+                break;
+
+            case 'updateAppointmentStatus':
+                if (!isset($data->appointmentId) || !isset($data->status)) {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "Missing required fields"
+                    ]);
+                    http_response_code(400);
+                    break;
+                    }
+                
+                    $updateData = (object)[
+                        'appointment_id' => intval($data->appointmentId),
+                        'status' => $data->status
+                    ];
+                
+                    $result = $post->updateAppointmentStatus($updateData);
+                    echo json_encode($result);
+                    break;
+                
         }
         break;
 

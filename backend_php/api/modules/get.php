@@ -30,26 +30,6 @@ class Get extends GlobalMethods {
 
         return array("code" => $code, "errmsg" => $errmsg, "data" => $data);
     }
-
-    // // Method to get the profile of a specific user by their ID
-    // public function getUserProfile($user_id) {
-    //     $sql = "SELECT * FROM user_profiles WHERE user_id = :user_id";
-
-    //     try {
-    //         $stmt = $this->pdo->prepare($sql);
-    //         $stmt->execute(['user_id' => $user_id]);
-    //         $profile = $stmt->fetch();
-            
-    //         if ($profile) {
-    //             return $this->sendPayload($profile, "success", "User profile fetched successfully", 200);
-    //         } else {
-    //             return $this->sendPayload(null, "error", "Profile not found", 404);
-    //         }
-    //     } catch (\PDOException $e) {
-    //         return $this->sendPayload(null, "error", $e->getMessage(), 403);
-    //     }
-    // }
-
     // Method to get all user profiles (optional, depending on your needs)
     public function getAllUserProfiles() {
         $sql = "SELECT * FROM user_profiles";
@@ -109,11 +89,6 @@ class Get extends GlobalMethods {
             return $this->sendPayload(null, "error", $e->getMessage(), 400);
         }
     }
- 
-
-
-
-
 
 //student side getting the firstname and lastname
 public function getUserFullNameByUsername($username) {
@@ -313,9 +288,66 @@ public function getStudentBasicDetails($userId)
     }
 }
 
+public function getTimeSlots($dayOfWeek) {
+    try {
+        $sql = "SELECT * FROM time_slots WHERE day_of_week = :day_of_week ORDER BY start_time";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':day_of_week' => $dayOfWeek]);
+        
+        return array("status" => "success", "data" => $stmt->fetchAll(PDO::FETCH_ASSOC));
+    } catch (PDOException $e) {
+        return array("status" => "error", "message" => $e->getMessage());
+    }
+}
 
+public function getAppointments() {
+    try {
+        $sql = "SELECT a.*, t.start_time, t.end_time, t.day_of_week, t.date 
+                FROM appointments a 
+                JOIN time_slots t ON a.slot_id = t.slot_id 
+                ORDER BY t.date, t.start_time";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        
+        return array("status" => "success", "data" => $stmt->fetchAll(PDO::FETCH_ASSOC));
+    } catch (PDOException $e) {
+        return array("status" => "error", "message" => $e->getMessage());
+    }
+}
 
-
-
+public function getClinicAppointments() {
+    try {
+        $sql = "SELECT 
+                a.appointment_id, 
+                a.purpose, 
+                a.status,
+                ts.date,
+                ts.start_time,
+                ts.end_time,
+                up.name,
+                up.department,
+                up.year_level,
+                up.id_number,
+                up.profile_image_path
+            FROM appointments a
+            JOIN time_slots ts ON a.slot_id = ts.slot_id
+            JOIN user_profiles up ON a.user_id = up.user_id
+            ORDER BY ts.date DESC, ts.start_time ASC";
+            
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            "status" => "success",
+            "data" => $appointments
+        ];
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => $e->getMessage()
+        ];
+    }
+}
 
 }

@@ -31,6 +31,7 @@ interface SideNavToggle {
 })
 export class SidenavComponent implements OnInit, OnDestroy {
   @Output() onToggleSideNav = new EventEmitter<SideNavToggle>();
+  someModel: string = '';
   collapsed = false;
   screenWidth = 0;
   navData = navbarData;

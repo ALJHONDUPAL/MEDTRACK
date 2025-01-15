@@ -74,72 +74,62 @@
     </div>
   </div>
   
-  <!-- Schedule Modal -->
-  <div class="schedule-modal" *ngIf="showScheduleModal">
-    <div class="modal-content">
-      <h2>Set an Appointment and Time Schedule</h2>
-      
-      <div class="form-group">
-        <label>Set a Limit for Students</label>
-        <input type="number" 
-               [(ngModel)]="studentLimit" 
-               class="form-input" 
-               placeholder="Enter student limit">
-      </div>
-  
-      <div class="form-group">
-        <label>Date</label>
-        <div class="input-with-icon">
-          <mat-form-field appearance="outline">
-            <input matInput
-                   [matDatepicker]="picker"
-                   [(ngModel)]="selectedDate"
-                   placeholder="MM/DD/YYYY"
-                   readonly>
-            <mat-datepicker-toggle matSuffix [for]="picker">
-              <i class="fas fa-calendar" matDatepickerToggleIcon></i>
-            </mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </div>
-  
-      <div class="form-group">
-        <label>Time</label>
-        <div class="time-inputs">
-          <div class="time-input-group">
-            <label>Start Time</label>
-            <div class="input-with-icon">
-              <input type="text" 
-                     [(ngModel)]="selectedStartTime" 
-                     class="form-input" 
-                     placeholder="Select Start Time" 
-                     readonly
-                     (click)="openTimePicker($event, true)">
-              <i class="fas fa-clock" (click)="openTimePicker($event, true)"></i>
-            </div>
-          </div>
-          <div class="time-input-group">
-            <label>End Time</label>
-            <div class="input-with-icon">
-              <input type="text" 
-                     [(ngModel)]="selectedEndTime" 
-                     class="form-input" 
-                     placeholder="Select End Time" 
-                     readonly
-                     (click)="openTimePicker($event, false)">
-              <i class="fas fa-clock" (click)="openTimePicker($event, false)"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <div class="modal-actions">
-        <button class="cancel-btn" (click)="closeScheduleModal()">Cancel</button>
-        <button class="save-btn" (click)="saveSchedule()">Save</button>
-      </div>
+
+ <!-- Schedule Modal -->
+<div class="schedule-modal" *ngIf="showScheduleModal">
+  <div class="modal-content">
+    <h2>Set an Appointment and Time Schedule</h2>
+    
+    <div class="form-group">
+      <label>Set a Limit for Students</label>
+      <input type="number" 
+             [(ngModel)]="studentLimit" 
+             class="form-input" 
+             placeholder="Enter student limit" required>
+    </div>
+
+    <div class="form-group">
+      <label>Date</label>
+      <mat-form-field appearance="outline">
+        <mat-label>Select Date</mat-label>
+        <input matInput
+               [matDatepicker]="picker"
+               [(ngModel)]="selectedDate"
+               placeholder="MM/DD/YYYY"
+               required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="form-group">
+      <label>Start Time</label>
+      <mat-form-field appearance="outline">
+        <mat-label>Start Time</mat-label>
+        <input matInput
+               [(ngModel)]="selectedStartTime"
+               placeholder="HH:MM AM/PM"
+               required>
+      </mat-form-field>
+    </div>
+
+    <div class="form-group">
+      <label>End Time</label>
+      <mat-form-field appearance="outline">
+        <mat-label>End Time</mat-label>
+        <input matInput
+               [(ngModel)]="selectedEndTime"
+               placeholder="HH:MM AM/PM"
+               required>
+      </mat-form-field>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeScheduleModal()">Cancel</button>
+      <button class="save-btn" (click)="saveSchedule()">Save</button>
     </div>
   </div>
+</div>
   
   <!-- Time Picker Dropdown -->
   <div class="time-picker-dropdown" 

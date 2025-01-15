@@ -1,42 +1,42 @@
 <mat-sidenav-container>
-    <mat-sidenav #snav [mode]="mobileQuery.matches ? 'over' : 'side'" 
-                 [opened]="!mobileQuery.matches"
-                 [ngClass]="collapsed ? 'sidenav-collapsed': ''">
-      <div class="logo-container">
-        <img src="/assets/medtrack-logo.png" class="logo" (click)="toggleCollapse()">
-        <button class="btn-close" *ngIf="collapsed" 
-                [@rotate]="collapsed ? 'rotated' : 'default'"
-                (click)="closeSidenav()">
-          <i class="fas fa-times close-icon"></i>
-        </button>
+  <mat-sidenav #snav [mode]="mobileQuery.matches ? 'over' : 'side'" 
+               [opened]="!mobileQuery.matches"
+               [ngClass]="collapsed ? 'sidenav-collapsed' : ''">
+    <div class="logo-container">
+      <img src="/assets/medtrack-logo.png" class="logo" (click)="toggleCollapse()">
+      <button class="btn-close" *ngIf="collapsed" 
+              [@rotate]="collapsed ? 'rotated' : 'default'"
+              (click)="closeSidenav()">
+        <i class="fas fa-times close-icon"></i>
+      </button>
+    </div>
+    <div class="scrollwrap scrollwrap_delayed">
+      <mat-nav-list class="sidenav-nav">
+        <mat-list-item class="sidenav-nav-item" *ngFor="let data of navData">
+          <a class="sidenav-nav-link" 
+             [routerLink]="[data.routeLink]" 
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="{exact: true}">
+            <i class="sidenav-link-icon" [class]="data.icon"></i>
+            <span class="sidenav-link-text" [@fadeInOut] *ngIf="collapsed">
+              {{data.label}}
+            </span>
+          </a>
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+  </mat-sidenav>
+  
+  <mat-sidenav-content>
+    <mat-toolbar>
+      <button mat-button (click)="snav.toggle()" class="side-nav-tbutton">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="datetime-container">
+        <i class="far fa-calendar"></i>
+        <span>{{ currentDateTime | date: 'EEEE, MMM d, y, h:mm a' }}</span>
       </div>
-      <div class="scrollwrap scrollwrap_delayed">
-        <mat-nav-list class="sidenav-nav">
-          <mat-list-item class="sidenav-nav-item" *ngFor="let data of navData">
-            <a class="sidenav-nav-link" 
-               [routerLink]="[data.routeLink]" 
-               routerLinkActive="active"
-               [routerLinkActiveOptions]="{exact: true}">
-              <i class="sidenav-link-icon" [class]="data.icon"></i>
-              <span class="sidenav-link-text" [@fadeInOut] *ngIf="collapsed">
-                {{data.label}}
-              </span>
-            </a>
-          </mat-list-item>
-        </mat-nav-list>
-      </div>
-    </mat-sidenav>
-    
-    <mat-sidenav-content>
-      <mat-toolbar>
-        <button mat-button (click)="snav.toggle()" class="side-nav-tbutton">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="datetime-container">
-          <i class="far fa-calendar"></i>
-          <span>{{ currentDateTime | date: 'EEEE, MMM d, y, h:mm a' }}</span>
-        </div>
-      </mat-toolbar>
-      <router-outlet></router-outlet>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+    </mat-toolbar>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

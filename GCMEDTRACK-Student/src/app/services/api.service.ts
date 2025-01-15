@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -49,20 +49,41 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/getVaccinationRecords/${userId}`);
 }
 
-  private handleError(error: HttpErrorResponse) {
-    console.error('API Error:', error);
-    let errorMessage = 'An error occurred';
+getTimeSlots(dayOfWeek: string): Observable<any> {
+  return this.http.get(`${this.baseUrl}/getTimeSlots/${dayOfWeek}`);
+}
+
+getAppointments(): Observable<any> {
+  return this.http.get(`${this.baseUrl}/getAppointments`);
+}
+
+createAppointment(appointmentData: any): Observable<any> {
+  // console.log('Sending appointment data:', appointmentData);
+  
+  const headers = new HttpHeaders()
+    .set('Content-Type', 'application/json')
+    .set('Accept', 'application/json');
     
+  const payload = {
+    action: 'createAppointment',
+    slotId: appointmentData.slotId,
+    userId: appointmentData.userId,
+    purpose: appointmentData.purpose
+  };
+  return this.http.post(`${this.baseUrl}/createAppointment`, payload, { headers })
+}
+
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An error occurred';
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = error.error.message;
-    } else if (error.status === 404) {
-      errorMessage = 'Requested resource not found';
     } else {
       // Server-side error
-      errorMessage = error.error?.message || error.message || 'Server error';
+      errorMessage = error.error?.message || 'Server error';
     }
-    
-    return throwError(() => new Error(errorMessage));
+    console.error('API Error:', error);
+    return throwError(() => errorMessage);
   }
 }

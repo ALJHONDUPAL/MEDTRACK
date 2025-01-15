@@ -23,7 +23,6 @@ export class AppComponent {
   title = 'GCMEDTRACK-Clinic';
   isSideNavCollapsed = false;
   screenWidth = 0;
-router: any;
 
   constructor(public authService: ClinicAuthService) {}
 

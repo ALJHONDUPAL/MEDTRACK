@@ -46,8 +46,20 @@
           <td>{{appointment.purpose}}</td>
           <td>{{appointment.yearLevel}}</td>
           <td class="action-buttons">
-            <button class="accept-btn">Accept</button>
-            <button class="cancel-btn">Cancel</button>
+            <div *ngIf="appointment.status === 'Pending'">
+              <button class="accept-btn" (click)="acceptAppointment(appointment)">
+                Accept
+              </button>
+              <button class="cancel-btn" (click)="cancelAppointment(appointment)">
+                Cancel
+              </button>
+            </div>
+            <div *ngIf="appointment.status === 'Accepted'" class="status-accepted">
+              Accepted
+            </div>
+            <div *ngIf="appointment.status === 'Cancelled'" class="status-cancelled">
+              Cancelled
+            </div>
           </td>
         </tr>
       </tbody>

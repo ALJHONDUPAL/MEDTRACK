@@ -1,12 +1,10 @@
 
-import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { UserManagementComponent } from './usermanagement/usermanagement.component';
 import { ClinicLoginComponent } from './login/login.component';
 import { ClinicAuthGuard } from './services/auth.guard';
 import { SidenavComponent } from './sidenav/sidenav.component';
 import { AppointmentsComponent } from './appointments/appointments.component';
-import { MedicalDetailsComponent } from './medical-details/medical-details.component';
 import { SchedulebookingComponent } from './schedulebooking/schedulebooking.component';
 import { DocumentsComponent } from './documents/documents.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -25,48 +23,39 @@ export const routes: Routes = [
   { 
     path: '', 
     component: SidenavComponent,
+    canActivate: [ClinicAuthGuard],
     children: [
  
       { 
         path: 'dashboard', 
-        component: DashboardComponent
+        component: DashboardComponent,
+        canActivate: [ClinicAuthGuard]
       },
       { 
         path: 'usermanagement', 
-        component: UserManagementComponent 
+        component: UserManagementComponent,
+        canActivate: [ClinicAuthGuard]
       },
       { 
         path: 'appointments', 
-        component: AppointmentsComponent 
+        component: AppointmentsComponent,
+        canActivate: [ClinicAuthGuard]
       },
       { 
         path: 'schedulebooking', 
-        component: SchedulebookingComponent
+        component: SchedulebookingComponent,
+        canActivate: [ClinicAuthGuard]
       },
       { 
         path: 'documents', 
-        component: DocumentsComponent
+        component: DocumentsComponent,
+        canActivate: [ClinicAuthGuard]
       },
-      // { 
-      //   path: 'medical-details', 
-      //   component: MedicalDetailsComponent
-      // },
-  
-        { path: 'medical-details/:user_id', component: MedicalDetailsComponent },
-      
-      // Add other protected routes here
     ]
   },
   
   { 
     path: '**', 
-    redirectTo: 'login' 
+    redirectTo: 'dashboard' 
   }
 ];
-
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

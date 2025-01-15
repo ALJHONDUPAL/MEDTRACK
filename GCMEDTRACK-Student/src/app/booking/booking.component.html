@@ -11,42 +11,49 @@
         {{day}}
       </div>
     </div>
-  
-    <!-- Appointments Card -->
-    <div class="appointments-card">
-      <div class="table-grid">
-        <div class="table-header">
-          <div class="header-cell text-center">Information</div>
-          <div class="header-cell text-center">Department</div>
-          <div class="header-cell text-center">Year Level</div>
-          <div class="header-cell text-center">Date and Time</div>
-          <div class="header-cell text-center">Purpose</div>
-          <div class="header-cell text-center">Status</div>
-        </div>
-  
-        <div class="appointments-body">
-          <div class="appointment-row" *ngFor="let appointment of getAppointmentsForSelectedDay()">
-            <div class="info-cell text-center">
-              <img [src]="appointment.userImage" class="user-avatar" alt="User Avatar">
-              <div class="user-info">
-                <div class="user-name">{{appointment.userName}}</div>
-                <div class="user-id">{{appointment.userId}}</div>
-              </div>
-            </div>
-            <div class="department-cell text-center">{{appointment.department}}</div>
-            <div class="year-cell text-center">{{appointment.yearLevel}} Year</div>
-            <div class="datetime-cell text-center">
-              <div>{{appointment.date}}</div>
-              <div class="time">{{appointment.time}}</div>
-            </div>
-            <div class="purpose-cell text-center">{{appointment.purpose}}</div>
-            <div class="status-cell text-center">
-              <span [class]="'status-badge ' + appointment.status.toLowerCase()">{{appointment.status}}</span>
-            </div>
+
+    <!-- Appointment Modal -->
+<div class="modal" *ngIf="showAppointmentModal">
+  <div class="modal-content">
+    <h2>Set Appointment</h2>
+    <form (ngSubmit)="saveAppointment()" #appointmentForm="ngForm">
+      <div class="form-group">
+        <label>Purpose</label>
+        <select [(ngModel)]="newAppointment.purpose" 
+                name="purpose" 
+                required 
+                class="form-control">
+          <option value="">Select Purpose</option>
+          <option *ngFor="let purpose of purposes" [value]="purpose">{{purpose}}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Selected Time Slot</label>
+        <input type="text" 
+               [value]="selectedTimeSlot ? selectedTimeSlot.startTime + ' - ' + selectedTimeSlot.endTime : ''" 
+               disabled 
+               class="form-control">
+        <div class="modal-time-slots">
+          <div class="modal-time-slot" 
+               *ngFor="let slot of getAvailableTimeSlots()"
+               [class.selected]="selectedTimeSlot?.slotId === slot.slotId"
+               (click)="selectTimeSlot(slot)">
+            {{slot.startTime}} - {{slot.endTime}}
           </div>
         </div>
       </div>
-    </div>
+
+      <div class="modal-buttons">
+        <button type="button" class="cancel-btn" (click)="closeAppointmentModal()">Cancel</button>
+        <button type="submit" class="save-btn" 
+                [disabled]="!appointmentForm.valid || !selectedTimeSlot">
+          Save Appointment
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
   
     <!-- Time Slots Section -->
     <div class="timeslots-section">
@@ -65,90 +72,6 @@
              (click)="selectTimeSlot(slot)">
           {{slot}}
         </div>
-      </div>
-    </div>
-  
-    <!-- Add this modal template -->
-    <div class="modal" *ngIf="showAppointmentModal">
-      <div class="modal-content">
-        <h2>Set Appointment</h2>
-        <form (ngSubmit)="saveAppointment()" #appointmentForm="ngForm">
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" 
-                   [(ngModel)]="newAppointment.name" 
-                   name="name" 
-                   required 
-                   class="form-control">
-          </div>
-  
-          <div class="form-row">
-            <div class="form-group department-group">
-              <label>Department</label>
-              <select [(ngModel)]="newAppointment.department" 
-                      name="department" 
-                      required 
-                      class="form-control">
-                <option value="">Select Department</option>
-                <option value="CCS">CCS</option>
-                <option value="CEAS">CEAS</option>
-                <option value="CAHS">CAHS</option>
-                <option value="CHTM-Tourism">CHTM-Tourism</option>
-                <option value="CHTM-Hospitality">CHTM-Hospitality</option>
-                <option value="CBA">CBA</option>
-              </select>
-            </div>
-  
-            <div class="form-group year-group">
-              <label>Year Level</label>
-              <select [(ngModel)]="newAppointment.yearLevel" 
-                      name="yearLevel" 
-                      required 
-                      class="form-control">
-                <option value="">Select Year</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-              </select>
-            </div>
-          </div>
-  
-          <div class="form-group">
-            <label>Purpose</label>
-            <select [(ngModel)]="newAppointment.purpose" 
-                    name="purpose" 
-                    required 
-                    class="form-control">
-              <option value="">Select Purpose</option>
-              <option *ngFor="let purpose of purposes" [value]="purpose">{{purpose}}</option>
-            </select>
-          </div>
-  
-          <div class="form-group">
-            <label>Selected Time Slot</label>
-            <input type="text" 
-                   [value]="selectedTimeSlot" 
-                   disabled 
-                   class="form-control">
-            <div class="modal-time-slots">
-              <div class="modal-time-slot" 
-                   *ngFor="let slot of getAvailableTimeSlots()"
-                   [class.selected]="selectedTimeSlot === slot"
-                   (click)="selectTimeSlot(slot)">
-                {{slot}}
-              </div>
-            </div>
-          </div>
-  
-          <div class="modal-buttons">
-            <button type="button" class="cancel-btn" (click)="closeAppointmentModal()">Cancel</button>
-            <button type="submit" class="save-btn" 
-                    [disabled]="!appointmentForm.valid || !selectedTimeSlot">
-              Save Appointment
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>

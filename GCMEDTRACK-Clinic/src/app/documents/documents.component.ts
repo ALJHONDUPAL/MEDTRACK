@@ -61,11 +61,6 @@
         },
       });
     }
-    
-    
-    
-    
-    
 
     onDepartmentChange(): void {
       this.applyFilters();
@@ -92,23 +87,15 @@
       console.log('Filtered Students Data:', this.filteredStudents); // Ensure userId is preserved
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
     logStudentId(userId: string): void {
       console.log('Clicked student ID for medical details:', userId);
     }
     
     goToMedicalDetails(user_id: string): void {
-      console.log('goToMedicalDetails called with user_id:', user_id); // Log incoming `user_id`
+      // console.log('goToMedicalDetails called with user_id:', user_id); // Log incoming `user_id`
     
       if (!user_id) {
-        console.error('Student ID is undefined or empty!', user_id); // Log undefined case
+        // console.error('Student ID is undefined or empty!', user_id); // Log undefined case
         return;
       }
     

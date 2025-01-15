@@ -374,6 +374,69 @@ class Post extends GlobalMethods {
         ]);
     }
 
+    public function createAppointment($data) {
+        try {
+            error_log("Starting appointment creation with data: " . print_r($data, true));
+            
+            // Validate slot exists
+            $slotCheck = $this->pdo->prepare("SELECT * FROM time_slots WHERE slot_id = ?");
+            $slotCheck->execute([$data->slot_id]);
+            if (!$slotCheck->fetch()) {
+                return [
+                    "status" => "error",
+                    "message" => "Invalid time slot"
+                ];
+            }
+            
+            // Check if user already has an appointment for this slot
+            $appointmentCheck = $this->pdo->prepare("SELECT * FROM appointments WHERE slot_id = ? AND user_id = ?");
+            $appointmentCheck->execute([$data->slot_id, $data->user_id]);
+            if ($appointmentCheck->fetch()) {
+                return [
+                    "status" => "error",
+                    "message" => "You already have an appointment for this time slot"
+                ];
+            }
+            
+            $this->pdo->beginTransaction();
+            
+            $sql = "INSERT INTO appointments (slot_id, user_id, purpose, status) 
+                    VALUES (:slot_id, :user_id, :purpose, :status)";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $result = $stmt->execute([
+                ':slot_id' => $data->slot_id,
+                ':user_id' => $data->user_id,
+                ':purpose' => $data->purpose,
+                ':status' => 'Pending'
+            ]);
+            
+            if (!$result) {
+                throw new Exception("Failed to insert appointment");
+            }
+            
+            $appointmentId = $this->pdo->lastInsertId();
+            $this->pdo->commit();
+            
+            error_log("Appointment created successfully with ID: " . $appointmentId);
+            
+            return [
+                "status" => "success",
+                "message" => "Appointment created successfully",
+                "appointment_id" => $appointmentId
+            ];
+            
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            error_log("Error in createAppointment: " . $e->getMessage());
+            return [
+                "status" => "error",
+                "message" => $e->getMessage()
+            ];
+        }
+    }
 
     
     
@@ -469,6 +532,89 @@ class Post extends GlobalMethods {
             return $this->sendPayload(null, "error", $e->getMessage(), 400);
         }
     }
+
+    public function addTimeSlot($data) {
+        try {
+            $sql = "INSERT INTO time_slots (day_of_week, start_time, end_time, date, student_limit) 
+                    VALUES (:day_of_week, :start_time, :end_time, :date, :student_limit)";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':day_of_week' => $data->dayOfWeek,
+                ':start_time' => $data->startTime,
+                ':end_time' => $data->endTime,
+                ':date' => $data->date,
+                ':student_limit' => $data->studentLimit
+            ]);
+            
+            return array("status" => "success", "message" => "Time slot added successfully");
+        } catch (PDOException $e) {
+            return array("status" => "error", "message" => $e->getMessage());
+        }
+    }
+    
+    public function updateTimeSlot($id, $data) {
+        try {
+            $sql = "UPDATE time_slots 
+                    SET day_of_week = :day_of_week,
+                        start_time = :start_time,
+                        end_time = :end_time,
+                        date = :date,
+                        student_limit = :student_limit
+                    WHERE id = :id";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':id' => $id,
+                ':day_of_week' => $data->dayOfWeek,
+                ':start_time' => $data->startTime,
+                ':end_time' => $data->endTime,
+                ':date' => $data->date,
+                ':student_limit' => $data->studentLimit
+            ]);
+            
+            return array("status" => "success", "message" => "Time slot updated successfully");
+        } catch (PDOException $e) {
+            return array("status" => "error", "message" => $e->getMessage());
+        }
+    }
+
+    public function updateAppointmentStatus($data) {
+        try {
+            error_log("Updating appointment status: " . print_r($data, true));
+            
+            $sql = "UPDATE appointments 
+                    SET status = :status 
+                    WHERE appointment_id = :appointment_id";
+                    
+            $stmt = $this->pdo->prepare($sql);
+            $result = $stmt->execute([
+                ':appointment_id' => $data->appointment_id,
+                ':status' => $data->status
+            ]);
+            
+            if ($result) {
+                return [
+                    "status" => "success",
+                    "message" => "Appointment status updated successfully"
+                ];
+            } else {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to update appointment status"
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log("Error updating appointment status: " . $e->getMessage());
+            return [
+                "status" => "error",
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+    
+
+    
 
 }
 

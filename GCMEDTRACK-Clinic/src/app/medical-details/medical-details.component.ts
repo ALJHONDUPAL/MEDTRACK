@@ -87,7 +87,7 @@ export class MedicalDetailsComponent implements OnInit {
   getImageUrl(): string {
     if (this.student && this.student.profile_image_path) {
       const imageUrl = this.apiService.getFullImageUrl(this.student.profile_image_path);
-      console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
+      // console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
       return imageUrl;
     }
     return 'assets/default-profile.png'; // Default image URL if profile_image_path is not available
@@ -95,7 +95,7 @@ export class MedicalDetailsComponent implements OnInit {
   getMedUrl(): string {
     if (this.student && this.student.file_path) {
       const imageUrl = this.apiService.getFullImageUrl(this.student.file_path);
-      console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
+      // console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
       return imageUrl;
     }
     return 'assets/default-profile.png'; // Default image URL if profile_image_path is not available
@@ -103,7 +103,7 @@ export class MedicalDetailsComponent implements OnInit {
   getVacUrl(): string {
     if (this.student && this.student.document_path) {
       const imageUrl = this.apiService.getFullImageUrl(this.student.document_path);
-      console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
+      // console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
       return imageUrl;
     }
     return 'assets/default-profile.png'; // Default image URL if profile_image_path is not available
