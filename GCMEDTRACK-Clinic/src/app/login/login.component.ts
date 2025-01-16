@@ -35,11 +35,16 @@ export class ClinicLoginComponent {
   password: string = '';
   isLoading: boolean = false;
   errorMessage: string = '';
+  showPassword: boolean = false;
 
   constructor(
     private authService: ClinicAuthService,
     private router: Router
   ) {}
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   onSubmit() {
     if (!this.domain_account || !this.password) {

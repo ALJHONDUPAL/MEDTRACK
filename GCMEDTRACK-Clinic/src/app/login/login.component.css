@@ -1,0 +1,295 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: #ffffff;
+  padding-right: 10%;
+  position: relative;
+  overflow: hidden;
+}
+
+.logos-container {
+  position: absolute;
+  top: 2rem;
+  left: 7rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  z-index: 3;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.left-side-content {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  z-index: 0;
+}
+
+.circle-background {
+  position: absolute;
+  bottom: -20%;
+  left: 0;
+  width: 100%;
+  z-index: 0;
+}
+
+.circle-image {
+  width: 120%;
+  height: auto;
+  opacity: 1;
+}
+
+.docs-illustration {
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  width: 80%;
+  z-index: 1;
+}
+
+.docs-image {
+  width: 90%;
+  height: auto;
+}
+
+.login-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem;
+  z-index: 2;
+}
+
+.arrow-group {
+  display: flex;
+  gap: 1rem;
+  position: absolute;
+}
+
+.left-hearts {
+  top: -50px;
+  left: 10px;
+  transform: rotate(0deg);
+}
+
+.right-hearts {
+  bottom: -50px;
+  right: -70px;
+  transform: rotate(0deg);
+}
+
+.heart {
+  width: 35px;
+  height: auto;
+  opacity: 1;
+}
+
+
+.login-form {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 25px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  border: 2px solid black;
+}
+
+.login-form h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 1.8rem;
+}
+
+label {
+  display: block;
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.input-underline {
+  position: relative;
+  border-bottom: 1px solid #ddd;
+}
+
+input {
+  width: 100%;
+  padding: 0.4rem 0;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+input:focus {
+  outline: none;
+}
+
+.input-underline:after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #4CAF50;
+  transition: width 0.3s ease;
+}
+
+.input-underline:focus-within:after {
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.password-toggle img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.password-toggle:hover img {
+  opacity: 1;
+}
+
+.login-button {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: white;
+  color: #526E48;
+  border: 2px solid #526E48;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+}
+
+.login-button:hover {
+  background-color: #2e8b57;
+}
+
+.login-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 992px) {
+  .auth-container {
+    padding-right: 5%;
+  }
+
+  .logos-container {
+    left: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .left-side-content {
+    width: 60%;
+  }
+
+  .docs-illustration {
+    left: 5%;
+    width: 90%;
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-container {
+    padding-right: 1rem;
+    justify-content: center;
+  }
+
+  .logos-container {
+    left: 1rem;
+    top: 1rem;
+    gap: 1rem;
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .left-side-content {
+    width: 100%;
+    opacity: 0.3;
+  }
+
+  .docs-illustration {
+    left: 0;
+    width: 100%;
+  }
+
+  .login-container {
+    margin: 1rem;
+  }
+
+  .login-form {
+    padding: 2rem;
+  }
+
+  .heart {
+    width: 25px;
+  }
+
+
+
+  .left-hearts {
+    left: -70px;
+    top: -40px;
+  }
+
+  .right-hearts {
+    right: -70px;
+    bottom: -40px;
+  }
+
+  .arrow-group {
+    gap: 0.8rem;
+  }
+}

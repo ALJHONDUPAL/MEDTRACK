@@ -1,29 +1,68 @@
 <div class="auth-container">
-  <div class="login-form">
-    <h2>Clinic Staff Login</h2>
-    <form (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <input 
-          type="text" 
-          placeholder="Domain Account (Email)" 
-          [(ngModel)]="domain_account" 
-          name="domain_account"
-          required>
+  <div class="logos-container">
+    <img src="assets/GCLOGO.png" alt="Gordon College Logo" class="logo">
+    <img src="assets/HEALTHSERVUNITLOGO.png" alt="Health Service Unit Logo" class="logo">
+    <img src="assets/MEDTRACKLOGO.png" alt="MedTrack Logo" class="logo">
+  </div>
+
+  <div class="left-side-content">
+    <div class="circle-background">
+      <img src="assets/Circle.png" alt="Circle Background" class="circle-image">
+    </div>
+    <div class="docs-illustration">
+      <img src="assets/Docs.png" alt="Medical Staff" class="docs-image">
+    </div>
+  </div>
+  
+  <div class="login-container">
+    <div class="arrow-group left-hearts">
+      <img src="assets/HEART.png" alt="Heart" class="heart">
+      <img src="assets/HEART.png" alt="Heart" class="heart">
+      <img src="assets/HEART.png" alt="Heart" class="heart">
+    </div>
+    
+    <div class="login-form">
+      
+      <h2>Welcome Clinic!</h2>
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Account</label>
+          <div class="input-underline">
+            <input 
+              type="text" 
+              [(ngModel)]="domain_account" 
+              name="domain_account"
+              required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-underline">
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password" 
+              name="password"
+              autocomplete="current-password"
+              required>
+            <span class="password-toggle" (click)="togglePasswordVisibility()">
+              <img [src]="'assets/Hide.png'" *ngIf="!showPassword" alt="Hide password">
+              <img [src]="'assets/Unhide.png'" *ngIf="showPassword" alt="Show password">
+            </span>
+          </div>
+        </div>
+        <button type="submit" class="login-button" [disabled]="isLoading">
+          {{ isLoading ? 'Signing in...' : 'Login' }}
+        </button>
+      </form>
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
       </div>
-      <div class="form-group">
-        <input 
-          type="password" 
-          placeholder="Password" 
-          [(ngModel)]="password" 
-          name="password"
-          required>
-      </div>
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Signing in...' : 'Sign In' }}
-      </button>
-    </form>
-    <div class="error-message" *ngIf="errorMessage">
-      {{ errorMessage }}
+    </div>
+
+    <div class="arrow-group right-hearts">
+      <img src="assets/HEART.png" alt="Heart" class="heart">
+      <img src="assets/HEART.png" alt="Heart" class="heart">
+      <img src="assets/HEART.png" alt="Heart" class="heart">
     </div>
   </div>
 </div>
