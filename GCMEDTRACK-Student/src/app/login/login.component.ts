@@ -20,6 +20,7 @@ export class LoginComponent {
   firstname: string = '';
   lastname: string = '';
   errorMessage: string = '';
+  showPassword: boolean = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -107,4 +108,8 @@ export class LoginComponent {
   //   this.authService.userLogout();
   //   this.router.navigate(['/login']);
   // }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 }

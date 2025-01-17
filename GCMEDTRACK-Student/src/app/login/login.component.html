@@ -1,27 +1,51 @@
-<p>login works!</p>
-<p>login works!</p>
-
-<p> login for student user</p>
 <div class="auth-container">
-    <div class="login-form">
-      <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
-      <form (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <input type="text" 
-                 [attr.placeholder]="isLoginMode ? 'Domain Account (Email)' : 'Enter Domain Account (Email)'" 
-                 [(ngModel)]="domain_account" 
-                 name="domainAccount">
-        </div>
-        <div class="form-group">
-          <input type="password" 
+  <div class="circle-background">
+    <img src="assets/Circle.png" alt="Circle Background" class="circle-img">
+  </div>
+  <div class="illustration-container">
+    <img src="assets/Student.png" alt="Student Illustration" class="student-img">
+  </div>
+  <div class="logos-container">
+    <img src="assets/GCLOGO.png" alt="GC Logo" class="logo">
+    <img src="assets/HEALTHSERVUNITLOGO.png" alt="Health Services Logo" class="logo">
+    <img src="assets/MEDTRACKLOGO.png" alt="MedTrack Logo" class="logo">
+  </div>
+  <div class="login-form">
+    <div class="hearts-top">
+      <img src="assets/HEART.png" alt="heart" class="heart">
+      <img src="assets/HEART.png" alt="heart" class="heart">
+      <img src="assets/HEART.png" alt="heart" class="heart">
+    </div>
+    <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input type="text" 
+               [attr.placeholder]="isLoginMode ? 'Domain Account (Email)' : 'Enter Domain Account (Email)'" 
+               [(ngModel)]="domain_account" 
+               name="domainAccount">
+      </div>
+      <div class="form-group">
+        <div class="password-container">
+          <input [type]="showPassword ? 'text' : 'password'" 
                  [attr.placeholder]="isLoginMode ? 'Password' : 'Enter Password'" 
                  [(ngModel)]="password" 
                  name="password">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            <img [src]="showPassword ? 'assets/Unhide.png' : 'assets/Hide.png'" 
+                 [alt]="showPassword ? 'Hide password' : 'Show password'" 
+                 class="visibility-icon">
+          </button>
         </div>
-        <button type="submit">{{ isLoginMode ? 'Sign In' : 'Register' }}</button>
-      </form>
-      <p>{{ isLoginMode ? "Don't have an account?" : "Already have an account?" }} 
-          <a href="#" (click)="toggleMode($event)">{{ isLoginMode ? 'Sign up' : 'Sign in' }}</a>
-      </p>
+      </div>
+      <button type="submit">{{ isLoginMode ? 'Sign In' : 'Register' }}</button>
+    </form>
+    <p>{{ isLoginMode ? "Don't have an account?" : "Already have an account?" }} 
+        <a href="#" (click)="toggleMode($event)">{{ isLoginMode ? 'Sign up' : 'Sign in' }}</a>
+    </p>
+    <div class="hearts-bottom">
+      <img src="assets/HEART.png" alt="heart" class="heart">
+      <img src="assets/HEART.png" alt="heart" class="heart">
+      <img src="assets/HEART.png" alt="heart" class="heart">
     </div>
   </div>
+</div>
