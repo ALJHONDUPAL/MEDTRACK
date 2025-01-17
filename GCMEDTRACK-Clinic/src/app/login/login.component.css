@@ -20,8 +20,8 @@
 }
 
 .logo {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 110px;
   object-fit: contain;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .circle-image {
-  width: 120%;
+  width: 155%;
   height: auto;
   opacity: 1;
 }
@@ -53,7 +53,7 @@
 .docs-illustration {
   position: absolute;
   bottom: 0;
-  left: 10%;
+  left: 40%;
   width: 80%;
   z-index: 1;
 }
@@ -78,19 +78,19 @@
 }
 
 .left-hearts {
-  top: -50px;
+  top: -75px;
   left: 10px;
   transform: rotate(0deg);
 }
 
 .right-hearts {
-  bottom: -50px;
+  bottom: -75px;
   right: -70px;
   transform: rotate(0deg);
 }
 
 .heart {
-  width: 35px;
+  width: 90px;
   height: auto;
   opacity: 1;
 }
@@ -218,15 +218,6 @@ input:focus {
     padding-right: 5%;
   }
 
-  .logos-container {
-    left: 1.5rem;
-    gap: 1.5rem;
-  }
-
-  .logo {
-    width: 70px;
-    height: 70px;
-  }
 
   .left-side-content {
     width: 60%;
@@ -244,16 +235,6 @@ input:focus {
     justify-content: center;
   }
 
-  .logos-container {
-    left: 1rem;
-    top: 1rem;
-    gap: 1rem;
-  }
-
-  .logo {
-    width: 60px;
-    height: 60px;
-  }
 
   .left-side-content {
     width: 100%;
@@ -273,9 +254,7 @@ input:focus {
     padding: 2rem;
   }
 
-  .heart {
-    width: 25px;
-  }
+  
 
 
 
