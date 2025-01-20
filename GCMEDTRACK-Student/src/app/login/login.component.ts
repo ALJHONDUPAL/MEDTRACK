@@ -17,8 +17,6 @@ export class LoginComponent {
   showRegister = false;
   domain_account: string = '';
   password: string = '';
-  firstname: string = '';
-  lastname: string = '';
   errorMessage: string = '';
   showPassword: boolean = false;
 
@@ -101,8 +99,7 @@ export class LoginComponent {
   resetForm() {
     this.domain_account = '';
     this.password = '';
-    this.firstname = '';
-    this.lastname = '';
+
   }
   // logout() {
   //   this.authService.userLogout();

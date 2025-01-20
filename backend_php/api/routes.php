@@ -183,7 +183,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($post->registerUser($data));
                 break;
             
-             case 'updateUserProfile':
+            case 'updateUserProfile':
                 if (!empty($_FILES) || !empty($_POST)) {
                         // Directly pass $_POST and $_FILES to the controller
                         echo json_encode($post->updateUserProfile());
@@ -196,7 +196,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     }
                     break;
             
-                    case 'createAppointment':
+            case 'createAppointment':
                         if (!isset($data->slotId) || !isset($data->userId) || !isset($data->purpose)) {
                             echo json_encode([
                                 "status" => "error",
