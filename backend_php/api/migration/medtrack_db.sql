@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 20, 2025 at 10:50 PM
+-- Generation Time: Jan 21, 2025 at 12:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,8 +42,9 @@ CREATE TABLE `appointments` (
 
 INSERT INTO `appointments` (`appointment_id`, `slot_id`, `user_id`, `purpose`, `status`, `created_at`) VALUES
 (4, 1, 5, 'Medical', 'Accepted', '2025-01-15 20:00:21'),
-(5, 1, 7, 'Medical', 'Cancelled', '2025-01-15 20:12:23'),
-(6, 3, 5, 'Dental', 'Pending', '2025-01-20 21:47:05');
+(6, 3, 5, 'Dental', 'Accepted', '2025-01-20 21:47:05'),
+(7, 4, 5, 'Clinic', 'Accepted', '2025-01-20 22:11:39'),
+(8, 4, 7, 'Medical', 'Accepted', '2025-01-20 23:41:53');
 
 -- --------------------------------------------------------
 
@@ -141,7 +142,8 @@ CREATE TABLE `time_slots` (
 
 INSERT INTO `time_slots` (`slot_id`, `day_of_week`, `start_time`, `end_time`, `date`, `student_limit`, `created_at`, `updated_at`) VALUES
 (1, 'MONDAY', '07:00 AM', '05:00 PM', '2025-01-21', 10, '2025-01-14 18:42:15', '2025-01-20 21:44:26'),
-(3, 'MONDAY', '01:00 PM', '05:00 PM', '2025-01-21', 10, '2025-01-20 21:33:32', '2025-01-20 21:33:32');
+(3, 'MONDAY', '01:00 PM', '05:00 PM', '2025-01-21', 10, '2025-01-20 21:33:32', '2025-01-20 21:33:32'),
+(4, 'TUESDAY', '07:00 AM', '11:00 AM', '2025-01-21', 10, '2025-01-20 22:11:26', '2025-01-20 22:11:26');
 
 -- --------------------------------------------------------
 
@@ -290,7 +292,7 @@ ALTER TABLE `vaccination_records`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `clinicstaff`
@@ -308,7 +310,7 @@ ALTER TABLE `medical_documents`
 -- AUTO_INCREMENT for table `time_slots`
 --
 ALTER TABLE `time_slots`
-  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
