@@ -438,8 +438,30 @@ class Post extends GlobalMethods {
         }
     }
 
-    
-    
+    public function deleteAppointment($appointmentId) {
+        try {
+            $sql = "DELETE FROM appointments WHERE appointment_id = :appointment_id";
+            $stmt = $this->pdo->prepare($sql);
+            $result = $stmt->execute([':appointment_id' => $appointmentId]);
+
+            if ($result) {
+                return [
+                    "status" => "success",
+                    "message" => "Appointment deleted successfully"
+                ];
+            } else {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to delete appointment"
+                ];
+            }
+        } catch (PDOException $e) {
+            return [
+                "status" => "error",
+                "message" => "Database error: " . $e->getMessage()
+            ];
+        }
+    }
 
 ///////////////////////////////////////////CLINIC SIDE///////////////////////////////////////////////////////////////////////////////////////////////
     public function clinicLogin($data) {
@@ -535,15 +557,22 @@ class Post extends GlobalMethods {
 
     public function addTimeSlot($data) {
         try {
+            // Convert date format from MM/DD/YYYY to YYYY-MM-DD
+            $formattedDate = date('Y-m-d', strtotime($data->date));
+            
+            // Format times to include AM/PM
+            $startTime = date('h:i A', strtotime($data->startTime));
+            $endTime = date('h:i A', strtotime($data->endTime));
+            
             $sql = "INSERT INTO time_slots (day_of_week, start_time, end_time, date, student_limit) 
                     VALUES (:day_of_week, :start_time, :end_time, :date, :student_limit)";
             
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 ':day_of_week' => $data->dayOfWeek,
-                ':start_time' => $data->startTime,
-                ':end_time' => $data->endTime,
-                ':date' => $data->date,
+                ':start_time' => $startTime,
+                ':end_time' => $endTime,
+                ':date' => $formattedDate,
                 ':student_limit' => $data->studentLimit
             ]);
             
@@ -553,23 +582,28 @@ class Post extends GlobalMethods {
         }
     }
     
-    public function updateTimeSlot($id, $data) {
+    public function updateTimeSlot($data) {
         try {
+            // Format the date and times
+            $formattedDate = date('Y-m-d', strtotime($data->date));
+            $startTime = date('h:i A', strtotime($data->startTime));
+            $endTime = date('h:i A', strtotime($data->endTime));
+            
             $sql = "UPDATE time_slots 
                     SET day_of_week = :day_of_week,
                         start_time = :start_time,
                         end_time = :end_time,
                         date = :date,
                         student_limit = :student_limit
-                    WHERE id = :id";
+                    WHERE slot_id = :slot_id";
             
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
-                ':id' => $id,
+                ':slot_id' => $data->slot_id,
                 ':day_of_week' => $data->dayOfWeek,
-                ':start_time' => $data->startTime,
-                ':end_time' => $data->endTime,
-                ':date' => $data->date,
+                ':start_time' => $startTime,
+                ':end_time' => $endTime,
+                ':date' => $formattedDate,
                 ':student_limit' => $data->studentLimit
             ]);
             
@@ -613,8 +647,21 @@ class Post extends GlobalMethods {
         }
     }
     
-
-    
+    public function deleteTimeSlot($data) {
+        try {
+            $sql = "DELETE FROM time_slots WHERE slot_id = :slot_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':slot_id' => $data->slot_id]);
+            
+            if ($stmt->rowCount() > 0) {
+                return array("status" => "success", "message" => "Time slot deleted successfully");
+            } else {
+                return array("status" => "error", "message" => "Time slot not found");
+            }
+        } catch (PDOException $e) {
+            return array("status" => "error", "message" => $e->getMessage());
+        }
+    }
 
 }
 

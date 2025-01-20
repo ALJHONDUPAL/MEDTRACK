@@ -60,6 +60,9 @@
             <div *ngIf="appointment.status === 'Cancelled'" class="status-cancelled">
               Cancelled
             </div>
+            <button class="delete-btn" (click)="deleteAppointment(appointment)">
+              Delete
+            </button>
           </td>
         </tr>
       </tbody>

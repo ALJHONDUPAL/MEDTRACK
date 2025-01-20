@@ -53,8 +53,12 @@ getTimeSlots(dayOfWeek: string): Observable<any> {
   return this.http.get(`${this.baseUrl}/getTimeSlots/${dayOfWeek}`);
 }
 
-getAppointments(): Observable<any> {
-  return this.http.get(`${this.baseUrl}/getAppointments`);
+getAppointments(userId?: number): Observable<any> {
+  let params = {};
+  if (userId) {
+    params = { user_id: userId.toString() };
+  }
+  return this.http.get(`${this.baseUrl}/getAppointments`, { params });
 }
 
 createAppointment(appointmentData: any): Observable<any> {

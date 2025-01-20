@@ -1,5 +1,5 @@
 <div class="schedule-container">
-    <h2>Set Appointment Time and Date</h2>
+    <h2>Set Appointment</h2>
     
     <div class="weekdays">
       <button class="weekday-btn" 
@@ -59,7 +59,11 @@
           <div class="slot-content">
             <div class="time">{{slot.startTime}} - {{slot.endTime}}</div>
             <div class="date">{{slot.date}}</div>
-            <div class="limit">Limit: {{slot.studentLimit}} students</div>
+            <div class="limit">
+              <span>Student Limit: {{slot.studentLimit}}</span>
+              <span class="bookings">Current Bookings: {{slot.currentBookings}}</span>
+              <span class="available">Available Slots: {{slot.studentLimit - slot.currentBookings}}</span>
+            </div>
           </div>
           <div class="slot-actions">
             <button class="edit-slot-btn" (click)="editTimeSlot(slot)">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 15, 2025 at 08:35 PM
+-- Generation Time: Jan 20, 2025 at 10:50 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,7 +41,9 @@ CREATE TABLE `appointments` (
 --
 
 INSERT INTO `appointments` (`appointment_id`, `slot_id`, `user_id`, `purpose`, `status`, `created_at`) VALUES
-(3, 1, 5, 'Medical', 'Pending', '2025-01-15 19:23:47');
+(4, 1, 5, 'Medical', 'Accepted', '2025-01-15 20:00:21'),
+(5, 1, 7, 'Medical', 'Cancelled', '2025-01-15 20:12:23'),
+(6, 3, 5, 'Dental', 'Pending', '2025-01-20 21:47:05');
 
 -- --------------------------------------------------------
 
@@ -125,9 +127,9 @@ INSERT INTO `medical_documents` (`document_id`, `user_id`, `document_type`, `fil
 CREATE TABLE `time_slots` (
   `slot_id` int(11) NOT NULL,
   `day_of_week` varchar(20) NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `date` date NOT NULL,
+  `start_time` varchar(10) DEFAULT NULL,
+  `end_time` varchar(10) DEFAULT NULL,
+  `date` date DEFAULT NULL,
   `student_limit` int(11) NOT NULL DEFAULT 10,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -138,7 +140,8 @@ CREATE TABLE `time_slots` (
 --
 
 INSERT INTO `time_slots` (`slot_id`, `day_of_week`, `start_time`, `end_time`, `date`, `student_limit`, `created_at`, `updated_at`) VALUES
-(1, 'MONDAY', '07:00:00', '11:00:00', '0000-00-00', 10, '2025-01-14 18:42:15', '2025-01-14 18:42:15');
+(1, 'MONDAY', '07:00 AM', '05:00 PM', '2025-01-21', 10, '2025-01-14 18:42:15', '2025-01-20 21:44:26'),
+(3, 'MONDAY', '01:00 PM', '05:00 PM', '2025-01-21', 10, '2025-01-20 21:33:32', '2025-01-20 21:33:32');
 
 -- --------------------------------------------------------
 
@@ -287,7 +290,7 @@ ALTER TABLE `vaccination_records`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `clinicstaff`
@@ -305,7 +308,7 @@ ALTER TABLE `medical_documents`
 -- AUTO_INCREMENT for table `time_slots`
 --
 ALTER TABLE `time_slots`
-  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`

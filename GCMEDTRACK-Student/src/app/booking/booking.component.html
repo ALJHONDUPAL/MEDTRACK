@@ -11,7 +11,42 @@
         {{day}}
       </div>
     </div>
+  <!-- Appointments Card -->
+  <div class="appointments-card">
+    <div class="table-grid">
+      <div class="table-header">
+        <div class="header-cell text-center">Information</div>
+        <div class="header-cell text-center">Department</div>
+        <div class="header-cell text-center">Year Level</div>
+        <div class="header-cell text-center">Date and Time</div>
+        <div class="header-cell text-center">Purpose</div>
+        <div class="header-cell text-center">Status</div>
+      </div>
 
+      <div class="appointments-body">
+        <div class="appointment-row" *ngFor="let appointment of getAppointmentsForSelectedDay()">
+          <div class="info-cell text-center">
+            <img [src]="appointment.userImage" class="user-avatar" alt="User Avatar">
+            <div class="user-info">
+              <div class="user-name">{{appointment.userName}}</div>
+              <div class="user-id">{{appointment.userId}}</div>
+            </div>
+          </div>
+          <div class="department-cell text-center">{{appointment.department}}</div>
+          <div class="year-cell text-center">{{appointment.yearLevel}} Year</div>
+          <div class="datetime-cell text-center">
+            <div>{{appointment.date}}</div>
+            <div class="time">{{appointment.time}}</div>
+          </div>
+          <div class="purpose-cell text-center">{{appointment.purpose}}</div>
+          <div class="status-cell text-center">
+            <span [class]="'status-badge ' + appointment.status.toLowerCase()">{{appointment.status}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
     <!-- Appointment Modal -->
 <div class="modal" *ngIf="showAppointmentModal">
   <div class="modal-content">
@@ -58,7 +93,7 @@
     <!-- Time Slots Section -->
     <div class="timeslots-section">
       <div class="timeslots-header">
-        <span>Time Slots Available</span>
+        <span>Available Time Slots</span>
         <button class="set-appointment-btn" (click)="openAppointmentModal()">
           <i class="far fa-calendar"></i>
           Set an Appointment
@@ -68,9 +103,12 @@
       <div class="timeslots-grid">
         <div class="time-slot" 
              *ngFor="let slot of getAvailableTimeSlots()"
-             [class.selected]="selectedTimeSlot === slot"
+             [class.selected]="selectedTimeSlot?.slotId === slot.slotId"
+             [class.full]="slot.currentBookings >= slot.studentLimit"
              (click)="selectTimeSlot(slot)">
-          {{slot}}
+          <div class="slot-time">{{slot.startTime}} - {{slot.endTime}}</div>
+          <div class="slot-date">{{slot.date}}</div>
+          <div class="slot-limit">Available slots: {{slot.studentLimit - slot.currentBookings}}</div>
         </div>
       </div>
     </div>

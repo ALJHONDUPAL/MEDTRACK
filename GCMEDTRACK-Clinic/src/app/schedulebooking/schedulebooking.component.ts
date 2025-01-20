@@ -19,12 +19,13 @@ interface Appointment {
 }
 
 interface TimeSlot {
-  id?: any;
+  id?: number;
   startTime: string;
   endTime: string;
   date: string;
   studentLimit: number;
   dayOfWeek: string;
+  currentBookings: number;
 }
 
 export const MY_DATE_FORMATS = {
@@ -85,6 +86,9 @@ export class SchedulebookingComponent implements OnInit {
   filteredAppointments: Appointment[] = [];
   filteredTimeSlots: TimeSlot[] = [];
 
+  // Update the editingSlotId type to handle undefined
+  editingSlotId: number | null = null;
+
   constructor(private apiService: ApiService) {}
   
   ngOnInit(): void {
@@ -93,7 +97,6 @@ export class SchedulebookingComponent implements OnInit {
   private loadTimeSlots(): void {
     this.apiService.getTimeSlots(this.selectedDay).subscribe({
       next: (response: any) => {
-        // Check if response has data property and it's an array
         if (response.status === 'success' && Array.isArray(response.data)) {
           this.timeSlots = response.data.map((slot: any) => ({
             id: slot.slot_id,
@@ -101,12 +104,11 @@ export class SchedulebookingComponent implements OnInit {
             startTime: slot.start_time,
             endTime: slot.end_time,
             date: slot.date,
-            studentLimit: slot.student_limit
+            studentLimit: slot.student_limit,
+            currentBookings: slot.current_bookings || 0
           }));
-        } else {
-          this.timeSlots = [];
+          this.filterTimeSlots();
         }
-        this.filterTimeSlots();
       },
       error: (error) => {
         console.error('Error loading time slots:', error);
@@ -122,30 +124,50 @@ export class SchedulebookingComponent implements OnInit {
   }
 
   saveSchedule(): void {
-    if (this.selectedDate && this.selectedStartTime && this.selectedEndTime) {
-      const formattedDate = this.formatDate(this.selectedDate);
-      
-      const timeSlot: TimeSlot = {
-        dayOfWeek: this.selectedDay,
-        startTime: this.selectedStartTime,
-        endTime: this.selectedEndTime,
-        date: formattedDate,
-        studentLimit: this.studentLimit || 10
-      };
+    if (!this.selectedDate || !this.selectedStartTime || !this.selectedEndTime || !this.studentLimit) {
+        // Show error message
+        return;
+    }
 
-      this.apiService.addTimeSlot(timeSlot).subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.loadTimeSlots();
-            this.closeScheduleModal();
-          } else {
-            console.error('Error saving time slot:', response.message);
-          }
-        },
-        error: (error) => {
-          console.error('Error saving time slot:', error);
-        }
-      });
+    // Format the date to YYYY-MM-DD
+    const formattedDate = this.formatDateForBackend(this.selectedDate);
+
+    const timeSlot: TimeSlot = {
+        dayOfWeek: this.selectedDay,
+        startTime: this.formatTimeWithPeriod(this.selectedStartTime),
+        endTime: this.formatTimeWithPeriod(this.selectedEndTime),
+        date: formattedDate,
+        studentLimit: this.studentLimit,
+        currentBookings: 0
+    };
+
+    // If we're editing, include the ID and use updateTimeSlot
+    if (this.editingSlotId) {
+        timeSlot.id = this.editingSlotId;
+        this.apiService.updateTimeSlot(this.editingSlotId, timeSlot).subscribe({
+            next: (response) => {
+                if (response.status === 'success') {
+                    this.closeScheduleModal();
+                    this.loadTimeSlots();
+                }
+            },
+            error: (error) => {
+                console.error('Error updating schedule:', error);
+            }
+        });
+    } else {
+        // If we're adding new, use addTimeSlot
+        this.apiService.addTimeSlot(timeSlot).subscribe({
+            next: (response) => {
+                if (response.status === 'success') {
+                    this.closeScheduleModal();
+                    this.loadTimeSlots();
+                }
+            },
+            error: (error) => {
+                console.error('Error saving schedule:', error);
+            }
+        });
     }
   }
   
@@ -254,6 +276,7 @@ export class SchedulebookingComponent implements OnInit {
     this.selectedEndPeriod = 'AM';
     this.showTimePicker = false;
     this.isSettingStartTime = true;
+    this.editingSlotId = null;
   }
 
   openScheduleModal(): void {
@@ -261,22 +284,25 @@ export class SchedulebookingComponent implements OnInit {
   }
 
   editTimeSlot(slot: TimeSlot): void {
+    // Ensure id exists before assigning
+    this.editingSlotId = slot.id ?? null;  // Use nullish coalescing
     this.studentLimit = slot.studentLimit;
 
-    // Parse the date from the formatted string
-    const [day, month, year] = slot.date.split(' ');
-    this.selectedDate = new Date(`${month} ${day} ${year}`);
+    // Parse the date string to Date object
+    this.selectedDate = new Date(slot.date);
 
     // Set start time
     this.selectedStartTime = slot.startTime;
-    const [startHour, startMinute, startPeriod] = slot.startTime.split(/[:\s]/);
+    const [startTime, startPeriod] = slot.startTime.split(' ');
+    const [startHour, startMinute] = startTime.split(':');
     this.selectedStartHour = startHour;
     this.selectedStartMinute = startMinute;
     this.selectedStartPeriod = startPeriod;
 
     // Set end time
     this.selectedEndTime = slot.endTime;
-    const [endHour, endMinute, endPeriod] = slot.endTime.split(/[:\s]/);
+    const [endTime, endPeriod] = slot.endTime.split(' ');
+    const [endHour, endMinute] = endTime.split(':');
     this.selectedEndHour = endHour;
     this.selectedEndMinute = endMinute;
     this.selectedEndPeriod = endPeriod;
@@ -303,5 +329,18 @@ export class SchedulebookingComponent implements OnInit {
 
     this.isSettingStartTime = isStartTime;
     this.showTimePicker = true;
+  }
+
+  private formatDateForBackend(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private formatTimeWithPeriod(time: string): string {
+    const [timeComponent, period] = time.split(' ');
+    const [hours, minutes] = timeComponent.split(':');
+    return `${hours.padStart(2, '0')}:${minutes} ${period}`;
   }
 }

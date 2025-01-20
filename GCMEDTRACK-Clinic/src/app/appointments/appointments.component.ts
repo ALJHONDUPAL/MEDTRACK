@@ -84,4 +84,23 @@ export class AppointmentsComponent implements OnInit {
       }
     });
   }
+
+  deleteAppointment(appointment: Appointment): void {
+    if (confirm('Are you sure you want to delete this appointment?')) {
+      this.apiService.deleteAppointment(appointment.id).subscribe({
+        next: (response) => {
+          if (response.status === 'success') {
+            alert('Appointment deleted successfully');
+            this.loadAppointments(); // Reload the appointments list
+          } else {
+            alert(response.message || 'Failed to delete appointment');
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting appointment:', error);
+          alert('Failed to delete appointment: ' + error);
+        }
+      });
+    }
+  }
 }

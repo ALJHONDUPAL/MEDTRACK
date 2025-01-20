@@ -13,6 +13,11 @@ interface Appointment {
   status: string;
   time?: string;
   day?: string;
+  userImage: string;
+  userName: string;
+  department: string;
+  yearLevel: string;
+  date: string;
 }
 
 interface TimeSlot {
@@ -22,6 +27,7 @@ interface TimeSlot {
   endTime: string;
   date: string;
   studentLimit: number;
+  currentBookings: number; // Add this to track current bookings
 }
 
 @Component({
@@ -42,7 +48,12 @@ export class BookingComponent implements OnInit {
     slotId: 0,
     userId: 0,
     purpose: '',
-    status: 'Pending'
+    status: 'Pending',
+    userImage: '',
+    userName: '',
+    department: '',
+    yearLevel: '',
+    date: ''
   };
 
   appointments: Appointment[] = [];
@@ -79,8 +90,9 @@ export class BookingComponent implements OnInit {
             dayOfWeek: slot.day_of_week,
             startTime: slot.start_time,
             endTime: slot.end_time,
-            date: slot.date,
-            studentLimit: slot.student_limit
+            date: this.formatDate(slot.date),
+            studentLimit: slot.student_limit,
+            currentBookings: slot.current_bookings || 0
           }));
         } else {
           this.timeSlots = [];
@@ -93,8 +105,17 @@ export class BookingComponent implements OnInit {
     });
   }
 
+  private formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
   private loadAppointments(): void {
-    this.apiService.getAppointments().subscribe({
+    this.apiService.getAppointments(this.currentUserId).subscribe({
       next: (response: any) => {
         if (response.status === 'success' && Array.isArray(response.data)) {
           this.appointments = response.data.map((appointment: any) => ({
@@ -103,12 +124,12 @@ export class BookingComponent implements OnInit {
             purpose: appointment.purpose,
             status: appointment.status,
             userName: appointment.userName,
-            userImage: appointment.userImage,
+            userImage: appointment.userImage || 'assets/default-avatar.png',
             department: appointment.department,
             yearLevel: appointment.yearLevel,
-            date: appointment.date,
-            time: appointment.time,
-            day: appointment.day
+            date: this.formatDate(appointment.date),
+            time: `${appointment.start_time} - ${appointment.end_time}`,
+            day: appointment.day_of_week
           }));
         } else {
           this.appointments = [];
@@ -131,10 +152,10 @@ export class BookingComponent implements OnInit {
   }
 
   getAvailableTimeSlots(): TimeSlot[] {
-    const bookedSlots = this.getAppointmentsForSelectedDay()
-      .map(appointment => `${appointment.time}`);
     return this.timeSlots.filter(slot => 
-      !bookedSlots.includes(`${slot.startTime} - ${slot.endTime}`));
+      slot.dayOfWeek === this.selectedDay && 
+      slot.currentBookings < slot.studentLimit
+    );
   }
 
   selectTimeSlot(slot: TimeSlot) {
@@ -148,14 +169,17 @@ export class BookingComponent implements OnInit {
       return;
     }
 
+    if (this.selectedTimeSlot.currentBookings >= this.selectedTimeSlot.studentLimit) {
+      alert('This time slot is already full');
+      return;
+    }
+
     const appointmentData = {
       slotId: this.selectedTimeSlot.slotId,
       userId: this.currentUserId,
       purpose: this.newAppointment.purpose,
       status: 'Pending'
     };
-
-    // console.log('Attempting to save appointment...', appointmentData);
 
     this.apiService.createAppointment(appointmentData).subscribe({
       next: (response: any) => {
@@ -171,9 +195,6 @@ export class BookingComponent implements OnInit {
       error: (error) => {
         console.error('Error creating appointment:', error);
         alert(typeof error === 'string' ? error : 'Failed to create appointment. Please try again.');
-      },
-      complete: () => {
-        console.log('Appointment creation request completed');
       }
     });
   }
@@ -183,7 +204,12 @@ export class BookingComponent implements OnInit {
       slotId: 0,
       userId: this.currentUserId,
       purpose: '',
-      status: 'Pending'
+      status: 'Pending',
+      userImage: '',
+      userName: '',
+      department: '',
+      yearLevel: '',
+      date: ''
     };
     this.selectedTimeSlot = null;
   }
@@ -199,7 +225,12 @@ export class BookingComponent implements OnInit {
       slotId: 0,
       userId: this.currentUserId,
       purpose: '',
-      status: 'Pending'
+      status: 'Pending',
+      userImage: '',
+      userName: '',
+      department: '',
+      yearLevel: '',
+      date: ''
     };
   }
 }

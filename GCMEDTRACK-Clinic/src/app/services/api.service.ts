@@ -34,8 +34,22 @@ export class ApiService {
     return `${this.imgBaseUrl}${document_path}`;
   }
 
-  getTimeSlots(dayOfWeek: string): Observable<TimeSlot[]> {
-    return this.http.get<TimeSlot[]>(`${this.baseUrl}/getTimeSlots/${dayOfWeek}`);
+  getTimeSlots(dayOfWeek: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/getTimeSlots/${dayOfWeek}`).pipe(
+      map((response: any) => {
+        if (response.status === 'success' && Array.isArray(response.data)) {
+          return {
+            status: 'success',
+            data: response.data.map((slot: any) => ({
+              ...slot,
+              currentBookings: slot.current_bookings || 0
+            }))
+          };
+        }
+        return response;
+      }),
+      catchError(this.handleError)
+    );
   }
 
   addTimeSlot(timeSlot: TimeSlot): Observable<any> {
@@ -43,11 +57,14 @@ export class ApiService {
   }
 
   updateTimeSlot(id: number, timeSlot: TimeSlot): Observable<any> {
-    return this.http.put(`${this.baseUrl}/updateTimeSlot/${id}`, timeSlot);
+    return this.http.post(`${this.baseUrl}/updateTimeSlot`, {
+        slot_id: id,
+        ...timeSlot
+    });
   }
 
   deleteTimeSlot(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/deleteTimeSlot/${id}`);
+    return this.http.post(`${this.baseUrl}/deleteTimeSlot`, { slot_id: id });
   }
 
 
@@ -144,6 +161,14 @@ deleteClinic(staffId: number): Observable<any> {
       tap(response => console.log('Update response:', response)),
       catchError(this.handleError)
     );
+  }
+  
+  deleteAppointment(appointmentId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/deleteAppointment`, { appointmentId })
+      .pipe(
+        tap(response => console.log('Delete response:', response)),
+        catchError(this.handleError)
+      );
   }
   
   private handleError(error: HttpErrorResponse) {

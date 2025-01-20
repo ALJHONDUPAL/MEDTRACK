@@ -149,7 +149,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         break;
 
             case 'getAppointments':
-                echo json_encode($get->getAppointments());
+                $userId = isset($_GET['user_id']) ? $_GET['user_id'] : null;
+                echo json_encode($get->getAppointments($userId));
                 break;
         
 
@@ -270,8 +271,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             case 'updateTimeSlot':
-                $id = isset($request[1]) ? $request[1] : null;
-                echo json_encode($post->updateTimeSlot($id, $data));
+                echo json_encode($post->updateTimeSlot($data));
                 break;
 
             case 'updateAppointmentStatus':
@@ -292,6 +292,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $result = $post->updateAppointmentStatus($updateData);
                     echo json_encode($result);
                     break;
+                
+            case 'deleteTimeSlot':
+                echo json_encode($post->deleteTimeSlot($data));
+                break;
+
+            case 'deleteAppointment':
+                if (!isset($data->appointmentId)) {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "Appointment ID is required"
+                    ]);
+                    http_response_code(400);
+                    break;
+                }
+                
+                echo json_encode($post->deleteAppointment($data->appointmentId));
+                break;
                 
         }
         break;

@@ -290,24 +290,55 @@ public function getStudentBasicDetails($userId)
 
 public function getTimeSlots($dayOfWeek) {
     try {
-        $sql = "SELECT * FROM time_slots WHERE day_of_week = :day_of_week ORDER BY start_time";
+        $sql = "SELECT t.*, 
+                (SELECT COUNT(*) FROM appointments a WHERE a.slot_id = t.slot_id AND a.status != 'Cancelled') as current_bookings 
+                FROM time_slots t 
+                WHERE t.day_of_week = :day_of_week";
+        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':day_of_week' => $dayOfWeek]);
+        $slots = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        return array("status" => "success", "data" => $stmt->fetchAll(PDO::FETCH_ASSOC));
+        return [
+            "status" => "success",
+            "data" => $slots
+        ];
     } catch (PDOException $e) {
-        return array("status" => "error", "message" => $e->getMessage());
+        return [
+            "status" => "error",
+            "message" => $e->getMessage()
+        ];
     }
 }
 
-public function getAppointments() {
+public function getAppointments($userId = null) {
     try {
-        $sql = "SELECT a.*, t.start_time, t.end_time, t.day_of_week, t.date 
-                FROM appointments a 
-                JOIN time_slots t ON a.slot_id = t.slot_id 
-                ORDER BY t.date, t.start_time";
+        $sql = "SELECT 
+                a.*,
+                t.start_time,
+                t.end_time,
+                t.day_of_week,
+                t.date,
+                up.name as userName,
+                up.profile_image_path as userImage,
+                up.department,
+                up.year_level as yearLevel
+            FROM appointments a 
+            JOIN time_slots t ON a.slot_id = t.slot_id
+            JOIN user_profiles up ON a.user_id = up.user_id";
+        
+        if ($userId) {
+            $sql .= " WHERE a.user_id = :userId";
+        }
+        
+        $sql .= " ORDER BY t.date, t.start_time";
+        
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
+        if ($userId) {
+            $stmt->execute(['userId' => $userId]);
+        } else {
+            $stmt->execute();
+        }
         
         return array("status" => "success", "data" => $stmt->fetchAll(PDO::FETCH_ASSOC));
     } catch (PDOException $e) {
