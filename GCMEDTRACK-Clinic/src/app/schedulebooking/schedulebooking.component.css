@@ -18,7 +18,7 @@
   }
   
   .weekday-btn.active {
-    background: #4B6455;
+    background: linear-gradient(115deg, #233329, #63d471);
     color: white;
   }
   
