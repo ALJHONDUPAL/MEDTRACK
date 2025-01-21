@@ -82,30 +82,63 @@
   
   /* Time slots section */
   .time-slots {
-    margin-top: 30px;
+    margin-top: 40px;
+    padding: 20px 40px;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .slots-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 50px;
+    margin: 30px 0;
+    justify-content: start;
   }
   
   .time-slot {
-    background: linear-gradient(115deg, #233329, #63d471);
-    color: white;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+    color: #333;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05), 
+                0 1px 2px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    width: calc(100% - 20px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .time-slot:not(:last-child) {
+    margin-bottom: 20px;
+  }
+  
+  .slots-grid:not(:last-child) {
+    margin-bottom: 40px;
+  }
+  
+  .time-slot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #4B6455, #63d471);
   }
   
   .time-slot:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    opacity: 0.95;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1),
+                0 2px 4px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
   }
   
   .slot-content {
@@ -115,47 +148,98 @@
   }
   
   .time {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: white;
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  
+  .time i {
+    color: #4B6455;
+    font-size: 1em;
   }
   
   .date {
-    color: rgba(255, 255, 255, 0.9);
+    color: #4a5568;
+    font-size: 1.1em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .slot-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(75, 100, 85, 0.04);
+    border-radius: 8px;
+  }
+  
+  .limit, .bookings, .available {
+    font-size: 1em;
+    color: #4a5568;
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    line-height: 1.5;
+  }
+  
+  .available {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 1.1em;
   }
   
   .slot-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
   }
   
   .edit-slot-btn, .delete-btn {
-    padding: 5px 10px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    font-size: 1em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   
   .edit-slot-btn {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: #355e3b;
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-  }
-  
-  .delete-btn {
-    background-color: rgba(244, 67, 54, 0.8);
-    color: white;
-    border: 1px solid rgba(244, 67, 54, 0.4);
+    border: none;
   }
   
   .edit-slot-btn:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background: linear-gradient(to right, #445c4f, #58c066);
+    transform: translateY(-1px);
+  }
+  
+  .delete-btn {
+    background: #fff;
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.2);
   }
   
   .delete-btn:hover {
-    background-color: rgba(244, 67, 54, 1);
+    background: #fff5f5;
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.4);
+    transform: translateY(-1px);
   }
   
   /* Edit button */
@@ -244,8 +328,8 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #4B6455;
-    font-size: 1.2rem;
+    color: #333;
+    cursor: pointer;
   }
   
   .time-inputs {
@@ -387,7 +471,7 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #4B6455;
+    color: #333;
     cursor: pointer;
   }
   
@@ -397,15 +481,15 @@
     gap: 5px;
     margin-top: 8px;
     font-size: 0.9em;
-    color: rgba(255, 255, 255, 0.9);
+    color: #333;
   }
   
   .bookings {
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
   }
   
   .available {
-    color: #ffffff;
+    color: #333;
     font-weight: bold;
   }
   

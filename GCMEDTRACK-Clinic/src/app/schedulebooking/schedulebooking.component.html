@@ -57,8 +57,8 @@
       <div class="slots-grid">
         <div class="time-slot" *ngFor="let slot of filteredTimeSlots">
           <div class="slot-content">
-            <div class="time">{{slot.startTime}} - {{slot.endTime}}</div>
-            <div class="date">{{slot.date}}</div>
+            <div class="time"><i class="fa-regular fa-clock" style="color: #355e3b;"></i> {{slot.startTime}} - {{slot.endTime}}</div>
+            <div class="date"><i class="fa-regular fa-calendar" style="color: #355e3b;"></i> {{slot.date}}</div>
             <div class="limit">
               <span>Student Limit: {{slot.studentLimit}}</span>
               <span class="bookings">Current Bookings: {{slot.currentBookings}}</span>
