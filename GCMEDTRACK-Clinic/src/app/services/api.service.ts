@@ -136,7 +136,7 @@ deleteClinic(staffId: number): Observable<any> {
               date: appointment.date,
               time: `${appointment.start_time} - ${appointment.end_time}`,
               purpose: appointment.purpose,
-              yearLevel: `${appointment.year_level} Year`,
+              yearLevel: `${appointment.year_level}`,
               avatar: this.getFullImageUrl(appointment.profile_image_path) || 'assets/default-avatar.png',
               status: appointment.status
             }))
@@ -169,6 +169,12 @@ deleteClinic(staffId: number): Observable<any> {
         tap(response => console.log('Delete response:', response)),
         catchError(this.handleError)
       );
+  }
+  
+  getDocumentDistributionByDepartment(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/getDocumentDistributionByDepartment`).pipe(
+      catchError(this.handleError)
+    );
   }
   
   private handleError(error: HttpErrorResponse) {

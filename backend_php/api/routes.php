@@ -158,6 +158,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo json_encode($get->getClinicAppointments());
                     break;
 
+            case 'getDocumentDistributionByDepartment':
+                echo json_encode($get->getDocumentDistributionByDepartment());
+                break;
+
     break;
             
             default:

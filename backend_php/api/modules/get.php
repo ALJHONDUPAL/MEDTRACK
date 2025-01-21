@@ -411,4 +411,23 @@ public function getClinicAppointments() {
     }
 }
 
+public function getDocumentDistributionByDepartment() {
+    try {
+        $sql = "SELECT 
+                    up.department,
+                    COUNT(DISTINCT md.user_id) as student_count
+                FROM user_profiles up
+                LEFT JOIN medical_documents md ON up.user_id = md.user_id
+                GROUP BY up.department";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $distribution = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return $this->sendPayload($distribution, "success", "Document distribution retrieved successfully", 200);
+    } catch (PDOException $e) {
+        return $this->sendPayload(null, "error", $e->getMessage(), 400);
+    }
+}
+
 }

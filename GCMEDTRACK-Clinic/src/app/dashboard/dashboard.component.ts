@@ -1,14 +1,15 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { ApiService } from '../services/api.service';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 
 Chart.register(...registerables);
 Chart.register(DataLabelsPlugin);
+
 @Component({
   selector: 'app-dashboard',
-  imports: [],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('appointmentsChart') appointmentsChartRef!: ElementRef;
@@ -23,19 +24,29 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     data: [5, 12, 8, 15, 10, 7, 3]
   };
 
-  // Mock data for documents per department
-  documentsData = {
-    labels: ['CSS', 'CEAS', 'CAHS', 'CHTM', 'CBA'],
-    data: [25, 18, 22, 35, 17]
-  };
-
-  constructor() { }
+  constructor(private apiService: ApiService) { }
 
   ngOnInit(): void { }
 
   ngAfterViewInit(): void {
     this.createAppointmentsChart();
-    this.createDocumentsChart();
+    this.loadDocumentDistribution();
+  }
+
+  private loadDocumentDistribution(): void {
+    this.apiService.getDocumentDistributionByDepartment().subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          const data = response.data;
+          const labels = data.map((item: any) => item.department);
+          const values = data.map((item: any) => item.student_count);
+          this.createDocumentsChart(labels, values);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading document distribution:', error);
+      }
+    });
   }
 
   private createAppointmentsChart(): void {
@@ -81,22 +92,22 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private createDocumentsChart(): void {
+  private createDocumentsChart(labels: string[], values: number[]): void {
     const ctx = this.documentsChartRef.nativeElement.getContext('2d');
     
     this.documentsChart = new Chart(ctx, {
       type: 'doughnut',
       plugins: [DataLabelsPlugin],
       data: {
-        labels: this.documentsData.labels,
+        labels: labels,
         datasets: [{
-          data: this.documentsData.data,
+          data: values,
           backgroundColor: [
-            '#FF9800',  // CSS - Orange
-            '#2196F3',  // CEAS - Blue
-            '#F44336',  // CAHS - Red
-            '#F8C8DC',  // CHTM - Pink 
-            '#FFEB3B'   // CBA - Yellow
+            '#FF9800',  // Orange
+            '#2196F3',  // Blue
+            '#F44336',  // Red
+            '#F8C8DC',  // Pink 
+            '#FFEB3B'   // Yellow
           ],
           borderWidth: 0
         }]
@@ -131,11 +142,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                 const value = context.parsed || 0;
                 const total = context.dataset.data.reduce((acc: number, current: number) => acc + current, 0);
                 const percentage = Math.round((value * 100) / total * 10) / 10;
-                return `${label}: ${percentage}%`;
+                return `${label}: ${percentage}% (${value} students)`;
               }
             }
           },
-          // @ts-ignore
           datalabels: {
             color: '#000',
             font: {
@@ -150,7 +160,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             }
           }
         }
-      } as any
+      } as any // Type assertion to avoid strict type checking for chart options
     });
   }
 }

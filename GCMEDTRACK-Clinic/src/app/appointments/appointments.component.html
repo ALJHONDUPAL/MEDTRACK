@@ -4,9 +4,14 @@
       <div class="filters">
         <div class="student-year">
           Student Year
-          <select [(ngModel)]="selectedYear">
-            <option>1st Year</option>
-            <!-- Add other year options -->
+          <select [(ngModel)]="selectedYear" (change)="onYearChange()">
+            <option *ngFor="let year of yearLevels">{{year}}</option>
+          </select>
+        </div>
+        <div class="student-department">
+          Department
+          <select [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()">
+            <option *ngFor="let dept of departments">{{dept}}</option>
           </select>
         </div>
         <div class="student-slot">
@@ -28,7 +33,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let appointment of appointments">
+        <tr *ngFor="let appointment of filteredAppointments">
           <td>
             <div class="student-info">
               <img [src]="appointment.avatar" alt="Student avatar">
@@ -44,7 +49,7 @@
             <div class="time">{{appointment.time}}</div>
           </td>
           <td>{{appointment.purpose}}</td>
-          <td>{{appointment.yearLevel}}</td>
+          <td>{{appointment.yearLevel}} Year</td>
           <td class="action-buttons">
             <div *ngIf="appointment.status === 'Pending'">
               <button class="accept-btn" (click)="acceptAppointment(appointment)">

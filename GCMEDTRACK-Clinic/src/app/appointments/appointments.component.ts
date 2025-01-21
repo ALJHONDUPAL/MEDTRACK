@@ -24,9 +24,22 @@ interface Appointment {
   styleUrl: './appointments.component.css'
 })
 export class AppointmentsComponent implements OnInit {
-  selectedYear: string = '1st Year';
+  selectedYear: string = 'All';
+  selectedDepartment: string = 'All';
   studentSlot: string = '99/100';
   appointments: Appointment[] = [];
+  filteredAppointments: Appointment[] = [];
+
+  yearLevels: string[] = ['All', '1', '2', '3', '4'];
+  departments: string[] = [
+    'All',
+    'CCS',
+    'CBA',
+    'CAHS',
+    'CEAH',
+    'CHTM-Tourism',
+    'CHTM-Hospitality'
+  ];
 
   constructor(private apiService: ApiService) {}
 
@@ -39,6 +52,8 @@ export class AppointmentsComponent implements OnInit {
       next: (response) => {
         if (response.status === 'success') {
           this.appointments = response.data;
+          this.filterAppointments();
+          console.log('Loaded appointments:', this.appointments);
         } else {
           console.error('Failed to load appointments:', response.message);
         }
@@ -47,6 +62,34 @@ export class AppointmentsComponent implements OnInit {
         console.error('Error loading appointments:', error);
       }
     });
+  }
+
+  filterAppointments() {
+    console.log('Filtering with:', { year: this.selectedYear, department: this.selectedDepartment });
+    
+    this.filteredAppointments = this.appointments.filter(appointment => {
+      const appointmentYear = appointment.yearLevel.split(' ')[0];
+      
+      const yearMatch = this.selectedYear === 'All' || appointmentYear === this.selectedYear;
+      const departmentMatch = this.selectedDepartment === 'All' || appointment.department === this.selectedDepartment;
+      
+      console.log('Appointment:', {
+        yearLevel: appointment.yearLevel,
+        extractedYear: appointmentYear,
+        yearMatch,
+        departmentMatch
+      });
+      
+      return yearMatch && departmentMatch;
+    });
+  }
+
+  onYearChange() {
+    this.filterAppointments();
+  }
+
+  onDepartmentChange() {
+    this.filterAppointments();
   }
 
   acceptAppointment(appointment: Appointment): void {
@@ -91,7 +134,7 @@ export class AppointmentsComponent implements OnInit {
         next: (response) => {
           if (response.status === 'success') {
             alert('Appointment deleted successfully');
-            this.loadAppointments(); // Reload the appointments list
+            this.loadAppointments();
           } else {
             alert(response.message || 'Failed to delete appointment');
           }
