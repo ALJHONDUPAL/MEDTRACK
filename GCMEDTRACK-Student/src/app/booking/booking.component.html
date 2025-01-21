@@ -46,10 +46,41 @@
     </div>
   </div>
   
+    <!-- Time Slots Section -->
+    <div class="timeslots-section">
+      <div class="timeslots-header">
+        <span>Available Time Slots</span>
+        <button class="set-appointment-btn" (click)="openAppointmentModal()">
+          <i class="far fa-calendar"></i>
+          Set an Appointment
+        </button>
+      </div>
+      
+      <div class="timeslots-grid">
+        <div class="time-slot" 
+             *ngFor="let slot of getAvailableTimeSlots()"
+             [class.selected]="selectedTimeSlot?.slotId === slot.slotId"
+             [class.full]="slot.currentBookings >= slot.studentLimit"
+             (click)="selectTimeSlot(slot)">
+          <div class="slot-header">
+            <div class="slot-time">{{slot.startTime}} - {{slot.endTime}}</div>
+            <div class="slot-date">{{slot.date}}</div>
+          </div>
+          <div class="slot-info">
+            <div class="slot-limit">Available slots: {{slot.studentLimit - slot.currentBookings}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
     <!-- Appointment Modal -->
 <div class="modal" *ngIf="showAppointmentModal">
   <div class="modal-content">
-    <h2>Set Appointment</h2>
+    <div class="modal-header">
+      <h2>Set Appointment</h2>
+      <button class="close-btn" (click)="closeAppointmentModal()">&times;</button>
+    </div>
     <form (ngSubmit)="saveAppointment()" #appointmentForm="ngForm">
       <div class="form-group">
         <label>Purpose</label>
@@ -68,14 +99,6 @@
                [value]="selectedTimeSlot ? selectedTimeSlot.startTime + ' - ' + selectedTimeSlot.endTime : ''" 
                disabled 
                class="form-control">
-        <div class="modal-time-slots">
-          <div class="modal-time-slot" 
-               *ngFor="let slot of getAvailableTimeSlots()"
-               [class.selected]="selectedTimeSlot?.slotId === slot.slotId"
-               (click)="selectTimeSlot(slot)">
-            {{slot.startTime}} - {{slot.endTime}}
-          </div>
-        </div>
       </div>
 
       <div class="modal-buttons">
@@ -88,28 +111,4 @@
     </form>
   </div>
 </div>
-  
-    <!-- Time Slots Section -->
-    <div class="timeslots-section">
-      <div class="timeslots-header">
-        <span>Available Time Slots</span>
-        <button class="set-appointment-btn" (click)="openAppointmentModal()">
-          <i class="far fa-calendar"></i>
-          Set an Appointment
-        </button>
-      </div>
-      
-      <div class="timeslots-grid">
-        <div class="time-slot" 
-             *ngFor="let slot of getAvailableTimeSlots()"
-             [class.selected]="selectedTimeSlot?.slotId === slot.slotId"
-             [class.full]="slot.currentBookings >= slot.studentLimit"
-             (click)="selectTimeSlot(slot)">
-          <div class="slot-time">{{slot.startTime}} - {{slot.endTime}}</div>
-          <div class="slot-date">{{slot.date}}</div>
-          <div class="slot-limit">Available slots: {{slot.studentLimit - slot.currentBookings}}</div>
-        </div>
-      </div>
-    </div>
-  </div>
   
