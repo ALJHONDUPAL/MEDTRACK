@@ -117,11 +117,7 @@ public function getUserProfile($userId) {
                 up.department,
                 up.year_level as yearLevel,
                 up.id_number as idNumber,
-                CASE 
-                    WHEN up.profile_image_path IS NOT NULL 
-                    THEN up.profile_image_path
-                    ELSE 'assets/default-avatar.png'
-                END as profileImage
+                up.profile_image_path
             FROM user_profiles up
             WHERE up.user_id = ?
         ");
@@ -130,9 +126,9 @@ public function getUserProfile($userId) {
         $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($profile) {
-            // Modify the profile image path to include the correct base URL
-            if ($profile['profileImage'] && !str_starts_with($profile['profileImage'], 'assets/')) {
-                $profile['profileImage'] = 'uploads/' . $userId . '/profile_images/' . basename($profile['profileImage']);
+            // Construct the correct path for profile image
+            if ($profile['profile_image_path']) {
+                $profile['profile_image_path'] = 'uploads/' . $userId . '/profile_images/' . basename($profile['profile_image_path']);
             }
             
             return [

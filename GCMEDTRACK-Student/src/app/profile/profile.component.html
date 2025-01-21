@@ -2,8 +2,9 @@
   <div class="profile-header">
       <div class="profile-image">
           <img 
-              [src]="profileData.profileImage || 'assets/default-avatar.png'" 
-              [alt]="profileData.name ? profileData.name + '\'s profile picture' : 'Default profile picture'" 
+              [src]="getProfileImageUrl()"
+              [alt]="profileData.name ? profileData.name + '\'s profile picture' : 'Default profile picture'"
+              (error)="handleImageError()"
           >
       </div>
       <h2>{{profileData.name || 'Name not provided'}}</h2>
@@ -355,9 +356,12 @@
           <h2>Edit Profile</h2>
           <form #profileForm="ngForm" (ngSubmit)="saveProfile(profileForm.value)">
               <div class="profile-image-upload">
-                  <img [src]="tempProfileImage || profileData.profileImage || 'assets/default-avatar.png'" 
-                       alt="Profile Picture" 
-                       class="preview-image">
+                  <img 
+                      [src]="tempProfileImage || getProfileImageUrl()" 
+                      alt="Profile Picture" 
+                      class="preview-image"
+                      (error)="handleImageError()"
+                  >
                   <label class="upload-button">
                       <span>Change Photo</span>
                       <input type="file" 

@@ -8,6 +8,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 })
 export class ApiService {
   public baseUrl = 'http://localhost/MEDTRACK/backend_php/api';
+  private imgBaseUrl = 'http://localhost/MEDTRACK/backend_php/api/';
 
   constructor(private http: HttpClient) {}
 
@@ -77,6 +78,9 @@ createAppointment(appointmentData: any): Observable<any> {
   return this.http.post(`${this.baseUrl}/createAppointment`, payload, { headers })
 }
 
+getFullImageUrl(profile_image_path: string): string {
+  return `${this.imgBaseUrl}${profile_image_path}`;
+}
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';

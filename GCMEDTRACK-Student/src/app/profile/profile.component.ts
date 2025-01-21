@@ -200,12 +200,12 @@ export class ProfileComponent implements OnInit {
     this.apiService.getUserProfile(this.userId).subscribe({
       next: (response: any) => {
         if (response && response.status === 'success') {
-          const baseUrl = 'http://localhost/MEDTRACK/backend_php';
+          // Set profile data
           this.profileData = {
             ...response.data,
-            profileImage: response.data.profileImage?.startsWith('assets/') 
-              ? 'assets/default-avatar.svg'
-              : `${baseUrl}/${response.data.profileImage}`
+            profileImage: response.data.profile_image_path ? 
+              this.apiService.getFullImageUrl(response.data.profile_image_path) :
+              'assets/default-avatar.svg'
           };
           
           // After loading profile, fetch medical documents
@@ -623,7 +623,9 @@ getDocumentStatus(requirement: string): string {
             department: formData.get('department'),
             yearLevel: formData.get('year_level'),
             idNumber: formData.get('id_number'),
-            profileImage: response.data?.profile_image_path || this.profileData.profileImage
+            profileImage: response.data?.profile_image_path ? 
+              this.apiService.getFullImageUrl(response.data.profile_image_path) :
+              'assets/default-avatar.svg'
           };
           
           this.closeModal();
@@ -920,5 +922,18 @@ getDocumentStatus(requirement: string): string {
   // Method to close Anti HAV modal
   closeAntiHAVModal(): void {
     this.showAntiHAVModal = false;
+  }
+
+  // Add this method to handle image loading errors
+  handleImageError() {
+    this.profileData.profileImage = 'assets/default-avatar.svg';
+  }
+
+  // Add this method to get the image URL
+  getProfileImageUrl(): string {
+    if (this.profileData?.profile_image_path) {
+      return this.apiService.getFullImageUrl(this.profileData.profile_image_path);
+    }
+    return 'assets/default-avatar.svg';
   }
 }
