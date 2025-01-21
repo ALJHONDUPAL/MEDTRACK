@@ -248,36 +248,70 @@ public function getStudentProfiles($department = null, $year = null) {
 public function getStudentBasicDetails($userId)
 {
     try {
-        // SQL query to fetch basic details for a specific student
         $sql = "
-        SELECT s.*, m.*, v.*
-        FROM user_profiles s
-        LEFT JOIN medical_documents m ON s.user_id = m.user_id
-        LEFT JOIN vaccination_records v ON s.user_id = v.user_id
-        WHERE s.user_id = :userId
-    ";
-    
-        // Prepare and execute the query
+            SELECT 
+                s.*,
+                m.document_type,
+                m.status as document_status,
+                m.file_path,
+                m.date as document_date,
+                m.location as document_location,
+                v.first_dose_type,
+                v.first_dose_date,
+                v.second_dose_type,
+                v.second_dose_date,
+                v.booster_type,
+                v.booster_date,
+                v.document_path as vaccination_document,
+                v.status as vaccination_status
+            FROM user_profiles s
+            LEFT JOIN medical_documents m ON s.user_id = m.user_id
+            LEFT JOIN vaccination_records v ON s.user_id = v.user_id
+            WHERE s.user_id = :userId
+        ";
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':userId' => $userId]);
+        $profile = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Fetch the profile
-        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Log the fetched profile for debugging
-        error_log('Fetched profile: ' . print_r($profile, true));
-
-        // If no profile is found, return an error message
-        if (!$profile) {
-            return [
-                "status" => "error",
-                "message" => "No profile found for user ID: " . $userId
-            ];
+        // Group documents by type
+        $formattedProfile = [];
+        foreach ($profile as $row) {
+            if (!isset($formattedProfile['basic'])) {
+                $formattedProfile['basic'] = [
+                    'name' => $row['name'],
+                    'department' => $row['department'],
+                    'year_level' => $row['year_level'],
+                    'id_number' => $row['id_number'],
+                    'profile_image_path' => $row['profile_image_path'],
+                    'vaccination_status' => $row['vaccination_status'],
+                    // Add vaccination details to basic profile
+                    'vaccination' => [
+                        'first_dose_type' => $row['first_dose_type'],
+                        'first_dose_date' => $row['first_dose_date'],
+                        'second_dose_type' => $row['second_dose_type'],
+                        'second_dose_date' => $row['second_dose_date'],
+                        'booster_type' => $row['booster_type'],
+                        'booster_date' => $row['booster_date'],
+                        'document_path' => $row['vaccination_document']
+                    ]
+                ];
+            }
+            
+            if ($row['document_type']) {
+                $formattedProfile['documents'][$row['document_type']] = [
+                    'status' => $row['document_status'] ?? 'Need Submission',
+                    'file_path' => $row['file_path'],
+                    'date' => $row['document_date'],
+                    'location' => $row['document_location'],
+                    'document_type' => $row['document_type']
+                ];
+            }
         }
 
         return [
             "status" => "success",
-            "data" => $profile
+            "data" => $formattedProfile
         ];
 
     } catch (PDOException $e) {

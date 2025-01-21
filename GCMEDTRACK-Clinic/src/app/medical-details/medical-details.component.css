@@ -247,3 +247,46 @@ button.bg-secondary {
 button.bg-secondary:hover {
   background-color: rgba(209, 213, 219, 0.8); /* Tailwind's hover:bg-secondary/80 */
 }
+
+.documents-details {
+  margin-top: 2rem;
+}
+
+.info-box {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-box h5 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.info-details {
+  margin-bottom: 1rem;
+}
+
+.info-details p {
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.no-records {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 8px;
+}

@@ -663,6 +663,39 @@ class Post extends GlobalMethods {
         }
     }
 
+    public function updateDocumentStatus($data) {
+        try {
+            $sql = "UPDATE medical_documents 
+                    SET status = :status 
+                    WHERE user_id = :user_id 
+                    AND document_type = :document_type";
+                    
+            $stmt = $this->pdo->prepare($sql);
+            $result = $stmt->execute([
+                ':user_id' => $data->user_id,
+                ':document_type' => $data->document_type,
+                ':status' => $data->status
+            ]);
+            
+            if ($result) {
+                return [
+                    "status" => "success",
+                    "message" => "Document status updated successfully"
+                ];
+            } else {
+                return [
+                    "status" => "error",
+                    "message" => "Failed to update document status"
+                ];
+            }
+        } catch (PDOException $e) {
+            return [
+                "status" => "error",
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
 }
 
 

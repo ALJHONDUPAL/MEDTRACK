@@ -310,6 +310,17 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($post->deleteAppointment($data->appointmentId));
                 break;
                 
+            case 'updateDocumentStatus':
+                if (!isset($data->user_id) || !isset($data->document_type) || !isset($data->status)) {
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "Missing required fields"
+                    ]);
+                    break;
+                }
+                echo json_encode($post->updateDocumentStatus($data));
+                break;
+                
         }
         break;
 

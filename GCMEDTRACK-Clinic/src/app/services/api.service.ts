@@ -197,13 +197,4 @@ deleteClinic(staffId: number): Observable<any> {
         'Content-Type': 'application/json'
       });
     }
-
-  
-  
-  
-
-
-  
-  
-
 }
