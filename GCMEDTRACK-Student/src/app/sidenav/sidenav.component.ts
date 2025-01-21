@@ -63,6 +63,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   // Mobile query for responsive design
   mobileQuery: MediaQueryList;
+  isCollapsed = false;
+  
   private _mobileQueryListener: () => void;
 
   // Navigation data
@@ -101,8 +103,10 @@ export class SidenavComponent implements OnInit, OnDestroy {
     media: MediaMatcher
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
-    this._mobileQueryListener = () => {};
-    this.mobileQuery.addEventListener('change', this._mobileQueryListener);
+    this._mobileQueryListener = () => {
+      // Handle mobile query changes
+    };
+    this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
   ngOnInit(): void {
@@ -116,7 +120,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.mobileQuery.removeEventListener('change', this._mobileQueryListener);
+    this.mobileQuery.removeListener(this._mobileQueryListener);
   }
 
   loadUserDetails(): void {
@@ -131,7 +135,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   }
 
   toggleCollapse(): void {
-    this.collapsed = !this.collapsed;
+    this.isCollapsed = !this.isCollapsed;
   }
 
   closeSidenav(): void {
@@ -158,5 +162,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
