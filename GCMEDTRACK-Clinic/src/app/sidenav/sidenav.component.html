@@ -8,19 +8,20 @@
       <i class="fas fa-times close-icon"></i>
     </button>
     <div class="scrollwrap scrollwrap_delayed">
-      <mat-nav-list class="sidenav-nav">
-        <mat-list-item class="sidenav-nav-item" *ngFor="let data of navData">
+      <ul class="sidenav-nav">
+        <li class="sidenav-nav-item" *ngFor="let data of navData">
           <a class="sidenav-nav-link" 
              [routerLink]="[data.routeLink]" 
              routerLinkActive="active"
-             [routerLinkActiveOptions]="{exact: true}">
+             [routerLinkActiveOptions]="{exact: true}"
+             (click)="!collapsed && toggleCollapse()">
             <i class="sidenav-link-icon" [class]="data.icon"></i>
             <span class="sidenav-link-text" *ngIf="collapsed">
               {{data.label}}
             </span>
           </a>
-        </mat-list-item>
-      </mat-nav-list>
+        </li>
+      </ul>
     </div>
   </mat-sidenav>
   
