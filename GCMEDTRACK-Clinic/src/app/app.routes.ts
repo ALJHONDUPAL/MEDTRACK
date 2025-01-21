@@ -8,6 +8,8 @@ import { AppointmentsComponent } from './appointments/appointments.component';
 import { SchedulebookingComponent } from './schedulebooking/schedulebooking.component';
 import { DocumentsComponent } from './documents/documents.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { MedicalDetailsComponent } from './medical-details/medical-details.component';
+import { NgModule } from '@angular/core';
 
 export const routes: Routes = [
   { 
@@ -51,6 +53,8 @@ export const routes: Routes = [
         component: DocumentsComponent,
         canActivate: [ClinicAuthGuard]
       },
+      { path: 'medical-details/:user_id', component: MedicalDetailsComponent, canActivate: [ClinicAuthGuard]},
+      
     ]
   },
   
@@ -59,3 +63,9 @@ export const routes: Routes = [
     redirectTo: 'dashboard' 
   }
 ];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
