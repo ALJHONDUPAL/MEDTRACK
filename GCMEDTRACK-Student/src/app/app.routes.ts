@@ -19,22 +19,22 @@ export const routes: Routes = [
   { 
     path: '', 
     component: SidenavComponent,
-    // canActivate: [AuthGuard],
+    canActivate: [AuthGuard],
     children: [
       { 
         path: 'home', 
         component: HomeComponent,
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       { 
         path: 'profile', 
         component: ProfileComponent,
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'booking',
         component: BookingComponent,
-        // canActivate: [AuthGuard]
+        canActivate: [AuthGuard]
       },
     ]
   },
