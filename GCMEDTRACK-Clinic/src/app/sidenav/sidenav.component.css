@@ -1,6 +1,6 @@
 .logo {
-    width: 3rem;
-    height: 3rem;
+    width: 3.8rem;
+    height: 3.8rem;
     margin: 1rem auto;
     display: block;
     transition: all .3s ease;
@@ -36,8 +36,8 @@
 }
 
 .sidenav-collapsed .logo {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 8rem;
+    height: 8rem;
     margin: 1.5rem auto;
 }
 
@@ -47,12 +47,11 @@
 
 .sidenav-nav {
     list-style: none;
-    padding: 0.8rem 0.5rem;
+    padding: 0.8rem 0.7rem;
     margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: calc(100% - 5rem);
 }
 
 .sidenav-nav-item {
@@ -75,9 +74,9 @@
 }
 
 .sidenav-nav-link .sidenav-link-icon {
-    font-size: 1.4rem;
-    width: 2rem;
-    min-width: 2rem;
+    font-size: 1.6rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
     margin: 0;
     text-align: center;
 }
@@ -208,14 +207,15 @@
 mat-sidenav {
     background: white;
     transition: all .3s ease;
-    width: 4.5rem;
+    width: 5.8rem;
     height: 100vh;
     border-right: 1px solid #e0e0e0;
     position: fixed;
+    overflow: hidden;
 }
 
 mat-sidenav-content {
-    margin-left: 4.5rem !important;
+    margin-left: 5.8rem !important;
     transition: margin-left .3s ease;
 }
 

@@ -7,22 +7,20 @@
             (click)="toggleCollapse()">
       <i class="fas fa-times close-icon"></i>
     </button>
-    <div class="scrollwrap scrollwrap_delayed">
-      <ul class="sidenav-nav">
-        <li class="sidenav-nav-item" *ngFor="let data of navData">
-          <a class="sidenav-nav-link" 
-             [routerLink]="[data.routeLink]" 
-             routerLinkActive="active"
-             [routerLinkActiveOptions]="{exact: true}"
-             (click)="!collapsed && toggleCollapse()">
-            <i class="sidenav-link-icon" [class]="data.icon"></i>
-            <span class="sidenav-link-text" *ngIf="collapsed">
-              {{data.label}}
-            </span>
-          </a>
-        </li>
-      </ul>
-    </div>
+    <ul class="sidenav-nav">
+      <li class="sidenav-nav-item" *ngFor="let data of navData">
+        <a class="sidenav-nav-link" 
+           [routerLink]="[data.routeLink]" 
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: true}"
+           (click)="!collapsed && toggleCollapse()">
+          <i class="sidenav-link-icon" [class]="data.icon"></i>
+          <span class="sidenav-link-text" *ngIf="collapsed">
+            {{data.label}}
+          </span>
+        </a>
+      </li>
+    </ul>
   </mat-sidenav>
   
   <mat-sidenav-content>
