@@ -828,3 +828,27 @@ input.error, select.error {
 .form-group select.error:focus {
     box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
 }
+
+.header {
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.datetime {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 15px;
+  justify-content: center;
+}
+
+.datetime i {
+  margin-right: 8px;
+  color: #2B5329;
+}

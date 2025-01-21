@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
 
   expandedSections: { [key: string]: boolean } = {
     bloodCount: false,
@@ -173,6 +173,9 @@ export class ProfileComponent implements OnInit {
   selectedFecalysisFile: File | null = null;
   selectedDrugTestFile: File | null = null ;
 
+  currentDate: Date = new Date();
+  private dateTimer: any;
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
@@ -191,6 +194,17 @@ export class ProfileComponent implements OnInit {
     
     this.loadProfileData();
     this.loadVaccinationData();
+
+    // Update time every second
+    this.dateTimer = setInterval(() => {
+      this.currentDate = new Date();
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.dateTimer) {
+      clearInterval(this.dateTimer);
+    }
   }
 
   loadProfileData() {

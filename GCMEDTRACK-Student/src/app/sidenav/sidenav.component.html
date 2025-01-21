@@ -39,6 +39,12 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
+    <div class="header">
+      <div class="datetime">
+        <i class="far fa-calendar"></i>
+        <span>{{ currentDate | date:'EEEE, MMM dd, yyyy, h:mm a' }}</span>
+      </div>
+    </div>
     <div class="content">
       <router-outlet></router-outlet>
     </div>

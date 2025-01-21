@@ -92,6 +92,9 @@ export class SidenavComponent implements OnInit, OnDestroy {
     // }
   ];
 
+  currentDate: Date = new Date();
+  private dateTimer: any;
+
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     this.screenWidth = window.innerWidth;
@@ -117,10 +120,18 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
     // Load user details
     this.loadUserDetails();
+
+    // Update time every second
+    this.dateTimer = setInterval(() => {
+      this.currentDate = new Date();
+    }, 1000);
   }
 
   ngOnDestroy(): void {
     this.mobileQuery.removeListener(this._mobileQueryListener);
+    if (this.dateTimer) {
+      clearInterval(this.dateTimer);
+    }
   }
 
   loadUserDetails(): void {
