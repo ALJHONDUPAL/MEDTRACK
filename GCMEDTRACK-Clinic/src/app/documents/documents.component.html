@@ -43,7 +43,7 @@
     <div *ngFor="let student of filteredStudents" class="student-card">
       <div class="card">
         <!-- <p><strong>Debug User ID:</strong> {{ student.user_id }}</p> -->
-        <img [src]="getImageUrl()" class="profile-img" alt="Profile Image" />
+        <img [src]="getImageUrl(student.profile_image_path, student.user_id)" class="profile-img" alt="Profile Image" />
         <div class="info">
           <h3>{{ student.name }}</h3>
           <p><strong>Department:</strong> {{ student.department }}</p>

@@ -57,7 +57,6 @@ class Post extends GlobalMethods {
             $domain_account = $data->domain_account;
             $password = $data->password;
             
-            // Query using the full email address
             $sql = "SELECT * FROM users WHERE domain_account = :domain_account";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['domain_account' => $domain_account]);

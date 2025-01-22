@@ -272,10 +272,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
                             this.antiHBSData = {
                                 date: doc.date,
                                 location: doc.location,
-                                status: doc.status,
+                                status: doc.status || 'Submitted',
                                 file_path: doc.file_path
                             };
-                            this.antiHBSImage = `${this.apiService.baseUrl}/${doc.file_path}`;
+                            this.antiHBSImage = doc.file_path ? `${this.apiService.baseUrl}/${doc.file_path}` : null;
                             break;
                         case 'hepaBVaccine':
                             this.hepaBVaccineData = {
@@ -296,32 +296,32 @@ export class ProfileComponent implements OnInit, OnDestroy {
                             this.fluVaccineImage = `${this.apiService.baseUrl}/${doc.file_path}`;
                             break;
                         case 'antiHAV':
-                              this.antiHAVData = {
-                                  date: doc.date,
-                                  location: doc.location,
-                                  status: doc.status,
-                                  file_path: doc.file_path
-                              };
-                              this.antiHAVImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                              break;
+                            this.antiHAVData = {
+                                date: doc.date,
+                                location: doc.location,
+                                status: doc.status || 'Submitted',
+                                file_path: doc.file_path
+                            };
+                            this.antiHAVImage = doc.file_path ? `${this.apiService.baseUrl}/${doc.file_path}` : null;
+                            break;
                         case 'fecalysis':
-                              this.fecalysisData = {
-                                  date: doc.date,
-                                  location: doc.location,
-                                  status: doc.status,
-                                  file_path: doc.file_path
-                              };
-                              this.fecalysisImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                              break;
-                          case 'drugTest':
-                              this.drugTestData = {
-                                  date: doc.date,
-                                  location: doc.location,
-                                  status: doc.status, 
-                                  file_path: doc.file_path
-                              };
-                              this.drugTestImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                              break;
+                            this.fecalysisData = {
+                                date: doc.date,
+                                location: doc.location,
+                                status: doc.status,
+                                file_path: doc.file_path
+                            };
+                            this.fecalysisImage = `${this.apiService.baseUrl}/${doc.file_path}`;
+                            break;
+                        case 'drugTest':
+                            this.drugTestData = {
+                                date: doc.date,
+                                location: doc.location,
+                                status: doc.status, 
+                                file_path: doc.file_path
+                            };
+                            this.drugTestImage = `${this.apiService.baseUrl}/${doc.file_path}`;
+                            break;
                         default:
                             console.warn(`Unknown document type: ${doc.document_type}`);
                     }
@@ -440,6 +440,9 @@ saveXray(formData: any): void {
 
 saveAntiHBS(formData: any): void {
   this.saveDocument(formData, 'antiHBS', this.selectedAntiHBSFile);
+  if (this.selectedAntiHBSFile) {
+    this.antiHBSData.status = 'Submitted';
+  }
 }
 
 saveHepaBVaccine(formData: any): void {
@@ -452,6 +455,9 @@ saveFluVaccine(formData: any): void {
 
 saveAntiHAV(formData: any): void {
   this.saveDocument(formData, 'antiHAV', this.selectedAntiHAVFile);
+  if (this.selectedAntiHAVFile) {
+    this.antiHAVData.status = 'Submitted';
+  }
 }
 
 // Save Fecalysis document
@@ -571,13 +577,13 @@ getDocumentStatus(requirement: string): string {
           return this.xrayData?.status || 'Need Submission';
       case 'COVID-19 Vaccination Card':
           return this.vaccinationData?.status || 'Need Submission'; 
-      case 'Anti HBS':
+      case 'Anti HBS (For students with previous Hepa B vaccine)':
           return this.antiHBSData?.status || 'Need Submission';
       case 'Hepatitis B Vaccine':
           return this.hepaBVaccineData?.status || 'Need Submission';
       case 'Flu Vaccine Card':
           return this.fluVaccineData?.status || 'Need Submission';
-      case 'Anti HAV':
+      case 'Anti HAV(Hepa A)':
           return this.antiHAVData?.status || 'Need Submission';
       case 'Fecalysis':
           return this.fecalysisData?.status || 'Need Submission';

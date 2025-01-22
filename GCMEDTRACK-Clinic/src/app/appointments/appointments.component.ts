@@ -26,7 +26,13 @@ interface Appointment {
 export class AppointmentsComponent implements OnInit {
   selectedYear: string = 'All';
   selectedDepartment: string = 'All';
-  studentSlot: string = '99/100';
+  totalSlots: number = 0;
+  currentBookings: number = 0;
+
+  get studentSlot(): string {
+    return `${this.currentBookings}/${this.totalSlots}`;
+  }
+
   appointments: Appointment[] = [];
   filteredAppointments: Appointment[] = [];
 
@@ -52,6 +58,13 @@ export class AppointmentsComponent implements OnInit {
       next: (response) => {
         if (response.status === 'success') {
           this.appointments = response.data;
+          
+          this.currentBookings = this.appointments.filter(app => 
+            app.status !== 'Cancelled'
+          ).length;
+          
+          this.getTotalSlots();
+          
           this.filterAppointments();
           console.log('Loaded appointments:', this.appointments);
         } else {
@@ -60,6 +73,24 @@ export class AppointmentsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading appointments:', error);
+      }
+    });
+  }
+
+  getTotalSlots() {
+    this.apiService.getTimeSlots(new Date().toLocaleDateString('en-US', { weekday: 'long' })).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          this.totalSlots = response.data.reduce((total: number, slot: any) => 
+            total + (slot.studentLimit || 0), 0);
+        } else {
+          console.error('Failed to get total slots:', response.message);
+          this.totalSlots = 100;
+        }
+      },
+      error: (error) => {
+        console.error('Error getting total slots:', error);
+        this.totalSlots = 100;
       }
     });
   }

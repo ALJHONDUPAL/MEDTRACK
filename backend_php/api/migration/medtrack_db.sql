@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 21, 2025 at 12:50 AM
+-- Generation Time: Jan 22, 2025 at 01:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,16 +36,6 @@ CREATE TABLE `appointments` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `appointments`
---
-
-INSERT INTO `appointments` (`appointment_id`, `slot_id`, `user_id`, `purpose`, `status`, `created_at`) VALUES
-(4, 1, 5, 'Medical', 'Accepted', '2025-01-15 20:00:21'),
-(6, 3, 5, 'Dental', 'Accepted', '2025-01-20 21:47:05'),
-(7, 4, 5, 'Clinic', 'Accepted', '2025-01-20 22:11:39'),
-(8, 4, 7, 'Medical', 'Accepted', '2025-01-20 23:41:53');
-
 -- --------------------------------------------------------
 
 --
@@ -73,9 +63,6 @@ CREATE TABLE `clinicstaff` (
 --
 
 INSERT INTO `clinicstaff` (`staff_id`, `first_name`, `last_name`, `domain_account`, `password`, `email`, `address`, `contact_number`, `role`, `is_active`, `created_at`, `updated_at`, `last_login`) VALUES
-(4, 'clinic', 'staff', 'clinicstaff', '$2y$10$y/bAa63GRnx9qZPtudNyOuOsd5s9Ehd0b7rNhWMt2i/aSqoiTjydW', 'clinicstaff@gordoncollege.edu.ph', 'Subic', '09511186442', 'staff', 1, '2024-12-14 13:08:59', '2024-12-14 13:08:59', NULL),
-(5, 'test', 'test', 'test', '$2y$10$0sNdNqR3a34eCmKXtkLYD.QS3/crTU.DLmx6NM8JOiCuubsZrtQFG', 'test@gordoncollege.edu.ph', 'Subic', '09511186442', 'staff', 1, '2024-12-14 20:52:13', '2024-12-14 20:52:13', NULL),
-(6, 'asdASD', 'sdasdsdf', 'dssadf', '$2y$10$6M0G8Y48BeILNA3e3szoCe.J2r2UGJDON6snCPMpRGfvpdN3k.8Tq', 'dssadf@gordoncollege.edu.ph', 'asdfasfasdfa', '09511186442', 'staff', 1, '2024-12-14 20:57:00', '2024-12-14 20:57:00', NULL),
 (7, 'Jayvee', 'Mayor', '202210768', '$2y$10$.SW4BOxWqHEFHX.crLEcz.24EjXRz3zfLyMrq.m9d8F8OPOIV.1za', '202210768@gordoncollege.edu.ph', 'Subic', '09511186442', 'staff', 1, '2025-01-14 11:42:53', '2025-01-14 11:42:53', NULL);
 
 -- --------------------------------------------------------
@@ -100,24 +87,15 @@ CREATE TABLE `medical_documents` (
 --
 
 INSERT INTO `medical_documents` (`document_id`, `user_id`, `document_type`, `file_path`, `date`, `location`, `status`, `uploaded_at`) VALUES
-(24, 5, 'bloodCount', 'uploads/5/medical_documents/bloodCount/1736526827_67814beb0e7ff_Yatiiiii.png', '2025-01-11', 'Subic', 'Submitted', '2025-01-10 16:33:47'),
-(25, 5, 'urinalysis', 'uploads/5/medical_documents/urinalysis/1736526839_67814bf711e82_Yatiiiii.png', '2025-01-11', 'undefined', 'Submitted', '2025-01-10 16:33:59'),
-(26, 5, 'chestXray', 'uploads/5/medical_documents/chestXray/1736526858_67814c0a00cd7_Yatiiiii.png', '2025-01-11', 'subic', 'Submitted', '2025-01-10 16:34:18'),
-(27, 7, 'bloodCount', 'uploads/7/medical_documents/bloodCount/1736530036_6781587474f5b_466542816_2012909459129945_5233219466458689157_n.png', '2025-01-11', 'aSDASD', 'Submitted', '2025-01-10 17:27:16'),
-(28, 7, 'urinalysis', 'uploads/7/medical_documents/urinalysis/1736530051_6781588308601_Yatiiiii.png', '2025-01-11', 'ASDASD', 'Submitted', '2025-01-10 17:27:31'),
-(29, 7, 'chestXray', 'uploads/7/medical_documents/chestXray/1736530081_678158a1efd3e_a393e55cd98cb900.png', '2025-01-11', 'undefined', 'Submitted', '2025-01-10 17:28:01'),
-(30, 8, 'chestXray', 'uploads/8/medical_documents/chestXray/1736537208_67817478f0227_Yatiiiii.png', '2025-01-11', 'asdfsdf', 'Submitted', '2025-01-10 19:26:48'),
-(33, 8, 'hepaBVaccine', 'uploads/8/medical_documents/hepaBVaccine/1736537388_6781752c8596f_Yatiiiii.png', '2025-01-11', 'sddfsddfd', 'Submitted', '2025-01-10 19:29:48'),
-(34, 8, 'fluVaccine', 'uploads/8/medical_documents/fluVaccine/1736537412_67817544218ee_Yatiiiii.png', '2025-01-11', 'dsfad', 'Submitted', '2025-01-10 19:30:12'),
-(36, 8, 'bloodCount', 'uploads/8/medical_documents/bloodCount/1736538541_678179ad084fb_a393e55cd98cb900.png', '2025-01-11', 'sdfsdf', 'Submitted', '2025-01-10 19:49:01'),
-(37, 8, 'urinalysis', 'uploads/8/medical_documents/urinalysis/1736538560_678179c0960a4_a393e55cd98cb900.png', '2025-01-09', 'sdfdsf', 'Submitted', '2025-01-10 19:49:20'),
-(38, 8, 'antiHBS', 'uploads/8/medical_documents/antiHBS/1736538650_67817a1a0963a_Yatiiiii.png', '2025-01-11', 'sdfsdf', 'Submitted', '2025-01-10 19:50:50'),
-(39, 10, 'antiHAV', 'uploads/10/medical_documents/antiHAV/1736541963_6781870b0fdda_Yatiiiii.png', '2025-01-11', 'asdfasdf', 'Submitted', '2025-01-10 20:46:03'),
-(40, 10, 'fecalysis', 'uploads/10/medical_documents/fecalysis/1736541982_6781871ea8fa6_a393e55cd98cb900.png', '2025-01-11', 'asdasd', 'Submitted', '2025-01-10 20:46:22'),
-(41, 10, 'bloodCount', 'uploads/10/medical_documents/bloodCount/1736542014_6781873e59649_a393e55cd98cb900.png', '2025-01-11', 'saddfsddf', 'Submitted', '2025-01-10 20:46:54'),
-(42, 10, 'urinalysis', 'uploads/10/medical_documents/urinalysis/1736542030_6781874e91583_a393e55cd98cb900.png', '2025-01-11', 'sadfsdf', 'Submitted', '2025-01-10 20:47:10'),
-(43, 10, 'chestXray', 'uploads/10/medical_documents/chestXray/1736542050_67818762523d9_a393e55cd98cb900.png', '2025-01-11', 'asdfsdf', 'Submitted', '2025-01-10 20:47:30'),
-(44, 8, 'drugTest', 'uploads/8/medical_documents/drugTest/1736544997_678192e5056c6_a393e55cd98cb900.png', '2025-01-11', 'asdfasdf', 'Submitted', '2025-01-10 21:36:37');
+(46, 5, 'bloodCount', 'uploads/5/medical_documents/bloodCount/1737481356_678fdc8c0cba3_testdocument.png', '2025-01-22', 'Subic', 'Submitted', '2025-01-21 17:42:36'),
+(47, 11, 'bloodCount', 'uploads/11/medical_documents/bloodCount/1737482425_678fe0b96ab3f_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:00:25'),
+(48, 11, 'urinalysis', 'uploads/11/medical_documents/urinalysis/1737482441_678fe0c946137_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:00:41'),
+(49, 11, 'antiHBS', 'uploads/11/medical_documents/antiHBS/1737482522_678fe11a7369a_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:02:02'),
+(50, 11, 'fluVaccine', 'uploads/11/medical_documents/fluVaccine/1737482560_678fe140ba6ae_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:02:40'),
+(51, 11, 'hepaBVaccine', 'uploads/11/medical_documents/hepaBVaccine/1737482590_678fe15e97d8a_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:03:10'),
+(52, 6, 'fecalysis', 'uploads/6/medical_documents/fecalysis/1737483048_678fe328367df_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:10:48'),
+(53, 6, 'antiHAV', 'uploads/6/medical_documents/antiHAV/1737483083_678fe34bc96d9_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:11:23'),
+(54, 11, 'chestXray', 'uploads/11/medical_documents/chestXray/1737484373_678fe855d2ade_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:32:53');
 
 -- --------------------------------------------------------
 
@@ -141,9 +119,8 @@ CREATE TABLE `time_slots` (
 --
 
 INSERT INTO `time_slots` (`slot_id`, `day_of_week`, `start_time`, `end_time`, `date`, `student_limit`, `created_at`, `updated_at`) VALUES
-(1, 'MONDAY', '07:00 AM', '05:00 PM', '2025-01-21', 10, '2025-01-14 18:42:15', '2025-01-20 21:44:26'),
-(3, 'MONDAY', '01:00 PM', '05:00 PM', '2025-01-21', 10, '2025-01-20 21:33:32', '2025-01-20 21:33:32'),
-(4, 'TUESDAY', '07:00 AM', '11:00 AM', '2025-01-21', 10, '2025-01-20 22:11:26', '2025-01-20 22:11:26');
+(5, 'WEDNESDAY', '09:00 AM', '09:30 AM', '2025-01-23', 5, '2025-01-21 17:46:11', '2025-01-21 17:46:11'),
+(6, 'MONDAY', '09:00 AM', '09:30 AM', '2025-01-22', 2, '2025-01-21 18:30:13', '2025-01-21 18:30:13');
 
 -- --------------------------------------------------------
 
@@ -168,7 +145,8 @@ INSERT INTO `users` (`user_id`, `domain_account`, `password`, `created_at`) VALU
 (7, '202210465@gordoncollege.edu.ph', '$2y$10$2dqKmJ3e/OPAco9TzeCWSOzV26N5rB3x9sNORmjRQkhK9Y7sBmguS', '2025-01-10 17:25:01'),
 (8, '202210445@gordoncollege.edu.ph', '$2y$10$/y75kFLswsF45HBcJtrpYeamsfoX7s1I7/wleUpKaaYcckzelMLZO', '2025-01-10 17:30:00'),
 (9, '202211183@gordoncollege.edu.ph', '$2y$10$xnqC769w9pr1EbteZZ/IKO/CFntv039bZR46ANIwtzzNichqyBDNS', '2025-01-10 20:25:54'),
-(10, '202211168@gordoncollege.edu.ph', '$2y$10$1ss0rKPKdqmc38SYmZ.EVuGTq4Jqd4Xc21jO9h9FrVbW4uHxSan56', '2025-01-10 20:28:14');
+(10, '202211168@gordoncollege.edu.ph', '$2y$10$1ss0rKPKdqmc38SYmZ.EVuGTq4Jqd4Xc21jO9h9FrVbW4uHxSan56', '2025-01-10 20:28:14'),
+(11, '202210272@gordoncollege.edu.ph', '$2y$10$Dr8RxHlkPzkTTONs22YCretUuchkEdqnqZsNTtglGPXMd.Mbacblq', '2025-01-21 17:57:23');
 
 -- --------------------------------------------------------
 
@@ -192,12 +170,9 @@ CREATE TABLE `user_profiles` (
 --
 
 INSERT INTO `user_profiles` (`id`, `user_id`, `name`, `department`, `year_level`, `id_number`, `profile_image`, `profile_image_path`) VALUES
-(1, 5, 'Jayvee Mayor', 'CCS', 4, '202210768', NULL, 'uploads/5/profile_images/1736156219_677ba43b9418b.jpg'),
-(2, 7, 'Rodge Muni', 'CEAH', 3, '202210465', NULL, 'uploads/7/profile_images/1736530008_6781585855d2b.jpg'),
-(3, 8, 'Bryn Pido', 'CAHS', 2, '202210445', NULL, 'uploads/8/profile_images/1736530302_6781597e9c884.jpg'),
-(4, 9, 'Gio', 'CHTM-Tourism', 3, '202211183', NULL, NULL),
-(5, 10, 'John Adrian Fontelera', 'CHTM-Hospitality', 3, '202211168', NULL, NULL),
-(6, 6, 'Al Jhon Dupal', 'CBA', 4, '202011035', NULL, 'uploads/6/profile_images/1736542274_67818842c9acc.jpg');
+(7, 5, 'Jayvee Mayor', 'CCS', 3, '202210768', NULL, 'uploads/5/profile_images/1737481163_678fdbcb76f54.jpg'),
+(8, 6, 'Al Jhon ', 'CHTM-Hospitality', 3, '202011035', NULL, 'uploads/6/profile_images/1737482103_678fdf775075b.jpg'),
+(9, 11, 'Jeremy Marron', 'CAHS', 3, '202210272', NULL, 'uploads/11/profile_images/1737482360_678fe07881bb4.jpg');
 
 -- --------------------------------------------------------
 
@@ -224,10 +199,7 @@ CREATE TABLE `vaccination_records` (
 --
 
 INSERT INTO `vaccination_records` (`record_id`, `user_id`, `first_dose_type`, `first_dose_date`, `second_dose_type`, `second_dose_date`, `booster_type`, `booster_date`, `document_path`, `status`, `uploaded_at`) VALUES
-(4, 5, 'asdasd', '2025-01-11', 'asdasd', '2025-01-11', 'dasdasd', '2025-01-11', 'uploads/5/vaccination_records/1736529301_67815595ea644_Yatiiiii.png', 'Submitted', '2025-01-10 17:15:01'),
-(5, 7, 'ASDASD', '2025-01-11', 'ASDASD', '2025-01-11', 'DASDSD', '2025-01-11', 'uploads/7/vaccination_records/1736530070_678158963af36_462585581_2583501862040436_1476240237619797417_n.jpg', 'Submitted', '2025-01-10 17:27:50'),
-(6, 8, 'sdfdsf', '2025-01-11', 'sdfds', '2025-01-11', 'fsdfs', '2025-01-11', 'uploads/8/vaccination_records/1736538584_678179d8de800_Yatiiiii.png', 'Submitted', '2025-01-10 19:49:44'),
-(7, 10, 'fsadfdsf', '2025-01-11', 'fasdfsdf', '2025-01-11', 'asdfsdf', '2025-01-18', 'uploads/10/vaccination_records/1736542074_6781877a9b195_a393e55cd98cb900.png', 'Submitted', '2025-01-10 20:47:54');
+(8, 11, 'Fizzer', '2025-01-22', 'Fizzer', '2025-01-22', 'Fizzer', '2025-01-22', 'uploads/11/vaccination_records/1737482495_678fe0ff61ad6_testdocument.png', 'Submitted', '2025-01-21 18:01:35');
 
 --
 -- Indexes for dumped tables
@@ -292,7 +264,7 @@ ALTER TABLE `vaccination_records`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `clinicstaff`
@@ -304,31 +276,31 @@ ALTER TABLE `clinicstaff`
 -- AUTO_INCREMENT for table `medical_documents`
 --
 ALTER TABLE `medical_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
 --
 ALTER TABLE `time_slots`
-  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `user_profiles`
 --
 ALTER TABLE `user_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `vaccination_records`
 --
 ALTER TABLE `vaccination_records`
-  MODIFY `record_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `record_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables

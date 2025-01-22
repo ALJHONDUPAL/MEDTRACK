@@ -195,7 +195,6 @@ public function getVaccinationRecords($userId) {
 //CLINIC SIDE  medical details component
 public function getStudentProfiles($department = null, $year = null) {
     try {
-        // Base SQL query
         $sql = "
             SELECT 
                 up.user_id,
@@ -203,30 +202,33 @@ public function getStudentProfiles($department = null, $year = null) {
                 up.department,
                 up.year_level AS yearLevel,
                 up.id_number AS idNumber,
-                up.profile_image_path AS profileImage
+                up.profile_image_path
             FROM user_profiles up
             WHERE 1=1
         ";
 
-        // Array to hold parameters
-        $params = [];
-
-        // Add filtering conditions dynamically
+        // Add department filter if provided
         if (!empty($department)) {
             $sql .= " AND up.department = :department";
             $params[':department'] = $department;
         }
 
+        // Add year filter if provided
         if (!empty($year)) {
             $sql .= " AND up.year_level = :year";
             $params[':year'] = $year;
         }
 
-        // Prepare and execute the query
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-
+        $stmt->execute($params ?? []);
         $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Format the profile image paths
+        foreach ($profiles as &$profile) {
+            if (!empty($profile['profile_image_path'])) {
+                $profile['profile_image_path'] = 'uploads/' . $profile['user_id'] . '/profile_images/' . basename($profile['profile_image_path']);
+            }
+        }
 
         return [
             "status" => "success",

@@ -23,7 +23,16 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 //for get the all images
   getFullImageUrl(profile_image_path: string): string {
-    return `${this.imgBaseUrl}${profile_image_path}`;
+    if (!profile_image_path) {
+      return 'assets/default-profile.png';
+    }
+    // Check if the path already contains the full URL
+    if (profile_image_path.startsWith('http')) {
+      return profile_image_path;
+    }
+    // Remove any leading slashes to prevent double slashes
+    const cleanPath = profile_image_path.replace(/^\/+/, '');
+    return `${this.imgBaseUrl}${cleanPath}`;
   }
   //for get the all images
   getMedUrl(file_path: string): string {

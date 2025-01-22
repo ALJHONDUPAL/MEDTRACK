@@ -16,7 +16,9 @@
         </div>
         <div class="student-slot">
           Student Slot
-          <span class="slot-count">{{studentSlot}}</span>
+          <span class="slot-count" [class.full]="currentBookings >= totalSlots">
+            {{currentBookings}}/{{totalSlots}}
+          </span>
         </div>
       </div>
     </div>

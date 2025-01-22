@@ -37,12 +37,18 @@ export class AuthService {
 
     return this.http.post<any>(`${this.baseUrl}/userLogin`, data).pipe(
       map(response => {
-        if (response.status?.remarks === 'success' && response.payload) {
-          this.saveToken(response.payload.token);
-          if (response.payload.user?.user_id) {
-            localStorage.setItem('user_id', response.payload.user.user_id.toString());
+        // Handle both response formats
+        if ((response.status?.remarks === 'success' || response.status === 'success') && 
+            (response.payload?.token || response.token)) {
+          // Store the token, handling both response structures
+          const token = response.payload?.token || response.token;
+          this.saveToken(token);
+          
+          // Store user ID if available
+          const userId = response.payload?.user?.user_id || response.user?.user_id;
+          if (userId) {
+            localStorage.setItem('user_id', userId.toString());
           }
-          this.router.navigate(['/home']);
         }
         return response;
       }),
@@ -76,6 +82,6 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem('authToken');
   }
 }

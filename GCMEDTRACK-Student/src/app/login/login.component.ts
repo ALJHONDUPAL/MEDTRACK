@@ -32,8 +32,12 @@ export class LoginComponent {
       this.authService.login(this.domain_account, this.password).subscribe({
         next: (response) => {
           console.log('Login response:', response);
-          if (response.status?.remarks === 'success') {
-            this.router.navigate(['/home']);
+          if (response.status?.remarks === 'success' || response.status === 'success') {
+            if (response.payload?.token || response.token) {
+              this.router.navigate(['/home']);
+            } else {
+              alert('Login successful but no token received');
+            }
           } else {
             alert(response.message || 'Login failed');
           }

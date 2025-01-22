@@ -32,10 +32,16 @@
   }
   
   .slot-count {
-    background: #f5f5f5;
+    background-color: #e8f5e9;
+    color: #2e7d32;
     padding: 4px 8px;
     border-radius: 4px;
-    margin-left: 8px;
+    font-weight: bold;
+  }
+  
+  .slot-count.full {
+    background-color: #ffebee;
+    color: #c62828;
   }
   
   .appointments-table {
@@ -147,4 +153,10 @@
     padding: 4px 8px;
     border-radius: 4px;
     border: 1px solid #ccc;
+  }
+  
+  .student-slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
