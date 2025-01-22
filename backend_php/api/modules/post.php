@@ -15,7 +15,9 @@ class Post extends GlobalMethods {
 
  //////////////////////////////////////////////STUDENT SIDE/////////////////////////////////////////////////////////////////////////
     public function registerUser($data) {
-        if (!isset($data->domain_account) || !isset($data->password)) {
+        if (!isset($data->domain_account) || !isset($data->password) || 
+            !isset($data->first_name) || !isset($data->last_name) || 
+            !isset($data->id_number)) {
             return $this->sendPayload(null, "error", "Missing required fields", 400);
         }
 
@@ -27,6 +29,9 @@ class Post extends GlobalMethods {
         }
         
         try {
+            $this->pdo->beginTransaction();
+
+            // Check if user already exists
             $checkSql = "SELECT domain_account FROM users WHERE domain_account = :domain_account";
             $checkStmt = $this->pdo->prepare($checkSql);
             $checkStmt->execute(['domain_account' => $domain_account]);
@@ -34,15 +39,33 @@ class Post extends GlobalMethods {
                 return $this->sendPayload(null, "error", "User already exists", 400);
             }
 
-            $sql = "INSERT INTO users (domain_account, password) VALUES (:domain_account, :password)";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
+            // Insert into users table
+            $userSql = "INSERT INTO users (domain_account, password) VALUES (:domain_account, :password)";
+            $userStmt = $this->pdo->prepare($userSql);
+            $userStmt->execute([
                 'domain_account' => $domain_account,
                 'password' => $password
             ]);
 
+            $userId = $this->pdo->lastInsertId();
+
+            // Insert into user_profiles table
+            $profileSql = "INSERT INTO user_profiles (user_id, first_name, last_name, middle_name, id_number) 
+                          VALUES (:user_id, :first_name, :last_name, :middle_name, :id_number)";
+            $profileStmt = $this->pdo->prepare($profileSql);
+            $profileStmt->execute([
+                'user_id' => $userId,
+                'first_name' => $data->first_name,
+                'last_name' => $data->last_name,
+                'middle_name' => $data->middle_name ?? null,
+                'id_number' => $data->id_number
+            ]);
+
+            $this->pdo->commit();
             return $this->sendPayload(null, "success", "User registered successfully", 201);
+
         } catch (\PDOException $e) {
+            $this->pdo->rollBack();
             return $this->sendPayload(null, "error", $e->getMessage(), 500);
         }
     }
@@ -97,109 +120,101 @@ class Post extends GlobalMethods {
     }
 
     public function updateUserProfile() {
-        header('Content-Type: application/json');
-        
-        $requiredFields = ['user_id', 'department', 'year_level', 'id_number'];
-        foreach ($requiredFields as $field) {
-            if (!isset($_POST[$field])) {
+        try {
+            if (!isset($_POST['user_id'])) {
                 return [
                     "status" => "error",
-                    "message" => "Missing required field: $field"
+                    "message" => "User ID is required"
                 ];
             }
-        }
-    
-        $userId = $_POST['user_id'];
 
-        // First verify that the user exists
-        try {
-            $stmt = $this->pdo->prepare("SELECT user_id FROM users WHERE user_id = ?");
-            $stmt->execute([$userId]);
-            if (!$stmt->fetch()) {
-                return [
-                    "status" => "error",
-                    "message" => "User not found"
-                ];
-            }
-        } catch (Exception $e) {
-            return [
-                "status" => "error",
-                "message" => "Database error: " . $e->getMessage()
-            ];
-        }
-    
-        $name = $_POST['name'];
-        $department = $_POST['department'];
-        $yearLevel = $_POST['year_level'];
-        $idNumber = $_POST['id_number'];
-    
-        // Handle profile image upload if present
-        $profileImagePath = null;
-        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-            $profileImagePath = $this->handleFileUpload(
-                $_FILES['profile_image'],
-                $userId,
-                'profile_images'
-            );
-            
-            if (!$profileImagePath) {
-                return [
-                    "status" => "error",
-                    "message" => "Failed to upload profile image"
-                ];
-            }
-        }
-    
-        try {
-            $this->pdo->beginTransaction();
-    
-            // Check if profile exists
-            $stmt = $this->pdo->prepare("SELECT id FROM user_profiles WHERE user_id = ?");
-            $stmt->execute([$userId]);
-            $profile = $stmt->fetch();
-    
-            if ($profile) {
-                // Update existing profile
-                $sql = "UPDATE user_profiles SET 
-                        name = ?,
-                        department = ?, 
-                        year_level = ?, 
-                        id_number = ?
-                        " . ($profileImagePath ? ", profile_image_path = ?" : "") . "
-                        WHERE user_id = ?";
-    
-                $params = [$name, $department, $yearLevel, $idNumber];
-                if ($profileImagePath) {
-                    $params[] = $profileImagePath;
+            $userId = $_POST['user_id'];
+            $updateFields = [];
+            $params = ['user_id' => $userId];
+
+            // Handle profile image upload if present
+            if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = 'uploads/' . $userId . '/profile_images/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
                 }
-                $params[] = $userId;
-            } else {
-                // Insert new profile
-                $sql = "INSERT INTO user_profiles (user_id, name, department, year_level, id_number" . 
-                       ($profileImagePath ? ", profile_image_path" : "") . ") 
-                       VALUES (?, ?, ?, ?, ?" . ($profileImagePath ? ", ?" : "") . ")";
-    
-                $params = [$userId, $name, $department, $yearLevel, $idNumber];
-                if ($profileImagePath) {
-                    $params[] = $profileImagePath;
+
+                $fileExtension = pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION);
+                $fileName = time() . '_' . uniqid() . '.' . $fileExtension;
+                $filePath = $uploadDir . $fileName;
+
+                if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $filePath)) {
+                    $updateFields[] = "profile_image_path = :profile_image_path";
+                    $params['profile_image_path'] = $filePath;
                 }
             }
-    
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
-            $this->pdo->commit();
-    
-            return [
-                'status' => 'success',
-                'message' => 'Profile updated successfully',
-                'data' => ['profile_image_path' => $profileImagePath]
-            ];
-    
-        } catch (Exception $e) {
-            $this->pdo->rollBack();
+
+            // Handle other profile fields
+            $fields = ['department', 'program', 'year_level', 'contact_number'];
+            foreach ($fields as $field) {
+                if (isset($_POST[$field])) {
+                    $updateFields[] = "$field = :$field";
+                    if ($field === 'year_level') {
+                        $params[$field] = intval($_POST[$field]);
+                    } else {
+                        $params[$field] = $_POST[$field] === '' ? null : $_POST[$field];
+                    }
+                }
+            }
+
+            if (empty($updateFields)) {
+                return [
+                    "status" => "error",
+                    "message" => "No fields to update"
+                ];
+            }
+
+            try {
+                $this->pdo->beginTransaction();
+
+                // Check if profile exists
+                $checkSql = "SELECT * FROM user_profiles WHERE user_id = :user_id";
+                $checkStmt = $this->pdo->prepare($checkSql);
+                $checkStmt->execute(['user_id' => $userId]);
+                $existingProfile = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($existingProfile) {
+                    $sql = "UPDATE user_profiles SET " . implode(", ", $updateFields) . " WHERE user_id = :user_id";
+                } else {
+                    $fields = array_keys($params);
+                    $sql = "INSERT INTO user_profiles (" . implode(", ", $fields) . ") 
+                            VALUES (:" . implode(", :", $fields) . ")";
+                }
+
+                $stmt = $this->pdo->prepare($sql);
+                $result = $stmt->execute($params);
+
+                if (!$result) {
+                    throw new \Exception("Failed to update profile");
+                }
+
+                $selectSql = "SELECT * FROM user_profiles WHERE user_id = :user_id";
+                $selectStmt = $this->pdo->prepare($selectSql);
+                $selectStmt->execute(['user_id' => $userId]);
+                $updatedProfile = $selectStmt->fetch(PDO::FETCH_ASSOC);
+
+                $this->pdo->commit();
+
+                return [
+                    "status" => "success",
+                    "message" => "Profile updated successfully",
+                    "data" => $updatedProfile
+                ];
+
+            } catch (\Exception $e) {
+                $this->pdo->rollBack();
+                throw $e;
+            }
+
+        } catch (\Exception $e) {
             return [
                 "status" => "error",
-                "message" => "Database error: " . $e->getMessage()
+                "message" => $e->getMessage()
             ];
         }
     }

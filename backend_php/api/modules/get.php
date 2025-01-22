@@ -109,86 +109,71 @@ public function getUserFullNameByUsername($username) {
     }
 }
 
-public function getUserProfile($userId) {
+public function getUserProfile($user_id) {
     try {
-        $stmt = $this->pdo->prepare("
-            SELECT 
-                up.name,
-                up.department,
-                up.year_level as yearLevel,
-                up.id_number as idNumber,
-                up.profile_image_path
-            FROM user_profiles up
-            WHERE up.user_id = ?
-        ");
-        
-        $stmt->execute([$userId]);
+        $sql = "SELECT up.*, u.domain_account 
+                FROM user_profiles up 
+                JOIN users u ON u.user_id = up.user_id 
+                WHERE up.user_id = :user_id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['user_id' => $user_id]);
         $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
         if ($profile) {
-            // Construct the correct path for profile image
-            if ($profile['profile_image_path']) {
-                $profile['profile_image_path'] = 'uploads/' . $userId . '/profile_images/' . basename($profile['profile_image_path']);
+            return $this->sendPayload($profile, "success", "User profile fetched successfully", 200);
+        } else {
+            // If no profile exists, get basic user info and return empty profile
+            $userSql = "SELECT user_id, domain_account FROM users WHERE user_id = :user_id";
+            $userStmt = $this->pdo->prepare($userSql);
+            $userStmt->execute(['user_id' => $user_id]);
+            $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                $emptyProfile = [
+                    'user_id' => $user['user_id'],
+                    'domain_account' => $user['domain_account'],
+                    'first_name' => '',
+                    'last_name' => '',
+                    'middle_name' => '',
+                    'id_number' => '',
+                    'department' => '',
+                    'program' => '',
+                    'year_level' => '',
+                    'profile_image_path' => null
+                ];
+                return $this->sendPayload($emptyProfile, "success", "Empty profile created", 200);
             }
-            
-            return [
-                "status" => "success",
-                "data" => $profile
-            ];
-        } else {
-            return [
-                "status" => "error",
-                "message" => "Profile not found"
-            ];
+            return $this->sendPayload(null, "error", "User not found", 404);
         }
-    } catch (PDOException $e) {
-        return [
-            "status" => "error",
-            "message" => "Database error: " . $e->getMessage()
-        ];
+    } catch (\PDOException $e) {
+        return $this->sendPayload(null, "error", $e->getMessage(), 500);
     }
 }
 
-public function getMedicalDocuments($userId) {
+public function getMedicalDocuments($user_id) {
     try {
-        $stmt = $this->pdo->prepare("SELECT * FROM medical_documents WHERE user_id = ? ORDER BY uploaded_at DESC");
-        $stmt->execute([$userId]);
+        $sql = "SELECT * FROM medical_documents WHERE user_id = :user_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['user_id' => $user_id]);
         $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return [
-            "status" => "success",
-            "data" => $documents
-        ];
-    } catch (Exception $e) {
-        return [
-            "status" => "error",
-            "message" => "Database error: " . $e->getMessage()
-        ];
+        
+        return $this->sendPayload($documents, "success", "Medical documents retrieved successfully", 200);
+    } catch (\PDOException $e) {
+        return $this->sendPayload(null, "error", $e->getMessage(), 500);
     }
 }
 
-public function getVaccinationRecords($userId) {
+public function getVaccinationRecords($user_id) {
     try {
-        $stmt = $this->pdo->prepare("SELECT * FROM vaccination_records WHERE user_id = ?");
-        $stmt->execute([$userId]);
+        $sql = "SELECT * FROM vaccination_records WHERE user_id = :user_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['user_id' => $user_id]);
         $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if ($records) {
-            return [
-                "status" => "success",
-                "data" => $records
-            ];
-        } else {
-            return [
-                "status" => "error",
-                "message" => "No vaccination records found"
-            ];
-        }
-    } catch (Exception $e) {
-        return [
-            "status" => "error",
-            "message" => "Database error: " . $e->getMessage()
-        ];
+        
+        return $this->sendPayload($records, "success", "Vaccination records retrieved successfully", 200);
+    } catch (\PDOException $e) {
+        return $this->sendPayload(null, "error", $e->getMessage(), 500);
     }
 }
 

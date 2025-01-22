@@ -17,19 +17,50 @@
       <img src="assets/HEART.png" alt="heart" class="heart">
     </div>
     <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
-    <form (ngSubmit)="onSubmit()">
+    
+    <!-- Registration Form -->
+    <form (ngSubmit)="onSubmit()" *ngIf="!isLoginMode">
       <div class="form-group">
         <input type="text" 
-               [attr.placeholder]="isLoginMode ? 'Domain Account (Email)' : 'Enter Domain Account (Email)'" 
-               [(ngModel)]="domain_account" 
-               name="domainAccount">
+               placeholder="First Name" 
+               [(ngModel)]="registrationData.first_name" 
+               name="firstName"
+               required>
+      </div>
+      <div class="form-group">
+        <input type="text" 
+               placeholder="Last Name" 
+               [(ngModel)]="registrationData.last_name" 
+               name="lastName"
+               required>
+      </div>
+      <div class="form-group">
+        <input type="text" 
+               placeholder="Middle Name" 
+               [(ngModel)]="registrationData.middle_name" 
+               name="middleName">
+      </div>
+      <div class="form-group">
+        <input type="text" 
+               placeholder="Student ID Number" 
+               [(ngModel)]="registrationData.id_number" 
+               name="idNumber"
+               required>
+      </div>
+      <div class="form-group">
+        <input type="text" 
+               placeholder="Domain Account (Email)" 
+               [(ngModel)]="registrationData.domain_account" 
+               name="domainAccount"
+               required>
       </div>
       <div class="form-group">
         <div class="password-container">
           <input [type]="showPassword ? 'text' : 'password'" 
-                 [attr.placeholder]="isLoginMode ? 'Password' : 'Enter Password'" 
-                 [(ngModel)]="password" 
-                 name="password">
+                 placeholder="Password" 
+                 [(ngModel)]="registrationData.password" 
+                 name="password"
+                 required>
           <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
             <img [src]="showPassword ? 'assets/Unhide.png' : 'assets/Hide.png'" 
                  [alt]="showPassword ? 'Hide password' : 'Show password'" 
@@ -37,8 +68,35 @@
           </button>
         </div>
       </div>
-      <button type="submit">{{ isLoginMode ? 'Sign In' : 'Register' }}</button>
+      <button type="submit">Register</button>
     </form>
+
+    <!-- Login Form -->
+    <form (ngSubmit)="onSubmit()" *ngIf="isLoginMode">
+      <div class="form-group">
+        <input type="text" 
+               placeholder="Domain Account (Email)" 
+               [(ngModel)]="registrationData.domain_account" 
+               name="domainAccount"
+               required>
+      </div>
+      <div class="form-group">
+        <div class="password-container">
+          <input [type]="showPassword ? 'text' : 'password'" 
+                 placeholder="Password" 
+                 [(ngModel)]="registrationData.password" 
+                 name="password"
+                 required>
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            <img [src]="showPassword ? 'assets/Unhide.png' : 'assets/Hide.png'" 
+                 [alt]="showPassword ? 'Hide password' : 'Show password'" 
+                 class="visibility-icon">
+          </button>
+        </div>
+      </div>
+      <button type="submit">Sign In</button>
+    </form>
+
     <p>{{ isLoginMode ? "Don't have an account?" : "Already have an account?" }} 
         <a href="#" (click)="toggleMode($event)">{{ isLoginMode ? 'Sign up' : 'Sign in' }}</a>
     </p>

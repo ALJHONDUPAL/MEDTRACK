@@ -15,21 +15,27 @@ import { FormsModule } from '@angular/forms';
 export class LoginComponent {
   isLoginMode: boolean = true;
   showRegister = false;
-  domain_account: string = '';
-  password: string = '';
   errorMessage: string = '';
   showPassword: boolean = false;
+  registrationData = {
+    first_name: '',
+    last_name: '',
+    middle_name: '',
+    id_number: '',
+    domain_account: '',
+    password: ''
+  };
 
   constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit() {
-    if (!this.domain_account || !this.password) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
     if (this.isLoginMode) {
-      this.authService.login(this.domain_account, this.password).subscribe({
+      if (!this.registrationData.domain_account || !this.registrationData.password) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      this.authService.login(this.registrationData.domain_account, this.registrationData.password).subscribe({
         next: (response) => {
           console.log('Login response:', response);
           if (response.status?.remarks === 'success' || response.status === 'success') {
@@ -49,42 +55,37 @@ export class LoginComponent {
         }
       });
     } else {
-      // Registration
-      if (!this.isValidEmail(this.domain_account)) {
+      // Registration validation
+      if (!this.registrationData.first_name || !this.registrationData.last_name || 
+          !this.registrationData.id_number || !this.registrationData.domain_account || 
+          !this.registrationData.password) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      if (!this.isValidEmail(this.registrationData.domain_account)) {
         alert('Please enter a valid Gordon College email');
         return;
       }
 
-      this.authService.register(this.domain_account, this.password).subscribe({
+      this.authService.register(this.registrationData).subscribe({
         next: (response) => {
           if (response.status === 'success') {
             alert('Registration successful! Please login.');
             this.isLoginMode = true;
-            // Keep the credentials for easier login
-            const savedEmail = this.domain_account;
-            const savedPassword = this.password;
+            const savedEmail = this.registrationData.domain_account;
+            const savedPassword = this.registrationData.password;
             this.resetForm();
-            this.domain_account = savedEmail;
-            this.password = savedPassword;
+            this.registrationData.domain_account = savedEmail;
+            this.registrationData.password = savedPassword;
           } else {
             alert(response.message || 'Registration failed');
           }
         },
         error: (error) => {
           console.error('Registration error:', error);
-          if (error.status === 201) {
-            alert('Registration successful! Please login.');
-            this.isLoginMode = true;
-            // Keep the credentials for easier login
-            const savedEmail = this.domain_account;
-            const savedPassword = this.password;
-            this.resetForm();
-            this.domain_account = savedEmail;
-            this.password = savedPassword;
-          } else {
-            const errorMessage = error.error?.message || 'Registration failed. Please try again.';
-            alert(errorMessage);
-          }
+          const errorMessage = error.error?.message || 'Registration failed. Please try again.';
+          alert(errorMessage);
         }
       });
     }
@@ -101,14 +102,15 @@ export class LoginComponent {
   }
 
   resetForm() {
-    this.domain_account = '';
-    this.password = '';
-
+    this.registrationData = {
+      first_name: '',
+      last_name: '',
+      middle_name: '',
+      id_number: '',
+      domain_account: '',
+      password: ''
+    };
   }
-  // logout() {
-  //   this.authService.userLogout();
-  //   this.router.navigate(['/login']);
-  // }
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

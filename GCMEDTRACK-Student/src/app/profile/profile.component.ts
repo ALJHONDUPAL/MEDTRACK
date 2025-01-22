@@ -40,11 +40,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   showModal: boolean = false;
   showErrors: boolean = false;
   profileData: any = {
-    name: '',
+    first_name: '',
+    last_name: '',
+    middle_name: '',
+    id_number: '',
     department: '',
-    yearLevel: '',
-    idNumber: '',
-    profileImage: 'assets/default-avatar.svg'
+    program: '',
+    year_level: '',
+    contact_number: '',
+    profile_image_path: 'assets/default-avatar.svg'
   };
   tempProfileImage: string | null = null;
 
@@ -176,6 +180,36 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentDate: Date = new Date();
   private dateTimer: any;
 
+  selectedProfileImage: File | null = null;
+
+  departmentPrograms: { [key: string]: string[] } = {
+    'CAHS': ['BSN', 'BSM'],
+    'CBA': [
+      'BSA',
+      'BSBA-Financial Management',
+      'BSBA-Human Resource Management',
+      'BSBA-Marketing Management',
+      'BSCA'
+    ],
+    'CCS': ['BSIT', 'BSCS', 'BSEMC'],
+    'CEAS': [
+      'BACOM',
+      'BECE',
+      'BCAE',
+      'BPED',
+      'BSED-English',
+      'BSED-Filipino',
+      'BSED-Mathematics',
+      'BSED-Social Studies',
+      'BSED-Sciences'
+    ],
+    'CHTM-Hospitality': ['BSHM'],
+    'CHTM-Tourism': ['BSTM']
+  };
+
+  // Add new properties
+  contactNumberError: boolean = false;
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
@@ -184,21 +218,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userId = this.authService.getUserId();
-    console.log('Initial userId:', this.userId);
-    
     if (!this.userId) {
       console.error('No user ID found');
       this.router.navigate(['/login']);
       return;
     }
     
-    this.loadProfileData();
-    this.loadVaccinationData();
-
-    // Update time every second
-    this.dateTimer = setInterval(() => {
-      this.currentDate = new Date();
-    }, 1000);
+    this.loadUserProfile();
+    this.startClock();
   }
 
   ngOnDestroy() {
@@ -207,23 +234,28 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadProfileData() {
-    if (!this.userId) return;
+  loadUserProfile() {
+    if (!this.userId) {
+      console.error('No user ID found');
+      this.router.navigate(['/login']);
+      return;
+    }
 
-    // Fetch user profile
     this.apiService.getUserProfile(this.userId).subscribe({
       next: (response: any) => {
-        if (response && response.status === 'success') {
-          // Set profile data
+        if (response.status === 'success') {
           this.profileData = {
             ...response.data,
-            profileImage: response.data.profile_image_path ? 
-              this.apiService.getFullImageUrl(response.data.profile_image_path) :
-              'assets/default-avatar.svg'
+            first_name: response.data.first_name || '',
+            last_name: response.data.last_name || '',
+            middle_name: response.data.middle_name || '',
+            id_number: response.data.id_number || '',
+            department: response.data.department || '',
+            program: response.data.program || '',
+            year_level: response.data.year_level || '',
+            contact_number: response.data.contact_number || '',
+            profile_image_path: response.data.profile_image_path || 'assets/default-avatar.svg'
           };
-          
-          // After loading profile, fetch medical documents
-          this.loadMedicalDocuments();
         }
       },
       error: (error) => {
@@ -232,107 +264,132 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
+  getFullName(): string {
+    if (!this.profileData) return '';
+    
+    const firstName = this.profileData.first_name || '';
+    const lastName = this.profileData.last_name || '';
+    const middleInitial = this.profileData.middle_name ? 
+      ` ${this.profileData.middle_name.charAt(0)}.` : '';
+    
+    return `${firstName}${middleInitial} ${lastName}`;
+  }
+
+  getYearLevelDisplay(year: string | number): string {
+    if (!year) return '';
+    
+    const yearNum = year.toString();
+    switch (yearNum) {
+      case '1': return '1st';
+      case '2': return '2nd';
+      case '3': return '3rd';
+      case '4': return '4th';
+      default: return '';
+    }
+  }
+
   loadMedicalDocuments(): void {
     if (!this.userId) return;
 
     this.apiService.getMedicalDocuments(this.userId).subscribe({
-        next: (response) => {
-            if (response.status === 'success' && response.data) {
-                response.data.forEach((doc: any) => {
-                    // Dynamically assign data based on document type
-                    switch (doc.document_type) {
-                        case 'bloodCount':
-                            this.bloodCountData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status,
-                                file_path: doc.file_path
-                            };
-                            this.bloodCountImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        case 'urinalysis':
-                            this.urinalysisData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status,
-                                file_path: doc.file_path
-                            };
-                            this.urinalysisImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        case 'chestXray':
-                            this.xrayData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status,
-                                file_path: doc.file_path
-                            };
-                            this.chestXrayImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        case 'antiHBS':
-                            this.antiHBSData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status || 'Submitted',
-                                file_path: doc.file_path
-                            };
-                            this.antiHBSImage = doc.file_path ? `${this.apiService.baseUrl}/${doc.file_path}` : null;
-                            break;
-                        case 'hepaBVaccine':
-                            this.hepaBVaccineData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status,
-                                file_path: doc.file_path
-                            };
-                            this.hepaBVaccineImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        case 'fluVaccine':
-                            this.fluVaccineData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status,
-                                file_path: doc.file_path
-                            };
-                            this.fluVaccineImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        case 'antiHAV':
-                            this.antiHAVData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status || 'Submitted',
-                                file_path: doc.file_path
-                            };
-                            this.antiHAVImage = doc.file_path ? `${this.apiService.baseUrl}/${doc.file_path}` : null;
-                            break;
-                        case 'fecalysis':
-                            this.fecalysisData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status,
-                                file_path: doc.file_path
-                            };
-                            this.fecalysisImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        case 'drugTest':
-                            this.drugTestData = {
-                                date: doc.date,
-                                location: doc.location,
-                                status: doc.status, 
-                                file_path: doc.file_path
-                            };
-                            this.drugTestImage = `${this.apiService.baseUrl}/${doc.file_path}`;
-                            break;
-                        default:
-                            console.warn(`Unknown document type: ${doc.document_type}`);
-                    }
-                });
+      next: (response) => {
+        if (response.status === 'success' && response.data) {
+          // Process each document
+          response.data.forEach((doc: any) => {
+            switch (doc.document_type) {
+              case 'Complete Blood Count':
+                this.bloodCountData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status,
+                  file_path: doc.file_path
+                };
+                this.bloodCountImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              case 'Urinalysis':
+                this.urinalysisData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status,
+                  file_path: doc.file_path
+                };
+                this.urinalysisImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              case 'Chest X-ray':
+                this.xrayData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status,
+                  file_path: doc.file_path
+                };
+                this.xrayImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              case 'antiHBS':
+                this.antiHBSData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status || 'Submitted',
+                  file_path: doc.file_path
+                };
+                this.antiHBSImage = doc.file_path ? this.apiService.getFullImageUrl(doc.file_path) : null;
+                break;
+              case 'hepaBVaccine':
+                this.hepaBVaccineData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status,
+                  file_path: doc.file_path
+                };
+                this.hepaBVaccineImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              case 'fluVaccine':
+                this.fluVaccineData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status,
+                  file_path: doc.file_path
+                };
+                this.fluVaccineImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              case 'antiHAV':
+                this.antiHAVData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status || 'Submitted',
+                  file_path: doc.file_path
+                };
+                this.antiHAVImage = doc.file_path ? this.apiService.getFullImageUrl(doc.file_path) : null;
+                break;
+              case 'fecalysis':
+                this.fecalysisData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status,
+                  file_path: doc.file_path
+                };
+                this.fecalysisImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              case 'drugTest':
+                this.drugTestData = {
+                  date: doc.date,
+                  location: doc.location,
+                  status: doc.status, 
+                  file_path: doc.file_path
+                };
+                this.drugTestImage = this.apiService.getFullImageUrl(doc.file_path);
+                break;
+              default:
+                console.warn(`Unknown document type: ${doc.document_type}`);
             }
-        },
-        error: (error) => {
-            console.error('Error loading medical documents:', error);
+          });
         }
+      },
+      error: (error) => {
+        console.error('Error loading medical documents:', error);
+      }
     });
-}
+  }
+
   loadVaccinationData() {
     if (!this.userId) {
         console.error('User ID is not available.');
@@ -594,64 +651,65 @@ getDocumentStatus(requirement: string): string {
   }
 }
 
-  saveProfile(formValue: any) {
-    this.showErrors = true;
-    
-    const userId = this.authService.getUserId();
-    if (!userId) {
-      console.error('No user ID available');
-      alert('Error: User ID not found. Please try logging in again.');
-      this.router.navigate(['/login']);
+  saveProfile(formData: any) {
+    if (!this.userId) {
+      console.error('No user ID found');
       return;
     }
 
-    console.log('Current userId:', userId); // Debug log
-    
-    // Create FormData object
-    const formData = new FormData();
-    formData.append('user_id', userId);
-    formData.append('name', formValue.name);
-    formData.append('department', formValue.department);
-    formData.append('year_level', formValue.yearLevel);
-    formData.append('id_number', formValue.idNumber);
+    // Reset error flags
+    this.departmentError = false;
+    this.yearLevelError = false;
+    this.contactNumberError = false;
 
-    // Debug log
-    for (const pair of formData.entries()) {
-      console.log('FormData:', pair[0], pair[1]);
+    // Validate required fields
+    if (!formData.department) {
+      this.departmentError = true;
+      alert('Please select a department');
+      return;
+    }
+    if (!formData.year_level && formData.year_level !== '0') {
+      this.yearLevelError = true;
+      alert('Please select a year level');
+      return;
     }
 
-    if (this.tempProfileImage) {
-      fetch(this.tempProfileImage)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
-          formData.append('profile_image', file);
-          this.sendUpdateRequest(formData);
-        });
-    } else {
-      this.sendUpdateRequest(formData);
+    // Validate phone number format
+    if (formData.contact_number && !formData.contact_number.match(/^09\d{9}$/)) {
+      this.contactNumberError = true;
+      alert('Please enter a valid phone number (e.g., 09511186442)');
+      return;
     }
-  }
 
-  private sendUpdateRequest(formData: FormData) {
-    this.apiService.updateUserProfile(formData).subscribe({
+    const updateData = new FormData();
+    updateData.append('user_id', this.userId);
+    updateData.append('department', formData.department);
+    updateData.append('program', formData.program || '');
+    updateData.append('year_level', formData.year_level.toString());
+    updateData.append('contact_number', formData.contact_number || '');
+
+    // Add the profile image if one was selected
+    if (this.selectedProfileImage) {
+      updateData.append('profile_image', this.selectedProfileImage);
+    }
+
+    this.apiService.updateUserProfile(updateData).subscribe({
       next: (response: any) => {
-        if (response.status === 'success') {
+        if (response && response.status === 'success') {
+          // Update local profile data
           this.profileData = {
             ...this.profileData,
-            name: formData.get('name'),
-            department: formData.get('department'),
-            yearLevel: formData.get('year_level'),
-            idNumber: formData.get('id_number'),
-            profileImage: response.data?.profile_image_path ? 
-              this.apiService.getFullImageUrl(response.data.profile_image_path) :
-              'assets/default-avatar.svg'
+            ...response.data
           };
-          
-          this.closeModal();
           alert('Profile updated successfully');
+          this.closeModal();
+          // Reset selected image
+          this.selectedProfileImage = null;
+          // Reload profile data
+          this.loadUserProfile();
         } else {
-          alert('Failed to update profile: ' + response.message);
+          console.error('Update failed:', response);
+          alert(response?.message || 'Failed to update profile');
         }
       },
       error: (error) => {
@@ -681,6 +739,8 @@ getDocumentStatus(requirement: string): string {
   closeModal() {
     this.showModal = false;
     this.showErrors = false;
+    this.tempProfileImage = null;
+    this.selectedProfileImage = null;
   }
 
   isProfileComplete(): boolean {
@@ -699,9 +759,26 @@ getDocumentStatus(requirement: string): string {
     alert('Please complete all profile information: Name, Department, Year Level, and ID Number');
   }
 
-  onProfileImageUpload(event: any) {
+  onProfileImageSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      // Check file size (e.g., limit to 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        alert('File size should not exceed 5MB');
+        return;
+      }
+
+      // Store the file for later upload
+      this.selectedProfileImage = file;
+
+      // Create a preview of the selected image
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.tempProfileImage = e.target.result;
@@ -828,36 +905,22 @@ getDocumentStatus(requirement: string): string {
         'Flu Vaccine Card'
       ];
 
-      // Add HBsAg screening only for first year CAHS students
-      if (this.profileData.yearLevel === '1') {
+      if (this.profileData.year_level === '1') {
         cahsRequirements.push('Hepatitis screening: HBsAg (Hepatitis B Surface Antigen)');
       }
 
-      // Add Drug Test for RLE requirements only for 2nd, 3rd, and 4th year CAHS students
-      if (['2', '3', '4'].includes(this.profileData.yearLevel)) {
+      if (['2', '3', '4'].includes(this.profileData.year_level)) {
         cahsRequirements.push('Drug Test for RLE requirements');
       }
 
       return cahsRequirements;
     }
 
-    if (this.profileData.department === 'CHTM-Hospitality') {
+    if (this.profileData.program === 'BSHM') {
       return [...baseRequirements, 'Anti HAV(Hepa A)', 'Fecalysis'];
     }
 
     return baseRequirements;
-  }
-
-  getYearSuffix(year: string): string {
-    if (!year) return '';
-    
-    switch(year) {
-      case '1': return 'st';
-      case '2': return 'nd';
-      case '3': return 'rd';
-      case '4': return 'th';
-      default: return '';
-    }
   }
 
   openHbsagModal(event: Event): void {
@@ -955,5 +1018,76 @@ getDocumentStatus(requirement: string): string {
       return this.apiService.getFullImageUrl(this.profileData.profile_image_path);
     }
     return 'assets/default-avatar.svg';
+  }
+
+  startClock() {
+    this.dateTimer = setInterval(() => {
+      this.currentDate = new Date();
+    }, 1000);
+  }
+
+  // Add method to get available programs based on selected department
+  getAvailablePrograms(): string[] {
+    return this.departmentPrograms[this.profileData.department] || [];
+  }
+
+  // Add method to handle department change
+  onDepartmentChange() {
+    // Reset program when department changes
+    this.profileData.program = '';
+  }
+
+  openUploadModal(documentType: string) {
+    switch(documentType) {
+      case 'Complete Blood Count':
+        this.openBloodCountModal(new Event('click'));
+        break;
+      case 'Urinalysis':
+        this.openUrinalysisModal(new Event('click'));
+        break;
+      case 'Chest X-ray':
+        this.openXrayModal(new Event('click'));
+        break;
+      // Add cases for other document types
+      default:
+        console.log(`Upload modal for ${documentType} not implemented`);
+    }
+  }
+
+  previewDocument(documentType: string) {
+    let documentImage = null;
+    switch(documentType) {
+      case 'Complete Blood Count':
+        documentImage = this.bloodCountImage;
+        break;
+      case 'Urinalysis':
+        documentImage = this.urinalysisImage;
+        break;
+      case 'Chest X-ray':
+        documentImage = this.xrayImage;
+        break;
+      // Add cases for other document types
+      default:
+        console.log(`Preview for ${documentType} not implemented`);
+        return;
+    }
+
+    if (documentImage) {
+      this.openImagePreview(documentImage);
+    }
+  }
+
+  hasUploadedDocument(documentType: string): boolean {
+    switch(documentType) {
+      case 'Complete Blood Count':
+        return !!this.bloodCountData?.file_path;
+      case 'Urinalysis':
+        return !!this.urinalysisData?.file_path;
+      case 'Chest X-ray':
+        return !!this.xrayData?.file_path;
+      // Add cases for other document types
+      default:
+        return false;
+    }
   }
 }

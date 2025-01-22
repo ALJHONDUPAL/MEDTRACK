@@ -13,16 +13,22 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   getUserProfile(userId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/getUserProfile`, {
-      params: { user_id: userId }
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.get(`${this.baseUrl}/getUserProfile?user_id=${userId}`);
   }
 
   updateUserProfile(formData: FormData): Observable<any> {
     return this.http.post(`${this.baseUrl}/updateUserProfile`, formData).pipe(
-      catchError(this.handleError)
+      map(response => {
+        if (response && (response as any).status === 'success') {
+          return response;
+        } else {
+          throw new Error((response as any)?.message || 'Failed to update profile');
+        }
+      }),
+      catchError(error => {
+        console.error('Error updating profile:', error);
+        return throwError(() => error?.message || 'Failed to update profile');
+      })
     );
   }
 

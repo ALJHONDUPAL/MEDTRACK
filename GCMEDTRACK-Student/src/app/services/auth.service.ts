@@ -4,6 +4,15 @@ import { Router } from '@angular/router';
 import { catchError, map } from 'rxjs/operators';
 import { of, Observable, throwError } from 'rxjs';
 
+interface RegistrationData {
+  first_name: string;
+  last_name: string;
+  middle_name: string;
+  id_number: string;
+  domain_account: string;
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -14,12 +23,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
 
   // Register user
-  register(domain_account: string, password: string): Observable<any> {
-    const data = {
-      domain_account: domain_account,
-      password: password
-    };
-    
+  register(data: RegistrationData): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/userRegister`, data).pipe(
       catchError(error => {
         console.error('Registration error:', error);

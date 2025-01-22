@@ -7,30 +7,47 @@
 
 <div class="profile-container">
   <div class="profile-header">
-      <div class="profile-image">
-          <img 
-              [src]="getProfileImageUrl()"
-              [alt]="profileData.name ? profileData.name + '\'s profile picture' : 'Default profile picture'"
-              (error)="handleImageError()"
-          >
-      </div>
-      <h2>{{profileData.name || 'Name not provided'}}</h2>
-      <p class="department">
-          {{profileData.department || 'Department not provided'}}
-          <span *ngIf="profileData.yearLevel">
-              - {{profileData.yearLevel}}{{getYearSuffix(profileData.yearLevel)}} year
-          </span>
-      </p>
-      <p class="id-number">
-          {{profileData.idNumber || 'ID number not provided'}}
-      </p>
-      <button 
-          class="edit-profile-btn" 
-          (click)="openModal()" 
-          aria-label="Edit profile details"
+    <div class="profile-image">
+      <img 
+        [src]="getProfileImageUrl()"
+        [alt]="getFullName() + '\'s profile picture'"
+        (error)="handleImageError()"
       >
-          <i class="fas fa-edit"></i> Edit profile
-      </button>
+    </div>
+
+    <!-- Add student info display -->
+    <div class="student-info">
+      <h2>{{ getFullName() }}</h2>
+      <div class="info-row">
+        <span class="info-label">Student ID:</span>
+        <span class="info-value">{{ profileData.id_number }}</span>
+      </div>
+      <div class="info-row" *ngIf="profileData.department || profileData.program">
+        <span class="info-label">Department:</span>
+        <span class="info-value">
+          {{ profileData.department || 'Not set' }}
+          <ng-container *ngIf="profileData.program">
+            - {{ profileData.program }}
+          </ng-container>
+        </span>
+      </div>
+      <div class="info-row" *ngIf="profileData.year_level">
+        <span class="info-label">Year Level:</span>
+        <span class="info-value">{{ getYearLevelDisplay(profileData.year_level) }} Year</span>
+      </div>
+      <div class="info-row" *ngIf="profileData.contact_number">
+        <span class="info-label">Contact Number:</span>
+        <span class="info-value">{{ profileData.contact_number }}</span>
+      </div>
+    </div>
+
+    <button 
+      class="edit-profile-btn" 
+      (click)="openModal()" 
+      aria-label="Edit profile details"
+    >
+      <i class="fas fa-edit"></i> Edit profile
+    </button>
   </div>
     
   <!-- Documents Table -->
@@ -40,6 +57,7 @@
               <tr>
                   <th>Medical Documents</th>
                   <th>Status</th>
+                  <th>Actions</th>
               </tr>   
           </thead>
           <tbody>
@@ -52,6 +70,16 @@
                     }">
                         {{getDocumentStatus(requirement)}}
                     </span>
+                </td>
+                <td class="action-buttons">
+                    <button class="upload-btn" (click)="openUploadModal(requirement)">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <button class="preview-btn" 
+                            (click)="previewDocument(requirement)"
+                            [disabled]="!hasUploadedDocument(requirement)">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
                 </td>
             </tr>
           </tbody>
@@ -194,7 +222,7 @@
       </div>
 
 <!-- Drug Test Document Section -->
-<div class="document-item" *ngIf="profileData.department === 'CAHS' && ['2', '3', '4'].includes(profileData.yearLevel)">
+<div class="document-item" *ngIf="profileData.department === 'CAHS' && ['2', '3', '4'].includes(profileData.year_level)">
     <div class="document-header">
         <span class="dropdown-icon" (click)="toggleSection('drugTest')">▼</span>
         <span>Drug Test for RLE requirements</span>
@@ -359,92 +387,103 @@
 
   <!-- Edit Profile Modal -->
   <div class="modal" *ngIf="showModal">
-      <div class="modal-content">
-          <h2>Edit Profile</h2>
-          <form #profileForm="ngForm" (ngSubmit)="saveProfile(profileForm.value)">
-              <div class="profile-image-upload">
-                  <img 
-                      [src]="tempProfileImage || getProfileImageUrl()" 
-                      alt="Profile Picture" 
-                      class="preview-image"
-                      (error)="handleImageError()"
-                  >
-                  <label class="upload-button">
-                      <span>Change Photo</span>
-                      <input type="file" 
-                             accept="image/*" 
-                             (change)="onProfileImageUpload($event)"
-                             class="file-input">
-                  </label>
-              </div>
+    <div class="modal-content">
+      <h2>Edit Profile</h2>
+      <form #profileForm="ngForm" (ngSubmit)="saveProfile(profileForm.value)">
+        <div class="profile-image-upload">
+          <img 
+            [src]="tempProfileImage || getProfileImageUrl()" 
+            alt="Profile Picture" 
+            class="preview-image"
+            (error)="handleImageError()"
+          >
+          <label class="upload-button">
+            <span>Change Photo</span>
+            <input 
+              type="file" 
+              accept="image/*" 
+              (change)="onProfileImageSelected($event)"
+              style="display: none;"
+            >
+          </label>
+        </div>
 
-              <div class="form-group">
-                  <label for="name">Name</label>
-                  <input type="text" id="name" name="name" [ngModel]="profileData.name" required>
-                  <span class="validation-error" *ngIf="showErrors && nameError">
-                      Please enter your name
-                  </span>
-              </div>
-              
-              <div class="form-group">
-                  <label for="department">Department</label>
-                  <select id="department" 
-                          name="department" 
-                          [ngModel]="profileData.department" 
-                          required
-                          class="department-select">
-                      <option value="" disabled>Select Department</option>
-                      <option value="CCS">CCS</option>
-                      <option value="CEAH">CEAH</option>
-                      <option value="CAHS">CAHS</option>
-                      <option value="CHTM-Tourism">CHTM-Tourism</option>
-                      <option value="CHTM-Hospitality">CHTM-Hospitality</option>
-                      <option value="CBA">CBA</option>
-                  </select>
-                  <span class="validation-error" *ngIf="showErrors && departmentError">
-                      Please select your department
-                  </span>
-              </div>
-              
-              <div class="form-group">
-                  <label for="yearLevel">Year Level</label>
-                  <select id="yearLevel" 
-                          name="yearLevel" 
-                          [ngModel]="profileData.yearLevel" 
-                          required
-                          class="year-select">
-                      <option value="" disabled>Select Year</option>
-                      <option value="1">1st Year</option>
-                      <option value="2">2nd Year</option>
-                      <option value="3">3rd Year</option>
-                      <option value="4">4th Year</option>
-                  </select>
-                  <span class="validation-error" *ngIf="showErrors && yearLevelError">
-                      Please select your year level
-                  </span>
-              </div>
-              
-              <div class="form-group">
-                  <label for="idNumber">ID Number</label>
-                  <input type="text" 
-                         id="idNumber" 
-                         name="idNumber" 
-                         [ngModel]="profileData.idNumber"
-                         (input)="onIdNumberInput($event)"
-                         pattern="[0-9]*"
-                         maxlength="10"
-                         required>
-                  <span class="validation-error" *ngIf="showErrors && idNumberError">
-                      {{idNumberErrorMessage}}
-                  </span>
-              </div>
-              
-              <div class="modal-buttons">
-                  <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
-                  <button type="submit" class="save-btn">Save Changes</button>
-              </div>
-          </form>
-      </div>
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select 
+            id="department" 
+            name="department" 
+            [(ngModel)]="profileData.department" 
+            (ngModelChange)="onDepartmentChange()"
+            required
+            [class.error]="departmentError"
+          >
+            <option value="">Select Department</option>
+            <option value="CAHS">CAHS</option>
+            <option value="CBA">CBA</option>
+            <option value="CCS">CCS</option>
+            <option value="CEAS">CEAS</option>
+            <option value="CHTM-Hospitality">CHTM-Hospitality</option>
+            <option value="CHTM-Tourism">CHTM-Tourism</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="program">Program</label>
+          <select 
+            id="program" 
+            name="program" 
+            [(ngModel)]="profileData.program" 
+            required
+            [disabled]="!profileData.department"
+          >
+            <option value="">Select Program</option>
+            <option *ngFor="let program of getAvailablePrograms()" [value]="program">
+              {{program}}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="yearLevel">Year Level</label>
+          <select 
+            id="yearLevel" 
+            name="year_level" 
+            [(ngModel)]="profileData.year_level" 
+            required
+            [class.error]="yearLevelError"
+          >
+            <option value="">Select Year Level</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="contactNumber">Contact Number</label>
+          <input 
+            type="text" 
+            id="contactNumber" 
+            name="contact_number" 
+            [(ngModel)]="profileData.contact_number" 
+            pattern="^09\d{9}$"
+            maxlength="11"
+            [class.error]="contactNumberError"
+            placeholder="09XXXXXXXXX"
+          >
+          <span class="validation-error" *ngIf="contactNumberError">
+            Please enter a valid phone number (e.g., 09511186442)
+          </span>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="save-btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Blood count modal -->

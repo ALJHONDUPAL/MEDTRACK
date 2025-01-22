@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 22, 2025 at 01:27 AM
+-- Generation Time: Jan 22, 2025 at 09:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -82,21 +82,6 @@ CREATE TABLE `medical_documents` (
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `medical_documents`
---
-
-INSERT INTO `medical_documents` (`document_id`, `user_id`, `document_type`, `file_path`, `date`, `location`, `status`, `uploaded_at`) VALUES
-(46, 5, 'bloodCount', 'uploads/5/medical_documents/bloodCount/1737481356_678fdc8c0cba3_testdocument.png', '2025-01-22', 'Subic', 'Submitted', '2025-01-21 17:42:36'),
-(47, 11, 'bloodCount', 'uploads/11/medical_documents/bloodCount/1737482425_678fe0b96ab3f_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:00:25'),
-(48, 11, 'urinalysis', 'uploads/11/medical_documents/urinalysis/1737482441_678fe0c946137_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:00:41'),
-(49, 11, 'antiHBS', 'uploads/11/medical_documents/antiHBS/1737482522_678fe11a7369a_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:02:02'),
-(50, 11, 'fluVaccine', 'uploads/11/medical_documents/fluVaccine/1737482560_678fe140ba6ae_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:02:40'),
-(51, 11, 'hepaBVaccine', 'uploads/11/medical_documents/hepaBVaccine/1737482590_678fe15e97d8a_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:03:10'),
-(52, 6, 'fecalysis', 'uploads/6/medical_documents/fecalysis/1737483048_678fe328367df_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:10:48'),
-(53, 6, 'antiHAV', 'uploads/6/medical_documents/antiHAV/1737483083_678fe34bc96d9_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:11:23'),
-(54, 11, 'chestXray', 'uploads/11/medical_documents/chestXray/1737484373_678fe855d2ade_testdocument.png', '2025-01-22', 'Olongapo', 'Submitted', '2025-01-21 18:32:53');
-
 -- --------------------------------------------------------
 
 --
@@ -113,14 +98,6 @@ CREATE TABLE `time_slots` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `time_slots`
---
-
-INSERT INTO `time_slots` (`slot_id`, `day_of_week`, `start_time`, `end_time`, `date`, `student_limit`, `created_at`, `updated_at`) VALUES
-(5, 'WEDNESDAY', '09:00 AM', '09:30 AM', '2025-01-23', 5, '2025-01-21 17:46:11', '2025-01-21 17:46:11'),
-(6, 'MONDAY', '09:00 AM', '09:30 AM', '2025-01-22', 2, '2025-01-21 18:30:13', '2025-01-21 18:30:13');
 
 -- --------------------------------------------------------
 
@@ -140,13 +117,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `domain_account`, `password`, `created_at`) VALUES
-(5, '202210768@gordoncollege.edu.ph', '$2y$10$zw141f6bPOvqt3qH9JlIbeqiFWCekjDOdvv9GcMbMmW3qr0iJYDX6', '2025-01-06 09:15:45'),
-(6, '202011035@gordoncollege.edu.ph', '$2y$10$qy1j88kHTEa4XrIMn56rXu.EjkcazjftAtW4FT5oBmiTxhh9ni9wu', '2025-01-07 18:30:29'),
-(7, '202210465@gordoncollege.edu.ph', '$2y$10$2dqKmJ3e/OPAco9TzeCWSOzV26N5rB3x9sNORmjRQkhK9Y7sBmguS', '2025-01-10 17:25:01'),
-(8, '202210445@gordoncollege.edu.ph', '$2y$10$/y75kFLswsF45HBcJtrpYeamsfoX7s1I7/wleUpKaaYcckzelMLZO', '2025-01-10 17:30:00'),
-(9, '202211183@gordoncollege.edu.ph', '$2y$10$xnqC769w9pr1EbteZZ/IKO/CFntv039bZR46ANIwtzzNichqyBDNS', '2025-01-10 20:25:54'),
-(10, '202211168@gordoncollege.edu.ph', '$2y$10$1ss0rKPKdqmc38SYmZ.EVuGTq4Jqd4Xc21jO9h9FrVbW4uHxSan56', '2025-01-10 20:28:14'),
-(11, '202210272@gordoncollege.edu.ph', '$2y$10$Dr8RxHlkPzkTTONs22YCretUuchkEdqnqZsNTtglGPXMd.Mbacblq', '2025-01-21 17:57:23');
+(18, '202210768@gordoncollege.edu.ph', '$2y$10$yoFAxo.H/38pwxY8fQMM.upvpqaJ.SCvVdAnH4PihSqjP2wLcbgeq', '2025-01-22 19:56:42');
 
 -- --------------------------------------------------------
 
@@ -157,8 +128,11 @@ INSERT INTO `users` (`user_id`, `domain_account`, `password`, `created_at`) VALU
 CREATE TABLE `user_profiles` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `middle_name` varchar(100) DEFAULT NULL,
   `department` varchar(255) NOT NULL,
+  `program` varchar(255) NOT NULL,
   `year_level` int(11) NOT NULL,
   `id_number` varchar(50) NOT NULL,
   `profile_image` varchar(255) DEFAULT NULL,
@@ -169,10 +143,8 @@ CREATE TABLE `user_profiles` (
 -- Dumping data for table `user_profiles`
 --
 
-INSERT INTO `user_profiles` (`id`, `user_id`, `name`, `department`, `year_level`, `id_number`, `profile_image`, `profile_image_path`) VALUES
-(7, 5, 'Jayvee Mayor', 'CCS', 3, '202210768', NULL, 'uploads/5/profile_images/1737481163_678fdbcb76f54.jpg'),
-(8, 6, 'Al Jhon ', 'CHTM-Hospitality', 3, '202011035', NULL, 'uploads/6/profile_images/1737482103_678fdf775075b.jpg'),
-(9, 11, 'Jeremy Marron', 'CAHS', 3, '202210272', NULL, 'uploads/11/profile_images/1737482360_678fe07881bb4.jpg');
+INSERT INTO `user_profiles` (`id`, `user_id`, `first_name`, `last_name`, `middle_name`, `department`, `program`, `year_level`, `id_number`, `profile_image`, `profile_image_path`) VALUES
+(15, 18, 'Jayvee', 'Mayor', 'Apiag', 'CCS', 'BSIT', 3, '202210768', NULL, 'uploads/18/profile_images/1737575851_67914dab3f2ca.png');
 
 -- --------------------------------------------------------
 
@@ -193,13 +165,6 @@ CREATE TABLE `vaccination_records` (
   `status` enum('Pending','Submitted','Approved','Rejected') NOT NULL DEFAULT 'Pending',
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `vaccination_records`
---
-
-INSERT INTO `vaccination_records` (`record_id`, `user_id`, `first_dose_type`, `first_dose_date`, `second_dose_type`, `second_dose_date`, `booster_type`, `booster_date`, `document_path`, `status`, `uploaded_at`) VALUES
-(8, 11, 'Fizzer', '2025-01-22', 'Fizzer', '2025-01-22', 'Fizzer', '2025-01-22', 'uploads/11/vaccination_records/1737482495_678fe0ff61ad6_testdocument.png', 'Submitted', '2025-01-21 18:01:35');
 
 --
 -- Indexes for dumped tables
@@ -276,7 +241,7 @@ ALTER TABLE `clinicstaff`
 -- AUTO_INCREMENT for table `medical_documents`
 --
 ALTER TABLE `medical_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
@@ -288,13 +253,13 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `user_profiles`
 --
 ALTER TABLE `user_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `vaccination_records`
