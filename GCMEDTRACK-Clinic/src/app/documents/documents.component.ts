@@ -4,6 +4,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 type DepartmentKeys = 'CSS' | 'CEAS' | 'CAHS' | 'CHTM-Tourism' | 'CHTM-Hospitality' | 'CBA';
 
@@ -19,8 +22,11 @@ interface MedicalDocument {
 
 interface Student {
   user_id: string;
-  name: string;
+  first_name: string;
+  middle_name: string;
+  last_name: string;
   department: DepartmentKeys;
+  program: string;
   yearLevel: string;
   idNumber: string;
   profile_image_path: string;
@@ -28,22 +34,50 @@ interface Student {
 
 @Component({
   selector: 'app-documents',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatTableModule, MatButtonModule, MatIconModule],
   templateUrl: './documents.component.html',
   styleUrl: './documents.component.css',
 })
 export class DocumentsComponent implements OnInit {
   searchQuery: string = '';
   selectedDepartment: string = ''; // Allow empty for "All Departments"
+  selectedProgram: string = ''; // Allow empty for "All Programs"
   selectedYear: string = ''; // Allow empty for "All Years"
   students: Student[] = [];
   filteredStudents: Student[] = [];
+  displayedColumns: string[] = ['profileImage', 'firstName', 'lastName', 'idNumber', 'department', 'program', 'yearLevel', 'action'];
+
+  selectedPrograms: { [key: string]: string[] } = {
+    'CAHS': ['BSN', 'BSM'],
+    'CBA': [
+      'BSA',
+      'BSBA-Financial Management',
+      'BSBA-Human Resource Management',
+      'BSBA-Marketing Management',
+      'BSCA',
+    ],
+    'CCS': ['BSIT', 'BSCS', 'BSEMC'],
+    'CEAS': [
+      'BACOM',
+      'BECE',
+      'BCAE',
+      'BPED',
+      'BSED-English',
+      'BSED-Filipino',
+      'BSED-Mathematics',
+      'BSED-Social Studies',
+      'BSED-Sciences',
+    ],
+    'CHTM-Hospitality': ['BSHM'],
+    'CHTM-Tourism': ['BSTM'],
+  };
 
   constructor(private apiService: ApiService, private sanitizer: DomSanitizer, private router: Router) {}
 
   ngOnInit(): void {
     this.fetchAllProfiles();
   }
+
   fetchAllProfiles(): void {
     this.apiService.getAllStudentProfiles(this.selectedDepartment, this.selectedYear).subscribe({
       next: (response) => {
@@ -63,6 +97,12 @@ export class DocumentsComponent implements OnInit {
   }
 
   onDepartmentChange(): void {
+    // Clear the selected program when department changes
+    this.selectedProgram = '';
+    this.applyFilters();
+  }
+
+  onProgramChange(): void {
     this.applyFilters();
   }
 
@@ -73,40 +113,42 @@ export class DocumentsComponent implements OnInit {
   onSearchChange(): void {
     this.applyFilters();
   }
+
   applyFilters(): void {
     console.log('Full students data before filtering:', this.students); // Raw data from API
     this.filteredStudents = this.students.filter(student => {
       const matchesDepartment = this.selectedDepartment ? student.department === this.selectedDepartment : true;
+      const matchesProgram = this.selectedProgram ? student.program === this.selectedProgram : true;
       const studentYear = parseInt(student.yearLevel);
       const matchesYear = this.selectedYear ? studentYear === parseInt(this.selectedYear) : true;
-      const matchesSearchQuery = this.searchQuery ? student.idNumber.includes(this.searchQuery) : true;
-  
-      return matchesDepartment && matchesYear && matchesSearchQuery;
+      const matchesSearchQuery = this.searchQuery ? (
+        student.idNumber.includes(this.searchQuery) ||
+        student.first_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        student.last_name.toLowerCase().includes(this.searchQuery.toLowerCase())
+      ) : true;
+
+      return matchesDepartment && matchesProgram && matchesYear && matchesSearchQuery;
     });
-  
+
     console.log('Filtered Students Data:', this.filteredStudents); // Ensure userId is preserved
   }
-  
+
   logStudentId(userId: string): void {
     console.log('Clicked student ID for medical details:', userId);
   }
-  
+
   goToMedicalDetails(user_id: string): void {
-    // console.log('goToMedicalDetails called with user_id:', user_id); // Log incoming `user_id`
-  
     if (!user_id) {
-      // console.error('Student ID is undefined or empty!', user_id); // Log undefined case
       return;
     }
-  
+
     this.router.navigate(['/medical-details', user_id]);
   }
-  
-  
+
   getImageUrl(profile_image_path: string, userId: string): string {
     console.log('Profile Image Path:', profile_image_path);
     console.log('User ID:', userId);
-    
+
     if (profile_image_path) {
       return this.apiService.getFullImageUrl(profile_image_path);
     }

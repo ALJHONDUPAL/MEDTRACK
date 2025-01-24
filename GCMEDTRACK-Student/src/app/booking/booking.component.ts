@@ -43,6 +43,16 @@ export class BookingComponent implements OnInit {
   selectedTimeSlot: TimeSlot | null = null;
   currentUserId: number = 0;
   purposes = ['Medical', 'Dental', 'Clinic'];
+
+
+  showSuccessModal: boolean = false;
+successMessage: string = '';
+
+showErrorModal: boolean = false;
+errorMessage: string = '';
+
+
+
   
   newAppointment: Appointment = {
     slotId: 0,
@@ -163,41 +173,50 @@ export class BookingComponent implements OnInit {
     this.newAppointment.slotId = slot.slotId;
   }
 
-  saveAppointment() {
+  saveAppointment(): void {
     if (!this.selectedTimeSlot || !this.newAppointment.purpose || !this.currentUserId) {
-      alert('Please fill in all required fields');
+      this.showErrorModal = true;
+      this.errorMessage = 'Please fill in all required fields.';
       return;
     }
-
+  
     if (this.selectedTimeSlot.currentBookings >= this.selectedTimeSlot.studentLimit) {
-      alert('This time slot is already full');
+      this.showErrorModal = true;
+      this.errorMessage = 'This time slot is already full.';
       return;
     }
-
+  
     const appointmentData = {
       slotId: this.selectedTimeSlot.slotId,
       userId: this.currentUserId,
       purpose: this.newAppointment.purpose,
       status: 'Pending'
     };
-
+  
     this.apiService.createAppointment(appointmentData).subscribe({
       next: (response: any) => {
         if (response && response.status === 'success') {
-          alert('Appointment created successfully!');
+          this.showSuccessModal = true;
+          this.successMessage = 'Appointment created successfully!';
           this.closeAppointmentModal();
           this.loadTimeSlots();
           this.loadAppointments();
         } else {
-          alert(response?.message || 'Failed to create appointment');
+          this.showErrorModal = true;
+          this.errorMessage = response?.message || 'Failed to create appointment.';
         }
       },
       error: (error) => {
         console.error('Error creating appointment:', error);
-        alert(typeof error === 'string' ? error : 'Failed to create appointment. Please try again.');
-      }
+        this.showErrorModal = true;
+        this.errorMessage =
+          typeof error === 'string'
+            ? error
+            : 'Failed to create appointment. Please try again.';
+      },
     });
   }
+  
 
   resetForm() {
     this.newAppointment = {

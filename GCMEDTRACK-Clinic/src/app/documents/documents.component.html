@@ -4,7 +4,11 @@
     <!-- Search controls outside container -->
     <div class="search-controls">
       <div class="dropdown">
-        <select [(ngModel)]="selectedDepartment" (ngModelChange)="onDepartmentChange()" class="form-select">
+        <select
+          [(ngModel)]="selectedDepartment"
+          (ngModelChange)="onDepartmentChange()"
+          class="form-select"
+        >
           <option value="">All Departments</option>
           <option value="CAHS">CAHS</option>
           <option value="CBA">CBA</option>
@@ -14,7 +18,23 @@
           <option value="CCS">CCS</option>
         </select>
       </div>
-      
+    
+      <div class="dropdown">
+        <select
+          [(ngModel)]="selectedProgram"
+          (ngModelChange)="onProgramChange()"
+          class="form-select"
+        >
+          <option value="">All Programs</option>
+          <option
+            *ngFor="let program of selectedPrograms[selectedDepartment] || []"
+            [value]="program"
+          >
+            {{ program }}
+          </option>
+        </select>
+      </div>
+    
       <div class="dropdown">
         <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
           <option value="">All Years</option>
@@ -24,12 +44,11 @@
           <option value="4">4th Year</option>
         </select>
       </div>
-      
     
       <div class="search-box">
         <input
           type="text"
-          placeholder="Student I.D"
+          placeholder="Student I.D or Student Name"
           [(ngModel)]="searchQuery"
           (input)="onSearchChange()"
         />
@@ -38,24 +57,74 @@
         </button>
       </div>
     </div>
-    <div class="container">
-    <!-- Display filtered results -->
-    <div *ngFor="let student of filteredStudents" class="student-card">
-      <div class="card">
-        <!-- <p><strong>Debug User ID:</strong> {{ student.user_id }}</p> -->
-        <img [src]="getImageUrl(student.profile_image_path, student.user_id)" class="profile-img" alt="Profile Image" />
-        <div class="info">
-          <h3>{{ student.name }}</h3>
-          <p><strong>Department:</strong> {{ student.department }}</p>
-          <p><strong>Year Level:</strong> {{ student.yearLevel }}</p>
-          <p><strong>ID Number:</strong> {{ student.idNumber }}</p>
-        </div>
-        <a class="view-medical" (click)="goToMedicalDetails(student.user_id)">
-          View Medical
-        </a>
-      </div>
+
+    
+
+
+    <div class="table-container mat-elevation-z8">
+      <table mat-table [dataSource]="filteredStudents" class="mat-table">
+    
+        <!-- Profile Image Column -->
+        <ng-container matColumnDef="profileImage">
+          <th mat-header-cell *matHeaderCellDef> Profile Image </th>
+          <td mat-cell *matCellDef="let student">
+            <img [src]="getImageUrl(student.profile_image_path, student.user_id)" class="profile-img" alt="Profile Image" />
+          </td>
+        </ng-container>
+    
+        <!-- First Name Column -->
+        <ng-container matColumnDef="firstName">
+          <th mat-header-cell *matHeaderCellDef> First Name </th>
+          <td mat-cell *matCellDef="let student"> {{ student.first_name }} </td>
+        </ng-container>
+    
+        <!-- Last Name Column -->
+        <ng-container matColumnDef="lastName">
+          <th mat-header-cell *matHeaderCellDef> Last Name </th>
+          <td mat-cell *matCellDef="let student"> {{ student.last_name }} </td>
+        </ng-container>
+    
+        <!-- ID Number Column -->
+        <ng-container matColumnDef="idNumber">
+          <th mat-header-cell *matHeaderCellDef> ID Number </th>
+          <td mat-cell *matCellDef="let student"> {{ student.idNumber }} </td>
+        </ng-container>
+    
+        <!-- Department Column -->
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef> Department </th>
+          <td mat-cell *matCellDef="let student"> {{ student.department }} </td>
+        </ng-container>
+    
+        <!-- Program Column -->
+        <ng-container matColumnDef="program">
+          <th mat-header-cell *matHeaderCellDef> Program </th>
+          <td mat-cell *matCellDef="let student"> {{ student.program }} </td>
+        </ng-container>
+    
+        <!-- Year Level Column -->
+        <ng-container matColumnDef="yearLevel">
+          <th mat-header-cell *matHeaderCellDef> Year Level </th>
+          <td mat-cell *matCellDef="let student"> {{ student.yearLevel }} </td>
+        </ng-container>
+    
+        <!-- Action Column -->
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef> Action </th>
+          <td mat-cell *matCellDef="let student">
+            <button mat-raised-button color="primary" (click)="goToMedicalDetails(student.user_id)">
+              View Medical
+            </button>
+          </td>
+        </ng-container>
+    
+        <!-- Header and Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
+      </table>
     </div>
-  </div>
+</div>
     
     
     

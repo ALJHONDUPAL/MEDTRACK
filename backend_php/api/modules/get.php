@@ -183,8 +183,11 @@ public function getStudentProfiles($department = null, $year = null) {
         $sql = "
             SELECT 
                 up.user_id,
-                up.name,
+                up.first_name,
+                up.last_name,
+                up.middle_name,
                 up.department,
+                up.program,
                 up.year_level AS yearLevel,
                 up.id_number AS idNumber,
                 up.profile_image_path

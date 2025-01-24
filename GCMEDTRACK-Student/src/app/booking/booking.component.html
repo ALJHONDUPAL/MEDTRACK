@@ -110,5 +110,21 @@
       </div>
     </form>
   </div>
+  <!-- Success Modal -->
+<div class="success-modal" *ngIf="showSuccessModal">
+  <div class="modal-content">
+    <p>{{ successMessage }}</p>
+    <button class="close-modal-btn" (click)="showSuccessModal = false">Close</button>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="error-modal" *ngIf="showErrorModal">
+  <div class="modal-content">
+    <p>{{ errorMessage }}</p>
+    <button class="close-modal-btn" (click)="showErrorModal = false">Close</button>
+  </div>
+</div>
+
 </div>
   

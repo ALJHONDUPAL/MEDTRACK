@@ -5,6 +5,7 @@ import { ApiService } from '../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { Observable, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -14,6 +15,12 @@ import { Router } from '@angular/router';
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
+
+  showSuccessModal: boolean = false;
+successMessage: string = '';
+showErrorModal: boolean = false;
+errorMessage: string = '';
+
 
   expandedSections: { [key: string]: boolean } = {
     bloodCount: false,
@@ -412,119 +419,315 @@ export class ProfileComponent implements OnInit, OnDestroy {
 }
 
 saveVaccination(formData: any): void {
-    if (!this.userId) return;
+  if (!this.userId) return;
 
-    const formDataObj = new FormData();
-    formDataObj.append('user_id', this.userId);
-    formDataObj.append('firstDoseType', formData.firstDoseType);
-    formDataObj.append('firstDoseDate', formData.firstDoseDate);
-    formDataObj.append('secondDoseType', formData.secondDoseType);
-    formDataObj.append('secondDoseDate', formData.secondDoseDate);
-    formDataObj.append('boosterType', formData.boosterType);
-    formDataObj.append('boosterDate', formData.boosterDate);
+  const formDataObj = new FormData();
+  formDataObj.append('user_id', this.userId);
+  formDataObj.append('firstDoseType', formData.firstDoseType || '');
+  formDataObj.append('firstDoseDate', formData.firstDoseDate || '');
+  formDataObj.append('secondDoseType', formData.secondDoseType || '');
+  formDataObj.append('secondDoseDate', formData.secondDoseDate || '');
+  formDataObj.append('boosterType', formData.boosterType || '');
+  formDataObj.append('boosterDate', formData.boosterDate || '');
 
-    // Check if a file is selected
-    if (this.selectedVaccinationFile) {
-        formDataObj.append('document', this.selectedVaccinationFile);
-    } else {
-        console.error('No document file selected for upload.');
-        alert('Please select a document to upload.');
-        return;
-    }
+  // Check if a file is selected
+  if (this.selectedVaccinationFile) {
+    formDataObj.append('document', this.selectedVaccinationFile);
+  } else {
+    this.showErrorModal = true;
+    this.errorMessage = 'Please select a document to upload.';
+    return;
+  }
 
-    this.apiService.uploadVaccinationRecord(formDataObj).subscribe({
-        next: (response: { status: string; message?: string }) => {
-            if (response.status === 'success') {
-                this.closeVaccinationModal();
-                this.loadVaccinationData();
-                alert('Vaccination record saved successfully.');
-            } else {
-                alert(response.message || 'Failed to save vaccination record');
-            }
-        },
-        error: (error: any) => {
-            console.error('Error saving vaccination record:', error);
-            alert('Failed to save vaccination record');
-        }
-    });
+  this.apiService.uploadVaccinationRecord(formDataObj).subscribe({
+    next: (response: { status: string; message?: string }) => {
+      if (response.status === 'success') {
+        this.closeVaccinationModal();
+        this.loadVaccinationData();
+        this.showSuccessModal = true;
+        this.successMessage = 'Vaccination record saved successfully.';
+      } else {
+        this.showErrorModal = true;
+        this.errorMessage = response.message || 'Failed to save vaccination record.';
+      }
+    },
+    error: (error: any) => {
+      console.error('Error saving vaccination record:', error);
+      this.showErrorModal = true;
+      this.errorMessage = 'An error occurred while saving the vaccination record.';
+    },
+  });
 }
 
-saveDocument(formData: any, documentType: string, selectedFile: File | null): void {
-    if (!this.userId) return;
 
-    if (!selectedFile) {
-        console.error('No file selected');
-        alert('Please select a document to upload');
-        return;
-    }
+saveDocument(formData: any, documentType: string, selectedFile: File | null): Observable<any> {
+  if (!this.userId) {
+      console.error('No user ID found');
+      return throwError(() => new Error('No user ID found'));
+  }
 
-    const documentFormData = new FormData();
-    documentFormData.append('user_id', this.userId);
-    documentFormData.append('document_type', documentType);
-    documentFormData.append('date', formData.date);
-    documentFormData.append('location', formData.location);
-    documentFormData.append('document', selectedFile);
+  if (!selectedFile) {
+      console.error('No file selected');
+      return throwError(() => new Error('No file selected. Please select a document to upload.'));
+  }
 
-    this.apiService.uploadMedicalDocument(documentFormData).subscribe({
-        next: (response) => {
-            if (response.status === 'success') {
-                console.log(`${documentType} saved successfully:`, response);
-                this.loadMedicalDocuments(); // Reload documents to get updated status
-                alert(`${documentType} document uploaded successfully`);
-            } else {
-                console.error(`Failed to save ${documentType}:`, response.message);
-                alert('Failed to upload document: ' + response.message);
-            }
-        },
-        error: (error) => {
-            console.error(`Error saving ${documentType}:`, error);
-            alert('Error uploading document. Please try again.');
-        }
-    });
+  const documentFormData = new FormData();
+  documentFormData.append('user_id', this.userId);
+  documentFormData.append('document_type', documentType);
+  documentFormData.append('date', formData.date);
+  documentFormData.append('location', formData.location);
+  documentFormData.append('document', selectedFile);
+
+  return this.apiService.uploadMedicalDocument(documentFormData);
 }
+
 
 saveBloodCount(formData: any): void {
-  this.saveDocument(formData, 'bloodCount', this.selectedBloodCountFile);
+  if (!formData.date || !formData.location || !this.selectedBloodCountFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'bloodCount', this.selectedBloodCountFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Blood Count information saved successfully!';
+        this.closeBloodCountModal();
+      } else {
+        console.error('Failed to save Blood Count information:', response.message);
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to save Blood Count information. Please try again.';
+      }
+    },
+    error: (error) => {
+      console.error('Error saving Blood Count information:', error);
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while saving the Blood Count information.';
+    },
+  });
 }
+
 
 saveUrinalysis(formData: any): void {
-  this.saveDocument(formData, 'urinalysis', this.selectedUrinalysisFile);
+  if (!formData.date || !formData.location || !this.selectedUrinalysisFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'urinalysis', this.selectedUrinalysisFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Urinalysis information saved successfully!';
+        this.closeUrinalysisModal();
+      } else {
+        console.error('Failed to save urinalysis information:', response.message);
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to save urinalysis information. Please try again.';
+      }
+    },
+    error: (error: any) => {
+      console.error('Error saving urinalysis information:', error);
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while saving the urinalysis information.';
+    },
+  });
 }
+
 
 saveXray(formData: any): void {
-  this.saveDocument(formData, 'chestXray', this.selectedChestXrayFile);
+  if (!formData.date || !formData.location || !this.selectedChestXrayFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'chestXray', this.selectedChestXrayFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Chest X-ray information saved successfully!';
+        this.closeXrayModal();
+      } else {
+        console.error('Failed to save chest X-ray information:', response.message);
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to save chest X-ray information. Please try again.';
+      }
+    },
+    error: (error) => {
+      console.error('Error saving chest X-ray information:', error);
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while saving the chest X-ray information.';
+    },
+  });
 }
+
 
 saveAntiHBS(formData: any): void {
-  this.saveDocument(formData, 'antiHBS', this.selectedAntiHBSFile);
-  if (this.selectedAntiHBSFile) {
-    this.antiHBSData.status = 'Submitted';
+  // Validation: Check for required fields and file selection
+  if (!formData.date || !formData.location || !this.selectedAntiHBSFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
   }
+
+  // Call saveDocument API
+  this.saveDocument(formData, 'antiHBS', this.selectedAntiHBSFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        // Update antiHBSData status and display success modal
+        this.antiHBSData.status = 'Submitted';
+        this.showSuccessModal = true;
+        this.successMessage = 'Anti-HBS document uploaded successfully!';
+        this.closeAntiHBSModal(); // Close form modal if implemented
+      } else {
+        console.error('Failed to save Anti-HBS document:', response.message);
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to upload Anti-HBS document. Please try again.';
+      }
+    },
+    error: (error) => {
+      console.error('Error saving Anti-HBS document:', error);
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while uploading the Anti-HBS document.';
+    },
+  });
 }
 
+
 saveHepaBVaccine(formData: any): void {
-  this.saveDocument(formData, 'hepaBVaccine', this.selectedHepaBVaccineFile);
+  if (!formData.date || !formData.location || !this.selectedHepaBVaccineFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'hepaBVaccine', this.selectedHepaBVaccineFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Hepa B vaccine document uploaded successfully!';
+        this.closeHepaBVaccineModal(); // Optional: Close modal if applicable
+      } else {
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to upload Hepa B vaccine document.';
+      }
+    },
+    error: () => {
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while uploading the Hepa B vaccine document.';
+    },
+  });
 }
 
 saveFluVaccine(formData: any): void {
-  this.saveDocument(formData, 'fluVaccine', this.selectedFluVaccineFile);
+  if (!formData.date || !formData.location || !this.selectedFluVaccineFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'fluVaccine', this.selectedFluVaccineFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Flu vaccine document uploaded successfully!';
+        this.closeFluVaccineModal(); // Optional: Close modal if applicable
+      } else {
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to upload flu vaccine document.';
+      }
+    },
+    error: () => {
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while uploading the flu vaccine document.';
+    },
+  });
 }
 
+
 saveAntiHAV(formData: any): void {
-  this.saveDocument(formData, 'antiHAV', this.selectedAntiHAVFile);
-  if (this.selectedAntiHAVFile) {
-    this.antiHAVData.status = 'Submitted';
+  if (!formData.date || !formData.location || !this.selectedAntiHAVFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
   }
+
+  this.saveDocument(formData, 'antiHAV', this.selectedAntiHAVFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.antiHAVData.status = 'Submitted';
+        this.showSuccessModal = true;
+        this.successMessage = 'Anti-HAV document uploaded successfully!';
+        this.closeAntiHAVModal(); // Optional: Close modal if applicable
+      } else {
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to upload Anti-HAV document.';
+      }
+    },
+    error: () => {
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while uploading the Anti-HAV document.';
+    },
+  });
 }
+
 
 // Save Fecalysis document
 saveFecalysis(formData: any): void {
-  this.saveDocument(formData, 'fecalysis', this.selectedFecalysisFile);
+  if (!formData.date || !formData.location || !this.selectedFecalysisFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'fecalysis', this.selectedFecalysisFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Fecalysis document uploaded successfully!';
+        this.closeFecalysisModal(); // Optional: Close modal if applicable
+      } else {
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to upload fecalysis document.';
+      }
+    },
+    error: () => {
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while uploading the fecalysis document.';
+    },
+  });
 }
 
+
 saveDrugTest(formData: any): void {
-  this.saveDocument(formData, 'drugTest', this.selectedDrugTestFile);
+  if (!formData.date || !formData.location || !this.selectedDrugTestFile) {
+    this.showSuccessModal = true;
+    this.successMessage = 'Please fill in all required fields and upload a document.';
+    return;
+  }
+
+  this.saveDocument(formData, 'drugTest', this.selectedDrugTestFile).subscribe({
+    next: (response: any) => {
+      if (response.status === 'success') {
+        this.showSuccessModal = true;
+        this.successMessage = 'Drug test document uploaded successfully!';
+        this.closeDrugTestModal(); // Optional: Close modal if applicable
+      } else {
+        this.showSuccessModal = true;
+        this.successMessage = 'Failed to upload drug test document.';
+      }
+    },
+    error: () => {
+      this.showSuccessModal = true;
+      this.successMessage = 'An error occurred while uploading the drug test document.';
+    },
+  });
 }
+
 
 onFileSelected(event: any, documentType: string): void {
     const file = event.target.files[0];
@@ -651,73 +854,80 @@ getDocumentStatus(requirement: string): string {
   }
 }
 
-  saveProfile(formData: any) {
-    if (!this.userId) {
-      console.error('No user ID found');
-      return;
-    }
-
-    // Reset error flags
-    this.departmentError = false;
-    this.yearLevelError = false;
-    this.contactNumberError = false;
-
-    // Validate required fields
-    if (!formData.department) {
-      this.departmentError = true;
-      alert('Please select a department');
-      return;
-    }
-    if (!formData.year_level && formData.year_level !== '0') {
-      this.yearLevelError = true;
-      alert('Please select a year level');
-      return;
-    }
-
-    // Validate phone number format
-    if (formData.contact_number && !formData.contact_number.match(/^09\d{9}$/)) {
-      this.contactNumberError = true;
-      alert('Please enter a valid phone number (e.g., 09511186442)');
-      return;
-    }
-
-    const updateData = new FormData();
-    updateData.append('user_id', this.userId);
-    updateData.append('department', formData.department);
-    updateData.append('program', formData.program || '');
-    updateData.append('year_level', formData.year_level.toString());
-    updateData.append('contact_number', formData.contact_number || '');
-
-    // Add the profile image if one was selected
-    if (this.selectedProfileImage) {
-      updateData.append('profile_image', this.selectedProfileImage);
-    }
-
-    this.apiService.updateUserProfile(updateData).subscribe({
-      next: (response: any) => {
-        if (response && response.status === 'success') {
-          // Update local profile data
-          this.profileData = {
-            ...this.profileData,
-            ...response.data
-          };
-          alert('Profile updated successfully');
-          this.closeModal();
-          // Reset selected image
-          this.selectedProfileImage = null;
-          // Reload profile data
-          this.loadUserProfile();
-        } else {
-          console.error('Update failed:', response);
-          alert(response?.message || 'Failed to update profile');
-        }
-      },
-      error: (error) => {
-        console.error('Error updating profile:', error);
-        alert('Failed to update profile. Please try again.');
-      }
-    });
+saveProfile(formData: any) {
+  if (!this.userId) {
+    console.error('No user ID found');
+    return;
   }
+
+  // Reset error flags
+  this.departmentError = false;
+  this.yearLevelError = false;
+  this.contactNumberError = false;
+
+  // Validate required fields
+  if (!formData.department) {
+    this.departmentError = true;
+    this.showErrorModal = true;
+    this.errorMessage = 'Please select a department';
+    return;
+  }
+  if (!formData.year_level && formData.year_level !== '0') {
+    this.yearLevelError = true;
+    this.showErrorModal = true;
+    this.errorMessage = 'Please select a year level';
+    return;
+  }
+
+  // Validate phone number format
+  if (formData.contact_number && !formData.contact_number.match(/^09\d{9}$/)) {
+    this.contactNumberError = true;
+    this.showErrorModal = true;
+    this.errorMessage = 'Please enter a valid phone number (e.g., 09511186442)';
+    return;
+  }
+
+  const updateData = new FormData();
+  updateData.append('user_id', this.userId);
+  updateData.append('department', formData.department);
+  updateData.append('program', formData.program || '');
+  updateData.append('year_level', formData.year_level.toString());
+  updateData.append('contact_number', formData.contact_number || '');
+
+  // Add the profile image if one was selected
+  if (this.selectedProfileImage) {
+    updateData.append('profile_image', this.selectedProfileImage);
+  }
+
+  this.apiService.updateUserProfile(updateData).subscribe({
+    next: (response: any) => {
+      if (response && response.status === 'success') {
+        // Update local profile data
+        this.profileData = {
+          ...this.profileData,
+          ...response.data
+        };
+        this.showSuccessModal = true;
+        this.successMessage = 'Profile updated successfully';
+        this.closeModal();
+        // Reset selected image
+        this.selectedProfileImage = null;
+        // Reload profile data
+        this.loadUserProfile();
+      } else {
+        console.error('Update failed:', response);
+        this.showErrorModal = true;
+        this.errorMessage = response?.message || 'Failed to update profile';
+      }
+    },
+    error: (error) => {
+      console.error('Error updating profile:', error);
+      this.showErrorModal = true;
+      this.errorMessage = 'Failed to update profile. Please try again.';
+    }
+  });
+}
+
 
   toggleSection(section: string): void {
     this.expandedSections[section] = !this.expandedSections[section];

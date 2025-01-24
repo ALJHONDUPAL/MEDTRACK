@@ -108,9 +108,10 @@ deleteClinic(staffId: number): Observable<any> {
 
 
 //get the all users profile
-  getAllStudentProfiles(department?: string, year?: string): Observable<any> {
+  getAllStudentProfiles(department?: string, program?: string, year?: string): Observable<any> {
     const params = new HttpParams()
       .set('department', department || '')
+      .set('program', program || '')
       .set('year', year || '');
   
     return this.http.get(`${this.baseUrl}/getAllStudentProfiles`, { params }).pipe(

@@ -88,7 +88,7 @@ h1 {
   color: #4CAF50;
 }
 
-/* Grid container */
+/* Grid container
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -97,7 +97,7 @@ h1 {
 }
 
 /* Card styling */
-.card {
+/* .card {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -162,7 +162,7 @@ h1 {
 }
 
 /* Status variations */
-.card.status-active {
+/* .card.status-active {
   border-left-color: #4CAF50;
 }
 
@@ -194,5 +194,22 @@ h1 {
 
 .card.status-special {
   border-left-color: #9C27B0;
-  background-color: #ffffe0;
-}
+  background-color: #ffffe0;  */
+
+
+  .table-container {
+    margin: 16px;
+    overflow-x: auto;
+  }
+  
+  .mat-table {
+    width: 100%;
+  }
+  
+  .profile-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  

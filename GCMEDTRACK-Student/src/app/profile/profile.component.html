@@ -486,6 +486,24 @@
     </div>
   </div>
 
+  <!-- Success Modal for edit profile-->
+<div class="modal" *ngIf="showSuccessModal">
+    <div class="modal-content">
+      <h2>Success</h2>
+      <p>{{ successMessage }}</p>
+      <button class="modal-close-btn" (click)="showSuccessModal = false">Close</button>
+    </div>
+  </div>
+  
+  <!-- Error Modal for edit profile -->
+  <div class="modal" *ngIf="showErrorModal">
+    <div class="modal-content">
+      <h2>Error</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="modal-close-btn" (click)="showErrorModal = false">Close</button>
+    </div>
+  </div>
+  
   <!-- Blood count modal -->
   <div class="modal" *ngIf="showBloodCountModal" id="bloodCountModal">
       <div class="modal-content">
