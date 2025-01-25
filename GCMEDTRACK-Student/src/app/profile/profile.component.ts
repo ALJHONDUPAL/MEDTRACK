@@ -210,8 +210,7 @@ errorMessage: string = '';
       'BSED-Social Studies',
       'BSED-Sciences'
     ],
-    'CHTM-Hospitality': ['BSHM'],
-    'CHTM-Tourism': ['BSTM']
+    'CHTM': ['BSHM','BSTM'],
   };
 
   // Add new properties
@@ -263,6 +262,8 @@ errorMessage: string = '';
             contact_number: response.data.contact_number || '',
             profile_image_path: response.data.profile_image_path || 'assets/default-avatar.svg'
           };
+          this.loadMedicalDocuments();
+          this.loadVaccinationData();
         }
       },
       error: (error) => {
@@ -299,105 +300,101 @@ errorMessage: string = '';
     if (!this.userId) return;
 
     this.apiService.getMedicalDocuments(this.userId).subscribe({
-      next: (response) => {
-        if (response.status === 'success' && response.data) {
-          // Process each document
-          response.data.forEach((doc: any) => {
-            switch (doc.document_type) {
-              case 'Complete Blood Count':
-                this.bloodCountData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status,
-                  file_path: doc.file_path
-                };
-                this.bloodCountImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              case 'Urinalysis':
-                this.urinalysisData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status,
-                  file_path: doc.file_path
-                };
-                this.urinalysisImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              case 'Chest X-ray':
-                this.xrayData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status,
-                  file_path: doc.file_path
-                };
-                this.xrayImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              case 'antiHBS':
-                this.antiHBSData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status || 'Submitted',
-                  file_path: doc.file_path
-                };
-                this.antiHBSImage = doc.file_path ? this.apiService.getFullImageUrl(doc.file_path) : null;
-                break;
-              case 'hepaBVaccine':
-                this.hepaBVaccineData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status,
-                  file_path: doc.file_path
-                };
-                this.hepaBVaccineImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              case 'fluVaccine':
-                this.fluVaccineData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status,
-                  file_path: doc.file_path
-                };
-                this.fluVaccineImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              case 'antiHAV':
-                this.antiHAVData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status || 'Submitted',
-                  file_path: doc.file_path
-                };
-                this.antiHAVImage = doc.file_path ? this.apiService.getFullImageUrl(doc.file_path) : null;
-                break;
-              case 'fecalysis':
-                this.fecalysisData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status,
-                  file_path: doc.file_path
-                };
-                this.fecalysisImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              case 'drugTest':
-                this.drugTestData = {
-                  date: doc.date,
-                  location: doc.location,
-                  status: doc.status, 
-                  file_path: doc.file_path
-                };
-                this.drugTestImage = this.apiService.getFullImageUrl(doc.file_path);
-                break;
-              default:
-                console.warn(`Unknown document type: ${doc.document_type}`);
-            }
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Error loading medical documents:', error);
-      }
-    });
-  }
+        next: (response) => {
+            if (response.status === 'success' && response.data) {
+                // Reset all document data first
+                this.resetDocumentData();
+                
+                // Process each document
+                response.data.forEach((doc: any) => {
+                    const documentData = {
+                        date: doc.date,
+                        location: doc.location,
+                        status: doc.status || 'Submitted',
+                        file_path: doc.file_path
+                    };
 
-  loadVaccinationData() {
+                    // Update the corresponding document data based on type
+                    switch (doc.document_type) {
+                        case 'bloodCount':
+                            this.bloodCountData = documentData;
+                            this.bloodCountImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'urinalysis':
+                            this.urinalysisData = documentData;
+                            this.urinalysisImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'chestXray':
+                            this.xrayData = documentData;
+                            this.xrayImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'antiHBS':
+                            this.antiHBSData = documentData;
+                            this.antiHBSImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'hepaBVaccine':
+                            this.hepaBVaccineData = documentData;
+                            this.hepaBVaccineImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'fluVaccine':
+                            this.fluVaccineData = documentData;
+                            this.fluVaccineImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'antiHAV':
+                            this.antiHAVData = documentData;
+                            this.antiHAVImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'fecalysis':
+                            this.fecalysisData = documentData;
+                            this.fecalysisImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        case 'drugTest':
+                            this.drugTestData = documentData;
+                            this.drugTestImage = this.getDocumentImageUrl(doc.file_path);
+                            break;
+                        default:
+                            console.warn(`Unknown document type: ${doc.document_type}`);
+                    }
+                });
+            }
+        },
+        error: (error) => {
+            console.error('Error loading medical documents:', error);
+        }
+    });
+}
+
+// Helper method to reset all document data
+private resetDocumentData(): void {
+    // Reset all document data objects
+    this.bloodCountData = {};
+    this.urinalysisData = {};
+    this.xrayData = {};
+    this.antiHBSData = {};
+    this.hepaBVaccineData = {};
+    this.fluVaccineData = {};
+    this.antiHAVData = {};
+    this.fecalysisData = {};
+    this.drugTestData = {};
+
+    // Reset all document images
+    this.bloodCountImage = null;
+    this.urinalysisImage = null;
+    this.xrayImage = null;
+    this.antiHBSImage = null;
+    this.hepaBVaccineImage = null;
+    this.fluVaccineImage = null;
+    this.antiHAVImage = null;
+    this.fecalysisImage = null;
+    this.drugTestImage = null;
+}
+
+// Helper method to get document image URL
+private getDocumentImageUrl(filePath: string | null): string | null {
+    return filePath ? this.apiService.getFullImageUrl(filePath) : null;
+}
+
+loadVaccinationData() {
     if (!this.userId) {
         console.error('User ID is not available.');
         return;
@@ -405,11 +402,23 @@ errorMessage: string = '';
 
     this.apiService.getVaccinationRecord(Number(this.userId)).subscribe({
         next: (response: { status: string; data?: any }) => {
-            if (response.status === 'success' && response.data) {
-                this.vaccinationData = response.data[0]; 
-                this.vaccinationImage = this.vaccinationData.document_path;
-            } else {
-                // console.error('No vaccination data found:', response);
+            if (response.status === 'success' && response.data && response.data.length > 0) {
+                // Store the complete vaccination data
+                this.vaccinationData = {
+                    firstDoseType: response.data[0].first_dose_type,
+                    firstDoseDate: response.data[0].first_dose_date,
+                    secondDoseType: response.data[0].second_dose_type,
+                    secondDoseDate: response.data[0].second_dose_date,
+                    boosterType: response.data[0].booster_type,
+                    boosterDate: response.data[0].booster_date,
+                    status: response.data[0].status || 'Submitted',
+                    document_path: response.data[0].document_path
+                };
+                
+                // Set the vaccination image if document_path exists
+                if (response.data[0].document_path) {
+                    this.vaccinationImage = this.apiService.getFullImageUrl(response.data[0].document_path);
+                }
             }
         },
         error: (error: any) => {
@@ -438,6 +447,13 @@ saveVaccination(formData: any): void {
     this.errorMessage = 'Please select a document to upload.';
     return;
   }
+    if (this.selectedVaccinationFile) {
+        formDataObj.append('document', this.selectedVaccinationFile);
+    } else {
+        console.error('No document file selected for upload.');
+        alert('Please select a document to upload.');
+        return;
+    }
 
   this.apiService.uploadVaccinationRecord(formDataObj).subscribe({
     next: (response: { status: string; message?: string }) => {
@@ -457,6 +473,29 @@ saveVaccination(formData: any): void {
       this.errorMessage = 'An error occurred while saving the vaccination record.';
     },
   });
+    this.apiService.uploadVaccinationRecord(formDataObj).subscribe({
+        next: (response: { status: string; message?: string; data?: any }) => {
+            if (response.status === 'success') {
+                // Update local data with the form values
+                this.vaccinationData = {
+                    ...formData,
+                    status: 'Submitted'
+                };
+                
+                // Reload vaccination data to get the complete updated data
+                this.loadVaccinationData();
+                
+                this.closeVaccinationModal();
+                alert('Vaccination record saved successfully.');
+            } else {
+                alert(response.message || 'Failed to save vaccination record');
+            }
+        },
+        error: (error: any) => {
+            console.error('Error saving vaccination record:', error);
+            alert('Failed to save vaccination record');
+        }
+    });
 }
 
 
@@ -828,30 +867,30 @@ onFileSelected(event: any, documentType: string): void {
 }
 
 getDocumentStatus(requirement: string): string {
-  switch(requirement) {
-      case 'Complete Blood Count':
-          return this.bloodCountData?.status || 'Need Submission';
-      case 'Urinalysis':
-          return this.urinalysisData?.status || 'Need Submission';
-      case 'Chest X-ray':
-          return this.xrayData?.status || 'Need Submission';
-      case 'COVID-19 Vaccination Card':
-          return this.vaccinationData?.status || 'Need Submission'; 
-      case 'Anti HBS (For students with previous Hepa B vaccine)':
-          return this.antiHBSData?.status || 'Need Submission';
-      case 'Hepatitis B Vaccine':
-          return this.hepaBVaccineData?.status || 'Need Submission';
-      case 'Flu Vaccine Card':
-          return this.fluVaccineData?.status || 'Need Submission';
-      case 'Anti HAV(Hepa A)':
-          return this.antiHAVData?.status || 'Need Submission';
-      case 'Fecalysis':
-          return this.fecalysisData?.status || 'Need Submission';
-      case 'Drug Test':
-          return this.drugTestData?.status || 'Need Submission';
-      default:
-          return 'Need Submission';
-  }
+    switch(requirement) {
+        case 'Complete Blood Count':
+            return this.bloodCountData?.status || 'Need Submission';
+        case 'Urinalysis':
+            return this.urinalysisData?.status || 'Need Submission';
+        case 'Chest X-ray':
+            return this.xrayData?.status || 'Need Submission';
+        case 'COVID-19 Vaccination Card':
+            return this.vaccinationData?.status || 'Need Submission';
+        case 'Anti HBS (For students with previous Hepa B vaccine)':
+            return this.antiHBSData?.status || 'Need Submission';
+        case 'Hepatitis B Vaccine':
+            return this.hepaBVaccineData?.status || 'Need Submission';
+        case 'Flu Vaccine Card':
+            return this.fluVaccineData?.status || 'Need Submission';
+        case 'Anti HAV(Hepa A)':
+            return this.antiHAVData?.status || 'Need Submission';
+        case 'Fecalysis':
+            return this.fecalysisData?.status || 'Need Submission';
+        case 'Drug Test for RLE requirements':
+            return this.drugTestData?.status || 'Need Submission';
+        default:
+            return 'Need Submission';
+    }
 }
 
 saveProfile(formData: any) {
@@ -1247,6 +1286,35 @@ saveProfile(formData: any) {
     this.profileData.program = '';
   }
 
+  // Update the hasUploadedDocument method to handle all document types
+  hasUploadedDocument(documentType: string): boolean {
+    switch(documentType) {
+      case 'Complete Blood Count':
+        return !!this.bloodCountData?.file_path;
+      case 'Urinalysis':
+        return !!this.urinalysisData?.file_path;
+      case 'Chest X-ray':
+        return !!this.xrayData?.file_path;
+      case 'COVID-19 Vaccination Card':
+        return !!this.vaccinationData?.document_path;
+      case 'Anti HBS (For students with previous Hepa B vaccine)':
+        return !!this.antiHBSData?.file_path;
+      case 'Hepatitis B Vaccine':
+        return !!this.hepaBVaccineData?.file_path;
+      case 'Flu Vaccine Card':
+        return !!this.fluVaccineData?.file_path;
+      case 'Anti HAV(Hepa A)':
+        return !!this.antiHAVData?.file_path;
+      case 'Fecalysis':
+        return !!this.fecalysisData?.file_path;
+      case 'Drug Test for RLE requirements':
+        return !!this.drugTestData?.file_path;
+      default:
+        return false;
+    }
+  }
+
+  // Update the openUploadModal method to handle all document types
   openUploadModal(documentType: string) {
     switch(documentType) {
       case 'Complete Blood Count':
@@ -1258,12 +1326,33 @@ saveProfile(formData: any) {
       case 'Chest X-ray':
         this.openXrayModal(new Event('click'));
         break;
-      // Add cases for other document types
+      case 'COVID-19 Vaccination Card':
+        this.openVaccinationModal(new Event('click'));
+        break;
+      case 'Anti HBS (For students with previous Hepa B vaccine)':
+        this.openAntiHBSModal(new Event('click'));
+        break;
+      case 'Hepatitis B Vaccine':
+        this.openHepaBVaccineModal(new Event('click'));
+        break;
+      case 'Flu Vaccine Card':
+        this.openFluVaccineModal(new Event('click'));
+        break;
+      case 'Anti HAV(Hepa A)':
+        this.openAntiHAVModal(new Event('click'));
+        break;
+      case 'Fecalysis':
+        this.openFecalysisModal(new Event('click'));
+        break;
+      case 'Drug Test for RLE requirements':
+        this.openDrugTestModal(new Event('click'));
+        break;
       default:
         console.log(`Upload modal for ${documentType} not implemented`);
     }
   }
 
+  // Update the previewDocument method to handle all document types
   previewDocument(documentType: string) {
     let documentImage = null;
     switch(documentType) {
@@ -1276,7 +1365,27 @@ saveProfile(formData: any) {
       case 'Chest X-ray':
         documentImage = this.xrayImage;
         break;
-      // Add cases for other document types
+      case 'COVID-19 Vaccination Card':
+        documentImage = this.vaccinationImage;
+        break;
+      case 'Anti HBS (For students with previous Hepa B vaccine)':
+        documentImage = this.antiHBSImage;
+        break;
+      case 'Hepatitis B Vaccine':
+        documentImage = this.hepaBVaccineImage;
+        break;
+      case 'Flu Vaccine Card':
+        documentImage = this.fluVaccineImage;
+        break;
+      case 'Anti HAV(Hepa A)':
+        documentImage = this.antiHAVImage;
+        break;
+      case 'Fecalysis':
+        documentImage = this.fecalysisImage;
+        break;
+      case 'Drug Test for RLE requirements':
+        documentImage = this.drugTestImage;
+        break;
       default:
         console.log(`Preview for ${documentType} not implemented`);
         return;
@@ -1284,20 +1393,8 @@ saveProfile(formData: any) {
 
     if (documentImage) {
       this.openImagePreview(documentImage);
-    }
-  }
-
-  hasUploadedDocument(documentType: string): boolean {
-    switch(documentType) {
-      case 'Complete Blood Count':
-        return !!this.bloodCountData?.file_path;
-      case 'Urinalysis':
-        return !!this.urinalysisData?.file_path;
-      case 'Chest X-ray':
-        return !!this.xrayData?.file_path;
-      // Add cases for other document types
-      default:
-        return false;
+    } else {
+      console.warn('No image available for preview');
     }
   }
 }

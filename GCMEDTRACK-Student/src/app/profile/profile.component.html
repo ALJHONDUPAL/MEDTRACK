@@ -86,305 +86,6 @@
       </table>
   </div>
 
-  <!-- Expandable Document Sections -->
-  <div class="document-sections">
-      <div class="document-item">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('bloodCount')">▼</span>
-              <span>Complete Blood Count</span>
-              <span class="plus-icon" (click)="openBloodCountModal($event)">+</span>
-          </div>
-          
-          <!-- Document Content Section -->
-          <div class="document-content" *ngIf="isExpanded('bloodCount')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{bloodCountData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{bloodCountData.location ?? 'Not provided'}}</div>
-              
-              <div class="document-upload-container">
-                  <div *ngIf="bloodCountImage" class="image-preview">
-                      <img [src]="bloodCountImage" class="document-image" (click)="openImagePreview(bloodCountImage)">
-                  </div>
-                  <label class="upload-button">
-                      <span>Change Document</span>
-                      <input type="file" accept="image/*" (change)="onFileSelected($event, 'bloodCount')">
-                    </label>
-                  <p class="upload-text">Supported formats: JPG, PNG, PDF</p>
-              </div>
-          </div>
-      </div>
-
-      <div class="document-item">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('urinalysis')">▼</span>
-              <span>Urinalysis</span>
-              <span class="plus-icon" (click)="openUrinalysisModal($event)">+</span>
-          </div>
-          
-          <div class="document-content" *ngIf="isExpanded('urinalysis')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{urinalysisData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{urinalysisData.location ?? 'Not provided'}}</div>
-              
-              <div class="document-image-container">
-                  <img [src]="urinalysisImage || 'assets/placeholder.png'" 
-                       alt="Urinalysis Document" 
-                       class="document-image"
-                       (click)="openImagePreview(urinalysisImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'urinalysis')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div>
-
-      <div class="document-item">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('vaccination')">▼</span>
-              <span>COVID-19 Vaccination Card</span>
-              <span class="plus-icon" (click)="openVaccinationModal($event)">+</span>
-          </div>
-          
-          <div class="document-content" *ngIf="isExpanded('vaccination')">
-              <h3 class="information-title">Information</h3>
-              <div class="vaccination-info">
-                  <div class="info-group">
-                      <div class="info-row">
-                          <span class="info-label">First Dose:</span>
-                          <span class="info-value">{{vaccinationData.first_dose_type ?? 'Not provided'}}</span>
-                      </div>
-                      <div class="info-row">
-                          <span class="info-label">First Dose Date:</span>
-                          <span class="info-value">{{vaccinationData.first_dose_date ?? 'Not provided'}}</span>
-                      </div>
-                  </div>
-
-                  <div class="info-group">
-                      <div class="info-row">
-                          <span class="info-label">Second Dose:</span>
-                          <span class="info-value">{{vaccinationData.second_dose_type ?? 'Not provided'}}</span>
-                      </div>
-                      <div class="info-row">
-                          <span class="info-label">Second Dose Date:</span>
-                          <span class="info-value">{{vaccinationData.second_dose_date ?? 'Not provided'}}</span>
-                      </div>
-                  </div>
-
-                  <div class="info-group">
-                      <div class="info-row">
-                          <span class="info-label">Booster Type:</span>
-                          <span class="info-value">{{vaccinationData.booster_type ?? 'Not provided'}}</span>
-                      </div>
-                      <div class="info-row">
-                          <span class="info-label">Booster Date:</span>
-                          <span class="info-value">{{vaccinationData.booster_date ?? 'Not provided'}}</span>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="document-image-container">
-                  <img [src]="vaccinationImage || 'assets/placeholder.png'" 
-                       alt="Vaccination Card" 
-                       class="document-image"
-                       (click)="openImagePreview(vaccinationImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'vaccination')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div>
-
-      <div class="document-item">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('xray')">▼</span>
-              <span>Chest X-ray</span>
-              <span class="plus-icon" (click)="openXrayModal($event)">+</span>
-          </div>
-          
-          <div class="document-content" *ngIf="isExpanded('xray')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{xrayData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{xrayData.location ?? 'Not provided'}}</div>
-              
-              <div class="document-image-container">
-                  <img [src]="xrayImage || 'assets/placeholder.png'" 
-                       alt="Chest X-ray Document" 
-                       class="document-image"
-                       (click)="openImagePreview(xrayImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'chestXray')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div>
-
-<!-- Drug Test Document Section -->
-<div class="document-item" *ngIf="profileData.department === 'CAHS' && ['2', '3', '4'].includes(profileData.year_level)">
-    <div class="document-header">
-        <span class="dropdown-icon" (click)="toggleSection('drugTest')">▼</span>
-        <span>Drug Test for RLE requirements</span>
-        <span class="plus-icon" (click)="openDrugTestModal($event)">+</span>
-    </div>
-    <div class="document-content" *ngIf="isExpanded('drugTest')">
-        <h3 class="information-title">Information</h3>
-        <div class="info-label">Date: {{drugTestData.date ?? 'Not provided'}}</div>
-        <div class="info-label">Location: {{drugTestData.location ?? 'Not provided'}}</div>
-        <div class="document-image-container">
-            <img [src]="drugTestImage || 'assets/placeholder.png'" 
-                 alt="Drug Test Document" 
-                 class="document-image"
-                 (click)="openImagePreview(drugTestImage || 'assets/placeholder.png')">
-            <input type="file" 
-                   (change)="onFileSelected($event, 'drugTest')" 
-                   accept="image/*" 
-                   class="image-upload">
-        </div>
-    </div>
-</div>
-
-      <!-- <div class="document-item" *ngIf="profileData.department === 'CAHS' && profileData.yearLevel === '1'">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('hbsag')">▼</span>
-              <span>Hepatitis screening: HBsAg (Hepatitis B Surface Antigen)</span>
-              <span class="plus-icon" (click)="openHbsagModal($event)">+</span>
-          </div>
-          <div class="document-content" *ngIf="isExpanded('hbsag')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{hbsagData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{hbsagData.location ?? 'Not provided'}}</div>
-              <div class="document-image-container">
-                  <img [src]="hbsagImage || 'assets/placeholder.png'" 
-                       alt="HBsAg Document" 
-                       class="document-image"
-                       (click)="openImagePreview(hbsagImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'hbsag')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div> -->
-
-      <div class="document-item" *ngIf="profileData.department === 'CAHS'">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('antiHBS')">▼</span>
-              <span>Anti HBS (For students with previous Hepa B vaccine)</span>
-              <span class="plus-icon" (click)="openAntiHBSModal($event)">+</span>
-          </div>
-          <div class="document-content" *ngIf="isExpanded('antiHBS')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{antiHBSData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{antiHBSData.location ?? 'Not provided'}}</div>
-              <div class="document-image-container">
-                  <img [src]="antiHBSImage || 'assets/placeholder.png'" 
-                       alt="Anti HBS Document" 
-                       class="document-image"
-                       (click)="openImagePreview(antiHBSImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'antiHBS')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div>
-
-      <div class="document-item" *ngIf="profileData.department === 'CAHS'">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('hepaB')">▼</span>
-              <span>Hepatitis B Vaccine</span>
-              <span class="plus-icon" (click)="openHepaBVaccineModal($event)">+</span>
-          </div>
-          <div class="document-content" *ngIf="isExpanded('hepaB')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{hepaBVaccineData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{hepaBVaccineData.location ?? 'Not provided'}}</div>
-              <div class="document-image-container">
-                  <img [src]="hepaBVaccineImage || 'assets/placeholder.png'" 
-                       alt="Hepatitis B Vaccine Document" 
-                       class="document-image"
-                       (click)="openImagePreview(hepaBVaccineImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'hepaB')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div>
-
-      <div class="document-item" *ngIf="profileData.department === 'CAHS'">
-          <div class="document-header">
-              <span class="dropdown-icon" (click)="toggleSection('fluVaccine')">▼</span>
-              <span>Flu Vaccine Card</span>
-              <span class="plus-icon" (click)="openFluVaccineModal($event)">+</span>
-          </div>
-          <div class="document-content" *ngIf="isExpanded('fluVaccine')">
-              <h3 class="information-title">Information</h3>
-              <div class="info-label">Date: {{fluVaccineData.date ?? 'Not provided'}}</div>
-              <div class="info-label">Location: {{fluVaccineData.location ?? 'Not provided'}}</div>
-              <div class="document-image-container">
-                  <img [src]="fluVaccineImage || 'assets/placeholder.png'" 
-                       alt="Flu Vaccine Card Document" 
-                       class="document-image"
-                       (click)="openImagePreview(fluVaccineImage || 'assets/placeholder.png')">
-                  <input type="file" 
-                         (change)="onFileSelected($event, 'fluVaccine')" 
-                         accept="image/*" 
-                         class="image-upload">
-              </div>
-          </div>
-      </div>
-
-<!-- Anti HAV Document Section -->
-<div class="document-item" *ngIf="profileData.department === 'CHTM-Hospitality'">
-    <div class="document-header">
-        <span class="dropdown-icon" (click)="toggleSection('antiHAV')">▼</span>
-        <span>Anti HAV (Hepatitis A)</span>
-        <span class="plus-icon" (click)="openAntiHAVModal($event)">+</span>
-    </div>
-    <div class="document-content" *ngIf="isExpanded('antiHAV')">
-        <h3 class="information-title">Information</h3>
-        <div class="info-label">Date: {{antiHAVData.date ?? 'Not provided'}}</div>
-        <div class="info-label">Location: {{antiHAVData.location ?? 'Not provided'}}</div>
-        <div class="document-image-container">
-            <img [src]="antiHAVImage || 'assets/placeholder.png'" 
-                 alt="Anti HAV Document" 
-                 class="document-image"
-                 (click)="openImagePreview(antiHAVImage || 'assets/placeholder.png')">
-            <input type="file" 
-                   (change)="onFileSelected($event, 'antiHAV')" 
-                   accept="image/*" 
-                   class="image-upload">
-        </div>
-    </div>
-</div>
-
-<!-- Fecalysis Document Section -->
-<div class="document-item" *ngIf="profileData.department === 'CHTM-Hospitality'">
-    <div class="document-header">
-        <span class="dropdown-icon" (click)="toggleSection('fecalysis')">▼</span>
-        <span>Fecalysis</span>
-        <span class="plus-icon" (click)="openFecalysisModal($event)">+</span>
-    </div>
-    <div class="document-content" *ngIf="isExpanded('fecalysis')">
-        <h3 class="information-title">Information</h3>
-        <div class="info-label">Date: {{fecalysisData.date ?? 'Not provided'}}</div>
-        <div class="info-label">Location: {{fecalysisData.location ?? 'Not provided'}}</div>
-        <div class="document-image-container">
-            <img [src]="fecalysisImage || 'assets/placeholder.png'" 
-                 alt="Fecalysis Document" 
-                 class="document-image"
-                 (click)="openImagePreview(fecalysisImage || 'assets/placeholder.png')">
-            <input type="file" 
-                   (change)="onFileSelected($event, 'fecalysis')" 
-                   accept="image/*" 
-                   class="image-upload">
-        </div>
-    </div>
-</div>
-
   <!-- Edit Profile Modal -->
   <div class="modal" *ngIf="showModal">
     <div class="modal-content">
@@ -423,8 +124,7 @@
             <option value="CBA">CBA</option>
             <option value="CCS">CCS</option>
             <option value="CEAS">CEAS</option>
-            <option value="CHTM-Hospitality">CHTM-Hospitality</option>
-            <option value="CHTM-Tourism">CHTM-Tourism</option>
+            <option value="CHTM">CHTM</option>
           </select>
         </div>
 
@@ -595,27 +295,51 @@
         <form #vaccinationForm="ngForm" (ngSubmit)="saveVaccination(vaccinationForm.value)">
             <div class="form-group">
                 <label for="firstDoseType">First Dose Vaccine Type</label>
-                <input type="text" id="firstDoseType" name="firstDoseType" [(ngModel)]="vaccinationData.firstDoseType" required>
+                <input type="text" 
+                       id="firstDoseType" 
+                       name="firstDoseType" 
+                       [(ngModel)]="vaccinationData.firstDoseType" 
+                       required>
             </div>
             <div class="form-group">
                 <label for="firstDoseDate">First Dose Date</label>
-                <input type="date" id="firstDoseDate" name="firstDoseDate" [(ngModel)]="vaccinationData.firstDoseDate" required>
+                <input type="date" 
+                       id="firstDoseDate" 
+                       name="firstDoseDate" 
+                       [(ngModel)]="vaccinationData.firstDoseDate" 
+                       required>
             </div>
             <div class="form-group">
                 <label for="secondDoseType">Second Dose Vaccine Type</label>
-                <input type="text" id="secondDoseType" name="secondDoseType" [(ngModel)]="vaccinationData.secondDoseType" required>
+                <input type="text" 
+                       id="secondDoseType" 
+                       name="secondDoseType" 
+                       [(ngModel)]="vaccinationData.secondDoseType" 
+                       required>
             </div>
             <div class="form-group">
                 <label for="secondDoseDate">Second Dose Date</label>
-                <input type="date" id="secondDoseDate" name="secondDoseDate" [(ngModel)]="vaccinationData.secondDoseDate" required>
+                <input type="date" 
+                       id="secondDoseDate" 
+                       name="secondDoseDate" 
+                       [(ngModel)]="vaccinationData.secondDoseDate" 
+                       required>
             </div>
             <div class="form-group">
                 <label for="boosterType">Booster Type</label>
-                <input type="text" id="boosterType" name="boosterType" [(ngModel)]="vaccinationData.boosterType" required>
+                <input type="text" 
+                       id="boosterType" 
+                       name="boosterType" 
+                       [(ngModel)]="vaccinationData.boosterType" 
+                       required>
             </div>
             <div class="form-group">
                 <label for="boosterDate">Booster Date</label>
-                <input type="date" id="boosterDate" name="boosterDate" [(ngModel)]="vaccinationData.boosterDate" required>
+                <input type="date" 
+                       id="boosterDate" 
+                       name="boosterDate" 
+                       [(ngModel)]="vaccinationData.boosterDate" 
+                       required>
             </div>
             <div class="form-group">
                 <label>Document Image</label>

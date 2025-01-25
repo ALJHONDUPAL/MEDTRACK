@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 22, 2025 at 09:16 PM
+-- Generation Time: Jan 22, 2025 at 11:50 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -82,6 +82,16 @@ CREATE TABLE `medical_documents` (
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `medical_documents`
+--
+
+INSERT INTO `medical_documents` (`document_id`, `user_id`, `document_type`, `file_path`, `date`, `location`, `status`, `uploaded_at`) VALUES
+(57, 18, 'bloodCount', 'uploads/18/medical_documents/bloodCount/1737582373_67916725baeb5_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 21:46:13'),
+(58, 18, 'chestXray', 'uploads/18/medical_documents/chestXray/1737584327_67916ec737268_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 22:18:47'),
+(59, 18, 'urinalysis', 'uploads/18/medical_documents/urinalysis/1737584463_67916f4f2057b_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 22:21:03'),
+(60, 19, 'bloodCount', 'uploads/19/medical_documents/bloodCount/1737585840_679174b0a6388_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 22:44:00');
+
 -- --------------------------------------------------------
 
 --
@@ -117,7 +127,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `domain_account`, `password`, `created_at`) VALUES
-(18, '202210768@gordoncollege.edu.ph', '$2y$10$yoFAxo.H/38pwxY8fQMM.upvpqaJ.SCvVdAnH4PihSqjP2wLcbgeq', '2025-01-22 19:56:42');
+(18, '202210768@gordoncollege.edu.ph', '$2y$10$yoFAxo.H/38pwxY8fQMM.upvpqaJ.SCvVdAnH4PihSqjP2wLcbgeq', '2025-01-22 19:56:42'),
+(19, '202210272@gordoncollege.edu.ph', '$2y$10$0z3wjOiHqkKXetA/uahwkOIKA3XcOVXfFL.OPJ4bIBz7N4LP.xw9.', '2025-01-22 22:29:47');
 
 -- --------------------------------------------------------
 
@@ -136,15 +147,17 @@ CREATE TABLE `user_profiles` (
   `year_level` int(11) NOT NULL,
   `id_number` varchar(50) NOT NULL,
   `profile_image` varchar(255) DEFAULT NULL,
-  `profile_image_path` varchar(255) DEFAULT NULL
+  `profile_image_path` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user_profiles`
 --
 
-INSERT INTO `user_profiles` (`id`, `user_id`, `first_name`, `last_name`, `middle_name`, `department`, `program`, `year_level`, `id_number`, `profile_image`, `profile_image_path`) VALUES
-(15, 18, 'Jayvee', 'Mayor', 'Apiag', 'CCS', 'BSIT', 3, '202210768', NULL, 'uploads/18/profile_images/1737575851_67914dab3f2ca.png');
+INSERT INTO `user_profiles` (`id`, `user_id`, `first_name`, `last_name`, `middle_name`, `department`, `program`, `year_level`, `id_number`, `profile_image`, `profile_image_path`, `contact_number`) VALUES
+(15, 18, 'Jayvee', 'Mayor', 'Apiag', 'CHTM-Hospitality', 'BSHM', 3, '202210768', NULL, 'uploads/18/profile_images/1737575851_67914dab3f2ca.png', '09511186443'),
+(16, 19, 'Jeremy', 'Marron', 'Alamat', 'CBA', 'BSA', 1, '202210272', NULL, 'uploads/19/profile_images/1737585075_679171b360b5d.png', '09511186442');
 
 -- --------------------------------------------------------
 
@@ -241,7 +254,7 @@ ALTER TABLE `clinicstaff`
 -- AUTO_INCREMENT for table `medical_documents`
 --
 ALTER TABLE `medical_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
@@ -253,13 +266,13 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `user_profiles`
 --
 ALTER TABLE `user_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `vaccination_records`
