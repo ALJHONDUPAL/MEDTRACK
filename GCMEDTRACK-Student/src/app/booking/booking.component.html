@@ -1,4 +1,10 @@
 <div class="booking-container">
+    <!-- Success Alert -->
+    <div class="alert-success" *ngIf="showSuccessAlert">
+      <div class="success-icon">✓</div>
+      <span class="success-message">Appointment created successfully!</span>
+    </div>
+
     <h2 class="booking-title">Medical Appointment</h2>
     
     <!-- Calendar Header -->
@@ -110,21 +116,16 @@
       </div>
     </form>
   </div>
-  <!-- Success Modal -->
-<div class="success-modal" *ngIf="showSuccessModal">
-  <div class="modal-content">
-    <p>{{ successMessage }}</p>
-    <button class="close-modal-btn" (click)="showSuccessModal = false">Close</button>
-  </div>
 </div>
 
 <!-- Error Modal -->
-<div class="error-modal" *ngIf="showErrorModal">
-  <div class="modal-content">
+<div class="modal error-modal" *ngIf="showErrorModal">
+  <div class="modal-content error-content">
+    <div class="error-icon">!</div>
+    <h2>Error</h2>
     <p>{{ errorMessage }}</p>
-    <button class="close-modal-btn" (click)="showErrorModal = false">Close</button>
+    <button class="ok-button" (click)="showErrorModal = false">OK</button>
   </div>
 </div>
 
-</div>
   

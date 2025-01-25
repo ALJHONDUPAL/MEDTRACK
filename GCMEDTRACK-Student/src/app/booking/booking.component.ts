@@ -44,15 +44,9 @@ export class BookingComponent implements OnInit {
   currentUserId: number = 0;
   purposes = ['Medical', 'Dental', 'Clinic'];
 
-
-  showSuccessModal: boolean = false;
-successMessage: string = '';
-
-showErrorModal: boolean = false;
-errorMessage: string = '';
-
-
-
+  showErrorModal: boolean = false;
+  errorMessage: string = '';
+  showSuccessAlert: boolean = false;
   
   newAppointment: Appointment = {
     slotId: 0,
@@ -196,9 +190,11 @@ errorMessage: string = '';
     this.apiService.createAppointment(appointmentData).subscribe({
       next: (response: any) => {
         if (response && response.status === 'success') {
-          this.showSuccessModal = true;
-          this.successMessage = 'Appointment created successfully!';
           this.closeAppointmentModal();
+          this.showSuccessAlert = true;
+          setTimeout(() => {
+            this.showSuccessAlert = false;
+          }, 3000); // Hide after 3 seconds
           this.loadTimeSlots();
           this.loadAppointments();
         } else {

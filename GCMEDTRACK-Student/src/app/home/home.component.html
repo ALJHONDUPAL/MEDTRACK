@@ -1,8 +1,67 @@
-<p>home works!</p>
-<h1>Dashboard</h1>
-<div class="card">
-    <div class="card-head">Lorem ipsum - dashboard</div>
-    <div class="card-body">
-        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quas ducimus soluta, quasi aut ipsa non, ullam enim rem repudiandae, vitae provident animi. Inventore rerum, voluptas optio dignissimos blanditiis modi illo!
+<div class="home-container">
+    <div class="welcome-section">
+        <h1>Welcome to MEDTRACK</h1>
+        <p>Gordon College Medical Appointments</p>
+    </div>
+
+    <div class="guidelines-section">
+        <h2>How to Book an Appointment</h2>
+        
+        <div class="guidelines-container">
+            <div class="guideline-card">
+                <div class="step-number">1</div>
+                <div class="image-container" (click)="openModal('step1')">
+                    <img src="assets/step1.png" alt="Navigate to Booking">
+                    <div class="image-overlay">
+                        <span>Click to view</span>
+                    </div>
+                </div>
+                <div class="step-description">
+                    <h3>Access Booking Page</h3>
+                    <p>Click on "Booking" in the side navigation menu to access the appointment booking page</p>
+                </div>
+            </div>
+
+            <div class="guideline-card">
+                <div class="step-number">2</div>
+                <div class="image-container" (click)="openModal('step2')">
+                    <img src="assets/step2.png" alt="Select Time Slot">
+                    <div class="image-overlay">
+                        <span>Click to view</span>
+                    </div>
+                </div>
+                <div class="step-description">
+                    <h3>Select Time Slot</h3>
+                    <p>Choose from available time slots and click "Set an Appointment" button</p>
+                </div>
+            </div>
+
+            <div class="guideline-card">
+                <div class="step-number">3</div>
+                <div class="image-container" (click)="openModal('step3')">
+                    <img src="assets/step3.png" alt="Set Purpose">
+                    <div class="image-overlay">
+                        <span>Click to view</span>
+                    </div>
+                </div>
+                <div class="step-description">
+                    <h3>Set Purpose & Save</h3>
+                    <p>Select your appointment purpose (Medical, Dental, or Clinic) and click "Save Appointment"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" *ngIf="selectedImage" (click)="closeModal()">
+        <div class="modal-content">
+            <span class="close-button" (click)="closeModal()">&times;</span>
+            <img [src]="'assets/' + selectedImage + '.png'" [alt]="selectedImage">
+        </div>
+    </div>
+
+    <!-- Success Alert -->
+    <div class="alert alert-success" *ngIf="showSuccessMessage">
+        Successfully logged in!
     </div>
 </div>

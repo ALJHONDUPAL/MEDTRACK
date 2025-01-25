@@ -31,7 +31,7 @@ export class LoginComponent {
   onSubmit() {
     if (this.isLoginMode) {
       if (!this.registrationData.domain_account || !this.registrationData.password) {
-        alert('Please fill in all required fields');
+        this.errorMessage = 'Please enter both email and password';
         return;
       }
 
@@ -42,16 +42,15 @@ export class LoginComponent {
             if (response.payload?.token || response.token) {
               this.router.navigate(['/home']);
             } else {
-              alert('Login successful but no token received');
+              this.errorMessage = 'Login successful but no token received';
             }
           } else {
-            alert(response.message || 'Login failed');
+            this.errorMessage = response.message || 'Invalid email or password';
           }
         },
         error: (error) => {
           console.error('Login error:', error);
-          const errorMessage = error.error?.message || 'Login failed. Please try again.';
-          alert(errorMessage);
+          this.errorMessage = error.error?.message || 'Login failed. Please check your email and password.';
         }
       });
     } else {
@@ -59,12 +58,12 @@ export class LoginComponent {
       if (!this.registrationData.first_name || !this.registrationData.last_name || 
           !this.registrationData.id_number || !this.registrationData.domain_account || 
           !this.registrationData.password) {
-        alert('Please fill in all required fields');
+        this.errorMessage = 'Please fill in all required fields';
         return;
       }
 
       if (!this.isValidEmail(this.registrationData.domain_account)) {
-        alert('Please enter a valid Gordon College email');
+        this.errorMessage = 'Please enter a valid Gordon College email';
         return;
       }
 
@@ -98,6 +97,7 @@ export class LoginComponent {
   toggleMode(event: Event) {
     event.preventDefault(); 
     this.isLoginMode = !this.isLoginMode;
+    this.errorMessage = '';
     this.resetForm();
   }
 
