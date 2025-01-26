@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 22, 2025 at 11:50 PM
+-- Generation Time: Jan 26, 2025 at 03:40 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -87,10 +87,16 @@ CREATE TABLE `medical_documents` (
 --
 
 INSERT INTO `medical_documents` (`document_id`, `user_id`, `document_type`, `file_path`, `date`, `location`, `status`, `uploaded_at`) VALUES
-(57, 18, 'bloodCount', 'uploads/18/medical_documents/bloodCount/1737582373_67916725baeb5_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 21:46:13'),
-(58, 18, 'chestXray', 'uploads/18/medical_documents/chestXray/1737584327_67916ec737268_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 22:18:47'),
-(59, 18, 'urinalysis', 'uploads/18/medical_documents/urinalysis/1737584463_67916f4f2057b_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 22:21:03'),
-(60, 19, 'bloodCount', 'uploads/19/medical_documents/bloodCount/1737585840_679174b0a6388_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 22:44:00');
+(63, 19, 'bloodCount', 'uploads/19/medical_documents/bloodCount/1737590145_6791858145720_testdocument.png', '2025-01-23', 'fdgdf', 'Submitted', '2025-01-22 23:55:45'),
+(64, 19, 'urinalysis', 'uploads/19/medical_documents/urinalysis/1737589276_6791821cb80f4_testdocument.png', '2025-01-23', 'Subic', 'Submitted', '2025-01-22 23:41:16'),
+(66, 20, 'bloodCount', 'uploads/20/medical_documents/bloodCount/1737846924_6795708ce59b7_dupal.jpg', '2025-01-27', 'HAYSSSCCSBINIGAY', 'Submitted', '2025-01-25 23:15:24'),
+(67, 20, 'urinalysis', 'uploads/20/medical_documents/urinalysis/1737842741_679560356ae94_testdocument.png', '2025-01-26', 'sdfsdf', 'Submitted', '2025-01-25 22:05:41'),
+(68, 20, 'chestXray', 'uploads/20/medical_documents/chestXray/1737843897_679564b994efc_testdocument.png', '2025-01-26', 'sdfsadf', 'Submitted', '2025-01-25 22:24:57'),
+(70, 20, 'antiHAV', 'uploads/20/medical_documents/antiHAV/1737844209_679565f1af06c_revision.png', '2025-01-29', 'dASD', 'Submitted', '2025-01-25 22:30:09'),
+(72, 20, 'fecalysis', 'uploads/20/medical_documents/fecalysis/1737844235_6795660b2d4d7_revision.png', '2025-01-26', 'asdfasdfsdf', 'Submitted', '2025-01-25 22:30:35'),
+(76, 21, 'bloodCount', 'uploads/21/medical_documents/bloodCount/1737902242_679648a2bc5ea_testdocument.png', '2025-01-26', 'Subic', 'Submitted', '2025-01-26 14:37:22'),
+(77, 21, 'urinalysis', 'uploads/21/medical_documents/urinalysis/1737902264_679648b8c8af1_testdocument.png', '2025-01-26', 'Subic', 'Submitted', '2025-01-26 14:37:44'),
+(78, 21, 'chestXray', 'uploads/21/medical_documents/chestXray/1737902285_679648cd6cc5c_testdocument.png', '2025-01-26', 'Subic', 'Submitted', '2025-01-26 14:38:05');
 
 -- --------------------------------------------------------
 
@@ -127,8 +133,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `domain_account`, `password`, `created_at`) VALUES
-(18, '202210768@gordoncollege.edu.ph', '$2y$10$yoFAxo.H/38pwxY8fQMM.upvpqaJ.SCvVdAnH4PihSqjP2wLcbgeq', '2025-01-22 19:56:42'),
-(19, '202210272@gordoncollege.edu.ph', '$2y$10$0z3wjOiHqkKXetA/uahwkOIKA3XcOVXfFL.OPJ4bIBz7N4LP.xw9.', '2025-01-22 22:29:47');
+(19, '202210272@gordoncollege.edu.ph', '$2y$10$0z3wjOiHqkKXetA/uahwkOIKA3XcOVXfFL.OPJ4bIBz7N4LP.xw9.', '2025-01-22 22:29:47'),
+(20, '202011035@gordoncollege.edu.ph', '$2y$10$wsNbV8tHNOB5laC/.p4bp.znpzCEATQHvxD323121iTE5BIINjRLO', '2025-01-25 21:38:50'),
+(21, '202210768@gordoncollege.edu.ph', '$2y$10$zPDdTedVlEqprnVAduelAOtHYOtHoxcxeBXDasdXwRK.0.a2/wvvW', '2025-01-26 14:31:19');
 
 -- --------------------------------------------------------
 
@@ -156,8 +163,9 @@ CREATE TABLE `user_profiles` (
 --
 
 INSERT INTO `user_profiles` (`id`, `user_id`, `first_name`, `last_name`, `middle_name`, `department`, `program`, `year_level`, `id_number`, `profile_image`, `profile_image_path`, `contact_number`) VALUES
-(15, 18, 'Jayvee', 'Mayor', 'Apiag', 'CHTM-Hospitality', 'BSHM', 3, '202210768', NULL, 'uploads/18/profile_images/1737575851_67914dab3f2ca.png', '09511186443'),
-(16, 19, 'Jeremy', 'Marron', 'Alamat', 'CBA', 'BSA', 1, '202210272', NULL, 'uploads/19/profile_images/1737585075_679171b360b5d.png', '09511186442');
+(16, 19, 'Jeremy', 'Marron', 'Alamat', 'CBA', 'BSA', 1, '202210272', NULL, 'uploads/19/profile_images/1737585075_679171b360b5d.png', '09511186442'),
+(17, 20, 'Aljhon', 'Dupal', 'Alamat', 'CHTM', 'BSHM', 3, '202011035', NULL, 'uploads/20/profile_images/1737841213_67955a3dab86e.jpg', '09511186442'),
+(18, 21, 'Jayvee', 'Mayor', 'Apiag', 'CCS', 'BSIT', 3, '202210768', NULL, 'uploads/21/profile_images/1737901920_67964760d7a4e.png', '09511186442');
 
 -- --------------------------------------------------------
 
@@ -178,6 +186,17 @@ CREATE TABLE `vaccination_records` (
   `status` enum('Pending','Submitted','Approved','Rejected') NOT NULL DEFAULT 'Pending',
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `vaccination_records`
+--
+
+INSERT INTO `vaccination_records` (`record_id`, `user_id`, `first_dose_type`, `first_dose_date`, `second_dose_type`, `second_dose_date`, `booster_type`, `booster_date`, `document_path`, `status`, `uploaded_at`) VALUES
+(9, 20, 'dsafsa', '2025-01-26', 'sdfsadf', '2025-01-26', 'sadfsadf', '2025-01-26', 'uploads/20/vaccination_records/1737841524_67955b743e9b6_testdocument.png', 'Submitted', '2025-01-25 21:45:24'),
+(12, 21, 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'uploads/21/vaccination_records/1737902379_6796492bebbc3_testdocument.png', 'Submitted', '2025-01-26 14:39:39'),
+(13, 21, 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'uploads/21/vaccination_records/1737902379_6796492beda9f_testdocument.png', 'Submitted', '2025-01-26 14:39:39'),
+(14, 21, 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'uploads/21/vaccination_records/1737902380_6796492c00ce5_testdocument.png', 'Submitted', '2025-01-26 14:39:40'),
+(15, 21, 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'Cobra Venum', '2025-01-26', 'uploads/21/vaccination_records/1737902380_6796492c08886_testdocument.png', 'Submitted', '2025-01-26 14:39:40');
 
 --
 -- Indexes for dumped tables
@@ -254,7 +273,7 @@ ALTER TABLE `clinicstaff`
 -- AUTO_INCREMENT for table `medical_documents`
 --
 ALTER TABLE `medical_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `time_slots`
@@ -266,19 +285,19 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `user_profiles`
 --
 ALTER TABLE `user_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `vaccination_records`
 --
 ALTER TABLE `vaccination_records`
-  MODIFY `record_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `record_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables
