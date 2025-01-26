@@ -76,3 +76,30 @@
     </table>
   </div>
   
+  <!-- Rejection Reason Modal -->
+  <div class="modal" *ngIf="showRejectModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Cancel Appointment</h2>
+        <button class="close-btn" (click)="closeRejectModal()">&times;</button>
+      </div>
+      <form (ngSubmit)="submitCancellation()">
+        <div class="form-group">
+          <label for="rejectionReason">Reason for Cancellation</label>
+          <textarea 
+            id="rejectionReason"
+            [(ngModel)]="rejectionReason"
+            name="rejectionReason"
+            class="form-control"
+            rows="4"
+            placeholder="Please provide a reason for cancelling this appointment"
+            required></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="cancel-btn" (click)="closeRejectModal()">Close</button>
+          <button type="submit" class="save-btn" [disabled]="!rejectionReason.trim()">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  

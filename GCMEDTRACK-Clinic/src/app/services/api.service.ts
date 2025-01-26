@@ -158,11 +158,12 @@ deleteClinic(staffId: number): Observable<any> {
     );
   }
   
-  updateAppointmentStatus(appointmentId: number, status: string): Observable<any> {
+  updateAppointmentStatus(appointmentId: number, status: string, rejectionReason?: string): Observable<any> {
     const payload = {
       action: 'updateAppointmentStatus',
       appointmentId: appointmentId,
-      status: status
+      status: status,
+      rejectionReason: rejectionReason
     };
 
     return this.http.post(`${this.baseUrl}/updateAppointmentStatus`, payload, {

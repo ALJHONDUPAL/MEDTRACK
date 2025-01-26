@@ -28,6 +28,9 @@ export class AppointmentsComponent implements OnInit {
   selectedDepartment: string = 'All';
   totalSlots: number = 0;
   currentBookings: number = 0;
+  showRejectModal: boolean = false;
+  rejectionReason: string = '';
+  selectedAppointment: Appointment | null = null;
 
   get studentSlot(): string {
     return `${this.currentBookings}/${this.totalSlots}`;
@@ -142,12 +145,22 @@ export class AppointmentsComponent implements OnInit {
   }
 
   cancelAppointment(appointment: Appointment): void {
-    this.apiService.updateAppointmentStatus(appointment.id, 'Cancelled').subscribe({
+    this.selectedAppointment = appointment;
+    this.showRejectModal = true;
+  }
+
+  submitCancellation(): void {
+    if (!this.selectedAppointment || !this.rejectionReason.trim()) {
+      return;
+    }
+
+    this.apiService.updateAppointmentStatus(this.selectedAppointment.id, 'Cancelled', this.rejectionReason).subscribe({
       next: (response) => {
         if (response.status === 'success') {
-          appointment.status = 'Cancelled';
+          this.selectedAppointment!.status = 'Cancelled';
           alert('Appointment cancelled successfully');
           this.loadAppointments();
+          this.closeRejectModal();
         } else {
           alert(response.message || 'Failed to cancel appointment');
         }
@@ -157,6 +170,12 @@ export class AppointmentsComponent implements OnInit {
         alert('Failed to cancel appointment: ' + error);
       }
     });
+  }
+
+  closeRejectModal(): void {
+    this.showRejectModal = false;
+    this.rejectionReason = '';
+    this.selectedAppointment = null;
   }
 
   deleteAppointment(appointment: Appointment): void {
