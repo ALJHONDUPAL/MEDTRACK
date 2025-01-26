@@ -1,1 +1,175 @@
+/* Main Container Styles */
+.announcements-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
 
+.announcements-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.announcements-header h1 {
+    color: #2c3e50;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.announcements-header .subtitle {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+/* Announcement Cards */
+.announcements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.announcement-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.announcement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Announcement Header */
+.announcement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.announcement-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.announcement-icon i {
+    font-size: 1.4rem;
+}
+
+.announcement-icon.approved {
+    background: #d4edda;
+    color: #28a745;
+}
+
+.announcement-icon.rejected {
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+.announcement-meta {
+    display: flex;
+    gap: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Announcement Content */
+.announcement-content {
+    padding: 1.5rem;
+}
+
+.announcement-content h2 {
+    color: #2c3e50;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+}
+
+.details {
+    color: #6c757d;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+}
+
+/* Appointment Info */
+.appointment-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.info-item i {
+    color: #4CAF50;
+}
+
+/* Rejection Styles */
+.rejection-reason {
+    background: #fff5f5;
+    border-left: 4px solid #dc3545;
+    padding: 1rem;
+    margin: 1rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.rejection-reason i {
+    color: #dc3545;
+    margin-top: 0.2rem;
+}
+
+.action-required {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.action-required h3 {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+}
+
+.action-required ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.action-required li {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .announcements-container {
+        margin: 1rem;
+        padding: 0 1rem;
+    }
+
+    .announcements-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .appointment-info {
+        grid-template-columns: 1fr;
+    }
+}
