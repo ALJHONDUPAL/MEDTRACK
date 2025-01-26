@@ -68,8 +68,7 @@ export class DocumentsComponent implements OnInit {
       'BSED-Social Studies',
       'BSED-Sciences',
     ],
-    'CHTM-Hospitality': ['BSHM'],
-    'CHTM-Tourism': ['BSTM'],
+    'CHTM': ['BSHM','BSTM'],
   };
 
   constructor(private apiService: ApiService, private sanitizer: DomSanitizer, private router: Router) {}
@@ -157,5 +156,29 @@ export class DocumentsComponent implements OnInit {
 
   getSanitizedImageUrl(url: string): SafeUrl {
     return this.sanitizer.bypassSecurityTrustUrl(url);
+  }
+
+  getYearLevelDisplay(yearLevel: string | number | undefined): string {
+    if (!yearLevel) return 'N/A';
+    
+    const level = yearLevel.toString();
+    
+    switch (level) {
+      case '1':
+        return '1st';
+      case '2':
+        return '2nd';
+      case '3':
+        return '3rd';
+      case '4':
+        return '4th';
+      default:
+        // Handle any other numbers with proper ordinal suffixes
+        const lastDigit = level.charAt(level.length - 1);
+        if (lastDigit === '1') return `${level}st`;
+        if (lastDigit === '2') return `${level}nd`;
+        if (lastDigit === '3') return `${level}rd`;
+        return `${level}th`;
+    }
   }
 }

@@ -1,52 +1,92 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '../services/api.service';
-import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
-
-interface Student {
-  user_id: string; // Added userId to the interface
-  name: string;
-  yearLevel: string;
-  idNumber: string;
-  profileImage: string;
+// Add this interface to better type the student data
+interface MedicalDocument {
+  status: string;
+  file_path: string;
+  date: string;
+  location: string;
+  document_type: string;
 }
 
-interface MedicalDocument {
-document_type: any;
-  name: string;
-  status: string;
-  file_path?: string;
-  date?: string;
-  location?: string;
+interface StudentData {
+  basic: {
+    name: string;
+    first_name: string;
+    last_name: string;
+    middle_name: string;
+    department: string;
+    program: string;
+    year_level: string;
+    id_number: string;
+    contact_number: string;
+    profile_image_path: string;
+    vaccination: {
+      first_dose_type: string | null;
+      first_dose_date: string | null;
+      second_dose_type: string | null;
+      second_dose_date: string | null;
+      booster_type: string | null;
+      booster_date: string | null;
+      document_path: string | null;
+      status: string | null;
+    };
+  };
+  documents: {
+    [key: string]: MedicalDocument;
+  };
 }
 
 @Component({
   selector: 'app-medical-details',
   imports: [CommonModule, RouterLink],
   templateUrl: './medical-details.component.html',
-  styleUrl: './medical-details.component.css'
+  styleUrl: './medical-details.component.css',
+  standalone: true
 })
 export class MedicalDetailsComponent implements OnInit {
-  student: any = {};
-  studentId: string = '';
-  safeProfileImagePath: SafeUrl = '';
-  students: Student[] = [];
-  medicalDocuments: MedicalDocument[] = [];
-  documents: { [key: string]: MedicalDocument } = {};
+  studentData: StudentData | null = null;
+  previewImage: string | null = null;
+  private documentTypeMap: { [key: string]: string } = {
+    'Complete Blood Count': 'bloodCount',
+    'Urinalysis': 'urinalysis',
+    'Chest X-ray': 'chestXray',
+    'COVID-19 Vaccination Card': 'covidVaccination',
+    'Anti HBS (For students with previous Hepa B vaccine)': 'antiHBS',
+    'Hepatitis B Vaccine': 'hepaBVaccine',
+    'Flu Vaccine Card': 'fluVaccine',
+    'Anti HAV(Hepa A)': 'antiHAV',
+    'Fecalysis': 'fecalysis',
+    'Drug Test for RLE requirements': 'drugTest'
+  };
+  selectedDocument: {
+    type: string;
+    details: MedicalDocument | null;
+    imageUrl: string | null;
+    vaccinationDetails?: {
+      first_dose_type: string | null;
+      first_dose_date: string | null;
+      second_dose_type: string | null;
+      second_dose_date: string | null;
+      booster_type: string | null;
+      booster_date: string | null;
+      document_path: string | null;
+      status: string | null;
+    };
+  } | null = null;
+
   constructor(
     private route: ActivatedRoute,
-    private apiService: ApiService,
-    private sanitizer: DomSanitizer
+    public apiService: ApiService
   ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       const studentId = params['user_id'];
       if (studentId) {
-        this.studentId = studentId;
         this.fetchStudentDetails(studentId);
       }
     });
@@ -55,9 +95,11 @@ export class MedicalDetailsComponent implements OnInit {
   fetchStudentDetails(studentId: string): void {
     this.apiService.getStudentById(studentId).subscribe({
       next: (response) => {
-        if (response.status === 'success') {
-          this.student = response.data.basic;
-          this.documents = this.formatDocuments(response.data.documents);
+        if (response.status === 'success' && response.data) {
+          this.studentData = response.data;
+          console.log('Student Data:', this.studentData);
+        } else {
+          console.error('Invalid response format:', response);
         }
       },
       error: (error) => {
@@ -66,109 +108,157 @@ export class MedicalDetailsComponent implements OnInit {
     });
   }
 
-  private formatDocuments(documents: any): { [key: string]: MedicalDocument } {
-    const formattedDocs: { [key: string]: MedicalDocument } = {
-      'Complete Blood Count': {
-        name: 'Complete Blood Count',
-        document_type: 'bloodCount',
-        status: documents?.bloodCount?.status || 'Need Submission',
-        file_path: documents?.bloodCount?.file_path,
-        date: documents?.bloodCount?.date,
-        location: documents?.bloodCount?.location
-      },
-      'Urinalysis': {
-        name: 'Urinalysis',
-        document_type: 'urinalysis',
-        status: documents?.urinalysis?.status || 'Need Submission',
-        file_path: documents?.urinalysis?.file_path,
-        date: documents?.urinalysis?.date,
-        location: documents?.urinalysis?.location
-      },
-      'COVID-19 Vaccination Card': {
-        name: 'COVID-19 Vaccination Card',
-        document_type: 'vaccination',
-        status: this.student?.vaccination_status || 'Need Submission',
-        file_path: this.student?.vaccination?.document_path,
-        date: this.student?.vaccination?.first_dose_date,
-        location: 'Vaccination Record'
-      },
-      'Chest X-ray': {
-        name: 'Chest X-ray',
-        document_type: 'chestXray',
-        status: documents?.chestXray?.status || 'Need Submission',
-        file_path: documents?.chestXray?.file_path,
-        date: documents?.chestXray?.date,
-        location: documents?.chestXray?.location
+  getFullName(): string {
+    if (!this.studentData?.basic) return '';
+    const { last_name, first_name, middle_name } = this.studentData.basic;
+    return `${last_name}, ${first_name} ${middle_name || ''}`.trim();
+  }
+
+  getMedicalRequirements(): string[] {
+    if (!this.studentData?.basic?.department) {
+      return [];
+    }
+
+    const baseRequirements = [
+      'Complete Blood Count',
+      'Urinalysis',
+      'Chest X-ray',
+      'COVID-19 Vaccination Card'
+    ];
+
+    // For CAHS department
+    if (this.studentData.basic.department === 'CAHS') {
+      const cahsRequirements = [
+        ...baseRequirements,
+        'Anti HBS (For students with previous Hepa B vaccine)',
+        'Hepatitis B Vaccine',
+        'Flu Vaccine Card'
+      ];
+
+      if (this.studentData.basic.year_level === '1') {
+        cahsRequirements.push('Hepatitis screening: HBsAg (Hepatitis B Surface Antigen)');
       }
+
+      if (['2', '3', '4'].includes(this.studentData.basic.year_level.toString())) {
+        cahsRequirements.push('Drug Test for RLE requirements');
+      }
+
+      return cahsRequirements;
+    }
+
+    // For BSHM program in CHTM
+    if (this.studentData.basic.department === 'CHTM' && 
+        this.studentData.basic.program === 'BSHM') {
+      return [
+        ...baseRequirements,
+        'Anti HAV(Hepa A)',
+        'Fecalysis'
+      ];
+    }
+
+    return baseRequirements;
+  }
+
+  getDocumentStatus(documentType: string): string {
+    if (!this.studentData?.documents) return 'Need Submission';
+    
+    const dbDocumentType = this.documentTypeMap[documentType];
+
+    // Special handling for COVID-19 Vaccination Card
+    if (documentType === 'COVID-19 Vaccination Card') {
+      // Check if vaccination data exists and has doses
+      if (this.studentData.basic?.vaccination) {
+        const vaccination = this.studentData.basic.vaccination;
+        if (vaccination.first_dose_type || vaccination.second_dose_type) {
+          return 'Submitted';
+        }
+      }
+      return 'Need Submission';
+    }
+
+    return this.studentData.documents[dbDocumentType]?.status || 'Need Submission';
+  }
+
+  getDocumentUrl(documentType: string): string | null {
+    if (!this.studentData?.documents) return null;
+    
+    const dbDocumentType = this.documentTypeMap[documentType];
+
+    // Special handling for COVID-19 Vaccination Card
+    if (documentType === 'COVID-19 Vaccination Card') {
+      return this.studentData.basic?.vaccination?.document_path ? 
+        this.apiService.getFullImageUrl(this.studentData.basic.vaccination.document_path) : 
+        null;
+    }
+
+    const document = this.studentData.documents[dbDocumentType];
+    return document?.file_path ? this.apiService.getFullImageUrl(document.file_path) : null;
+  }
+
+  openImagePreview(documentType: string): void {
+    const imageUrl = this.getDocumentUrl(documentType);
+    let details: MedicalDocument | null = null;
+    let vaccinationDetails;
+
+    if (documentType === 'COVID-19 Vaccination Card') {
+      vaccinationDetails = this.studentData?.basic?.vaccination;
+      details = {
+        status: 'Submitted',
+        file_path: vaccinationDetails?.document_path || '',
+        date: vaccinationDetails?.first_dose_date || '',
+        location: 'N/A',
+        document_type: documentType
+      };
+    } else {
+      const dbDocumentType = this.documentTypeMap[documentType];
+      details = this.studentData?.documents[dbDocumentType] || null;
+    }
+
+    this.selectedDocument = {
+      type: documentType,
+      details,
+      imageUrl,
+      vaccinationDetails: documentType === 'COVID-19 Vaccination Card' ? 
+        this.studentData?.basic?.vaccination : undefined
     };
+    this.previewImage = imageUrl;
+  }
 
-    // Add CAHS specific documents if student is from CAHS
-    if (this.student?.department === 'CAHS') {
-      formattedDocs['Anti HBS'] = {
-        name: 'Anti HBS',
-        document_type: 'antiHBS',
-        status: documents?.antiHBS?.status || 'Need Submission',
-        file_path: documents?.antiHBS?.file_path,
-        date: documents?.antiHBS?.date,
-        location: documents?.antiHBS?.location
-      };
-      formattedDocs['Hepatitis B Vaccine'] = {
-        name: 'Hepatitis B Vaccine',
-        document_type: 'hepaBVaccine',
-        status: documents?.hepaBVaccine?.status || 'Need Submission',
-        file_path: documents?.hepaBVaccine?.file_path,
-        date: documents?.hepaBVaccine?.date,
-        location: documents?.hepaBVaccine?.location
-      };
-      formattedDocs['Flu Vaccine'] = {
-        name: 'Flu Vaccine',
-        document_type: 'fluVaccine',
-        status: documents?.fluVaccine?.status || 'Need Submission',
-        file_path: documents?.fluVaccine?.file_path,
-        date: documents?.fluVaccine?.date,
-        location: documents?.fluVaccine?.location
-      };
+  closeImagePreview(): void {
+    this.previewImage = null;
+    this.selectedDocument = null;
+  }
+
+  // Add this method to handle image error
+  handleImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    if (imgElement) {
+      imgElement.src = 'assets/default-profile.png';
     }
-
-    // Log the documents and status for debugging
-    console.log('Student data:', this.student);
-    console.log('Documents:', documents);
-    console.log('Formatted docs:', formattedDocs);
-
-    return formattedDocs;
   }
 
-  getDocumentStatus(documentName: string): string {
-    return this.documents[documentName]?.status || 'Need Submission';
-  }
-
-  getImageUrl(): string {
-    if (this.student && this.student.profile_image_path) {
-      const imageUrl = this.apiService.getFullImageUrl(this.student.profile_image_path);
-      // console.log('Constructed Image URL:', imageUrl); // Log the full image URL for debugging
-      return imageUrl;
+  // Add this method to format year level
+  getYearLevelDisplay(yearLevel: string | undefined): string {
+    if (!yearLevel) return 'N/A';
+    
+    const level = yearLevel.toString();
+    
+    switch (level) {
+      case '1':
+        return '1st';
+      case '2':
+        return '2nd';
+      case '3':
+        return '3rd';
+      case '4':
+        return '4th';
+      default:
+        // Handle any other numbers with proper ordinal suffixes
+        const lastDigit = level.charAt(level.length - 1);
+        if (lastDigit === '1') return `${level}st`;
+        if (lastDigit === '2') return `${level}nd`;
+        if (lastDigit === '3') return `${level}rd`;
+        return `${level}th`;
     }
-    return 'assets/default-profile.png'; // Default image URL if profile_image_path is not available
-  }
-
-  getSanitizedImageUrl(url: string): SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
-
-  getDocumentUrl(path: string): string {
-    if (path) {
-      return this.apiService.getFullImageUrl(path);
-    }
-    return 'assets/default-document.png';
-  }
-
-  hasAnyRecords(): boolean {
-    return (
-      Object.values(this.documents).some(doc => doc.file_path) || 
-      (this.student.vaccination && 
-       (this.student.vaccination.first_dose_type || 
-        this.student.vaccination.second_dose_type || 
-        this.student.vaccination.booster_type))
-    );
   }
 }

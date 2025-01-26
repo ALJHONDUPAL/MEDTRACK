@@ -125,8 +125,21 @@ deleteClinic(staffId: number): Observable<any> {
   
   //get the specified student profile 
   getStudentById(studentId: string): Observable<any> {
-    const params = new HttpParams().set('user_id', studentId); // Assuming 'userId' is the param expected by your API
+    const params = new HttpParams().set('user_id', studentId);
     return this.http.get(`${this.baseUrl}/getStudentBasicDetails`, { params }).pipe(
+      map(response => {
+        // Remove any HTML warnings from the response
+        if (typeof response === 'string') {
+          try {
+            const cleanResponse = response.substring(response.indexOf('{'));
+            return JSON.parse(cleanResponse);
+          } catch (e) {
+            console.error('Error parsing response:', e);
+            throw e;
+          }
+        }
+        return response;
+      }),
       catchError(this.handleError)
     );
   }
@@ -191,15 +204,26 @@ deleteClinic(staffId: number): Observable<any> {
   private handleError(error: HttpErrorResponse) {
     console.error('API Error:', error);
     let errorMessage = 'An unknown error occurred!';
+    
     if (error.error instanceof ErrorEvent) {
-        // Client-side error
-        errorMessage = `Error: ${error.error.message}`;
-      } else {
-        // Server-side error
-        errorMessage = error.error?.message || `Error Code: ${error.status}\nMessage: ${error.message}`;
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else if (typeof error.error === 'string' && error.error.includes('{')) {
+      // Try to parse JSON from error response that might include PHP warnings
+      try {
+        const cleanResponse = error.error.substring(error.error.indexOf('{'));
+        const jsonResponse = JSON.parse(cleanResponse);
+        return jsonResponse;
+      } catch (e) {
+        errorMessage = `Error parsing response: ${e}`;
       }
-      return throwError(() => new Error(errorMessage));
+    } else {
+      // Server-side error
+      errorMessage = error.error?.message || `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
+    
+    return throwError(() => new Error(errorMessage));
+  }
   
     private getHeaders(): HttpHeaders {
       const token = localStorage.getItem('clinicAuthToken');

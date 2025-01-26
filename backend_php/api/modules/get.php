@@ -236,7 +236,15 @@ public function getStudentBasicDetails($userId)
     try {
         $sql = "
             SELECT 
-                s.*,
+                up.first_name,
+                up.last_name,
+                up.middle_name,
+                up.department,
+                up.program,
+                up.year_level,
+                up.id_number,
+                up.contact_number,
+                up.profile_image_path,
                 m.document_type,
                 m.status as document_status,
                 m.file_path,
@@ -250,28 +258,31 @@ public function getStudentBasicDetails($userId)
                 v.booster_date,
                 v.document_path as vaccination_document,
                 v.status as vaccination_status
-            FROM user_profiles s
-            LEFT JOIN medical_documents m ON s.user_id = m.user_id
-            LEFT JOIN vaccination_records v ON s.user_id = v.user_id
-            WHERE s.user_id = :userId
+            FROM user_profiles up
+            LEFT JOIN medical_documents m ON up.user_id = m.user_id
+            LEFT JOIN vaccination_records v ON up.user_id = v.user_id
+            WHERE up.user_id = :userId
         ";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':userId' => $userId]);
         $profile = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Group documents by type
+        // Format the response
         $formattedProfile = [];
         foreach ($profile as $row) {
             if (!isset($formattedProfile['basic'])) {
                 $formattedProfile['basic'] = [
-                    'name' => $row['name'],
+                    'name' => $row['first_name'] . ' ' . $row['last_name'],
+                    'first_name' => $row['first_name'],
+                    'last_name' => $row['last_name'],
+                    'middle_name' => $row['middle_name'],
                     'department' => $row['department'],
+                    'program' => $row['program'],
                     'year_level' => $row['year_level'],
                     'id_number' => $row['id_number'],
+                    'contact_number' => $row['contact_number'],
                     'profile_image_path' => $row['profile_image_path'],
-                    'vaccination_status' => $row['vaccination_status'],
-                    // Add vaccination details to basic profile
                     'vaccination' => [
                         'first_dose_type' => $row['first_dose_type'],
                         'first_dose_date' => $row['first_dose_date'],
@@ -279,7 +290,8 @@ public function getStudentBasicDetails($userId)
                         'second_dose_date' => $row['second_dose_date'],
                         'booster_type' => $row['booster_type'],
                         'booster_date' => $row['booster_date'],
-                        'document_path' => $row['vaccination_document']
+                        'document_path' => $row['vaccination_document'],
+                        'status' => $row['vaccination_status']
                     ]
                 ];
             }
@@ -293,6 +305,18 @@ public function getStudentBasicDetails($userId)
                     'document_type' => $row['document_type']
                 ];
             }
+        }
+
+        // Add COVID vaccination status to documents if vaccination record exists
+        if (!empty($formattedProfile['basic']['vaccination']['first_dose_type']) || 
+            !empty($formattedProfile['basic']['vaccination']['second_dose_type'])) {
+            $formattedProfile['documents']['covidVaccination'] = [
+                'status' => 'Submitted',
+                'file_path' => $formattedProfile['basic']['vaccination']['document_path'],
+                'date' => $formattedProfile['basic']['vaccination']['first_dose_date'] ?? 
+                         $formattedProfile['basic']['vaccination']['second_dose_date'],
+                'document_type' => 'covidVaccination'
+            ];
         }
 
         return [

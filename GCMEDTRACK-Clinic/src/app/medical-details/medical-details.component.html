@@ -5,65 +5,127 @@
     </button>
   </div>
 
-  <!-- Student Profile -->
-  <div class="student-info-card" *ngIf="student.name; else loading">
-    <img [src]="getImageUrl()"  alt="Profile Image" />
-    <div class="info">
-      <h3>{{ student.name }}</h3>
-      <p><strong>Department:</strong> {{ student.department }}</p>
-      <p><strong>Year Level:</strong> {{ student.year_level }}</p>
-      <p><strong>ID Number:</strong> {{ student.id_number }}</p>
+  <!-- Student Profile Card -->
+  <div class="student-profile-card" *ngIf="studentData?.basic">
+    <div class="profile-image-container">
+      <img [src]="apiService.getFullImageUrl(studentData?.basic?.profile_image_path || '')" 
+           [alt]="getFullName()" 
+           class="profile-image"
+           (error)="handleImageError($event)">
+    </div>
+    <div class="student-info">
+      <h2 class="student-name">{{ getFullName() }}</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>ID Number:</label>
+          <span>{{ studentData?.basic?.id_number || 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Department:</label>
+          <span>{{ studentData?.basic?.department || 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Program:</label>
+          <span>{{ studentData?.basic?.program || 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Year Level:</label>
+          <span>{{ getYearLevelDisplay(studentData?.basic?.year_level) }}</span>
+        </div>
+        <div class="info-item">
+          <label>Contact Number:</label>
+          <span>{{ studentData?.basic?.contact_number || 'Not provided' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 
-
-  
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="th">Medical Documents</th>
-        <th class="th">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let doc of documents | keyvalue">
-        <td class="td">{{ doc.value.name }}</td>
-        <td class="td" 
-            [class.text-green-600]="doc.value.status === 'Submitted'"
-            [class.text-red-600]="doc.value.status === 'Need Submission'">
-          {{ doc.value.status }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <!-- Medical Records -->
+  <!-- Medical Documents Section -->
   <div class="documents-details">
     <h4>Medical Records</h4>
     
-    <!-- Document Records -->
-    <div *ngFor="let doc of documents | keyvalue">
-      <div class="info-box" *ngIf="doc.value.file_path">
-        <h5>{{ doc.value.name }}</h5>
-        <div class="info-details">
-          <p><strong>Document Type:</strong> {{ doc.value.document_type }}</p>
-          <p><strong>Location:</strong> {{ doc.value.location }}</p>
-          <p><strong>Date:</strong> {{ doc.value.date | date }}</p>
-          <p><strong>Status:</strong> {{ doc.value.status }}</p>
-        </div>
-        <img [src]="getDocumentUrl(doc.value.file_path)" class="image" [alt]="doc.value.name" />
-      </div>
+    <!-- Documents Table -->
+    <div class="documents-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Medical Documents</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let requirement of getMedicalRequirements()">
+            <td>{{requirement}}</td>
+            <td>
+              <span [ngClass]="{
+                'status-submitted': getDocumentStatus(requirement) === 'Submitted',
+                'status-pending': getDocumentStatus(requirement) === 'Need Submission'
+              }">
+                {{getDocumentStatus(requirement)}}
+              </span>
+            </td>
+            <td>
+              <button 
+                class="preview-btn" 
+                [disabled]="!getDocumentUrl(requirement)"
+                (click)="openImagePreview(requirement)"
+              >
+                <i class="fas fa-eye"></i> View Document
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- No Records Message -->
-    <div *ngIf="!hasAnyRecords()" class="no-records">
+    <div *ngIf="getMedicalRequirements().length === 0" class="no-records">
       <p>No medical records available.</p>
     </div>
   </div>
 
-  <!-- Loading Template -->
-  <ng-template #loading>
-    <p>Loading student details...</p>
-  </ng-template>
+  <!-- Image Preview Modal -->
+  <div class="image-preview-modal" *ngIf="previewImage && selectedDocument" (click)="closeImagePreview()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <span class="close-button" (click)="closeImagePreview()">&times;</span>
+      
+      <div class="document-info">
+        <h3>{{ selectedDocument.type }}</h3>
+        
+        <!-- COVID-19 Vaccination Details -->
+        <div class="vaccination-details" *ngIf="selectedDocument.type === 'COVID-19 Vaccination Card' && selectedDocument.vaccinationDetails">
+          <div class="info-row">
+            <h4>First Dose</h4>
+            <p><strong>Type:</strong> {{ selectedDocument.vaccinationDetails.first_dose_type || 'N/A' }}</p>
+            <p><strong>Date:</strong> {{ selectedDocument.vaccinationDetails.first_dose_date || 'N/A' }}</p>
+          </div>
+          <div class="info-row">
+            <h4>Second Dose</h4>
+            <p><strong>Type:</strong> {{ selectedDocument.vaccinationDetails.second_dose_type || 'N/A' }}</p>
+            <p><strong>Date:</strong> {{ selectedDocument.vaccinationDetails.second_dose_date || 'N/A' }}</p>
+          </div>
+          <div class="info-row">
+            <h4>Booster</h4>
+            <p><strong>Type:</strong> {{ selectedDocument.vaccinationDetails.booster_type || 'N/A' }}</p>
+            <p><strong>Date:</strong> {{ selectedDocument.vaccinationDetails.booster_date || 'N/A' }}</p>
+          </div>
+        </div>
+
+        <!-- Regular Medical Document Details -->
+        <div class="document-details" *ngIf="selectedDocument.details">
+          <div class="info-row">
+            <p><strong>Date Submitted:</strong> {{ selectedDocument.details.date || 'N/A' }}</p>
+            <p><strong>Location:</strong> {{ selectedDocument.details.location || 'N/A' }}</p>
+            <p><strong>Status:</strong> {{ selectedDocument.details.status }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="document-image">
+        <img [src]="previewImage" alt="Document Preview" class="preview-image">
+      </div>
+    </div>
+  </div>
 </div>
 
