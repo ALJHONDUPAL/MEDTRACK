@@ -20,7 +20,7 @@
 }
 
 .logo {
-  width: 120px;
+  width: 110px;
   height: 110px;
   object-fit: contain;
 }
@@ -45,7 +45,7 @@
 }
 
 .circle-image {
-  width: 155%;
+  width: 140%;
   height: auto;
   opacity: 1;
 }
@@ -59,7 +59,7 @@
 }
 
 .docs-image {
-  width: 90%;
+  width: 80%;
   height: auto;
 }
 
