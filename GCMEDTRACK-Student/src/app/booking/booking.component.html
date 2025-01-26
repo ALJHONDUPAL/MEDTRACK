@@ -26,18 +26,24 @@
         <div class="header-cell text-center">Date and Time</div>
         <div class="header-cell text-center">Purpose</div>
         <div class="header-cell text-center">Status</div>
+        <div class="header-cell text-center">Remarks</div>
       </div>
 
       <div class="appointments-body">
         <div class="appointment-row" *ngFor="let appointment of getAppointmentsForSelectedDay()">
           <div class="info-cell text-center">
-            <img [src]="appointment.userImage" class="user-avatar" alt="User Avatar">
+            <img [src]="appointment.userImage" 
+                 (error)="appointment.userImage = 'assets/default-avatar.png'"
+                 class="user-avatar" 
+                 alt="User Avatar">
             <div class="user-info">
               <div class="user-name">{{appointment.userName}}</div>
-              <div class="user-id">{{appointment.userId}}</div>
+              <div class="user-id">{{appointment.studentId || 'N/A'}}</div>
             </div>
           </div>
-          <div class="department-cell text-center">{{appointment.department}}</div>
+          <div class="department-cell text-center">
+            {{appointment.department}}/{{appointment.program}}
+          </div>
           <div class="year-cell text-center">{{appointment.yearLevel}} Year</div>
           <div class="datetime-cell text-center">
             <div>{{appointment.date}}</div>
@@ -45,7 +51,17 @@
           </div>
           <div class="purpose-cell text-center">{{appointment.purpose}}</div>
           <div class="status-cell text-center">
-            <span [class]="'status-badge ' + appointment.status.toLowerCase()">{{appointment.status}}</span>
+            <span [class]="'status-badge ' + appointment.status.toLowerCase()">
+              {{appointment.status}}
+            </span>
+          </div>
+          <div class="remarks-cell text-center">
+            <button *ngIf="appointment.remarks" 
+                    class="remarks-btn"
+                    (click)="openRemarksModal(appointment.remarks)">
+              <i class="fas fa-comment-alt"></i>
+              <span class="notification-dot"></span>
+            </button>
           </div>
         </div>
       </div>
@@ -125,6 +141,22 @@
     <h2>Error</h2>
     <p>{{ errorMessage }}</p>
     <button class="ok-button" (click)="showErrorModal = false">OK</button>
+  </div>
+</div>
+
+<!-- Remarks Modal -->
+<div class="modal remarks-modal" *ngIf="showRemarksModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Appointment Remarks</h2>
+      <button class="close-btn" (click)="closeRemarksModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>{{selectedRemarks}}</p>
+    </div>
+    <div class="modal-footer">
+      <button class="ok-btn" (click)="closeRemarksModal()">OK</button>
+    </div>
   </div>
 </div>
 

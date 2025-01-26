@@ -18,14 +18,20 @@ class Post extends GlobalMethods {
         if (!isset($data->domain_account) || !isset($data->password) || 
             !isset($data->first_name) || !isset($data->last_name) || 
             !isset($data->id_number)) {
-            return $this->sendPayload(null, "error", "Missing required fields", 400);
+            return [
+                "status" => "error",
+                "message" => "Missing required fields"
+            ];
         }
 
         $domain_account = $data->domain_account;
         $password = password_hash($data->password, PASSWORD_BCRYPT);
         
         if (!preg_match('/^\d{9}@gordoncollege\.edu\.ph$/', $domain_account)) {
-            return $this->sendPayload(null, "error", "Invalid email format. Must be a valid Gordon College email", 400);
+            return [
+                "status" => "error",
+                "message" => "Invalid email format. Must be a valid Gordon College email"
+            ];
         }
         
         try {
@@ -36,7 +42,10 @@ class Post extends GlobalMethods {
             $checkStmt = $this->pdo->prepare($checkSql);
             $checkStmt->execute(['domain_account' => $domain_account]);
             if ($checkStmt->fetch()) {
-                return $this->sendPayload(null, "error", "User already exists", 400);
+                return [
+                    "status" => "error",
+                    "message" => "User already exists"
+                ];
             }
 
             // Insert into users table
@@ -62,11 +71,17 @@ class Post extends GlobalMethods {
             ]);
 
             $this->pdo->commit();
-            return $this->sendPayload(null, "success", "User registered successfully", 201);
+            return [
+                "status" => "success",
+                "message" => "User registered successfully"
+            ];
 
         } catch (\PDOException $e) {
             $this->pdo->rollBack();
-            return $this->sendPayload(null, "error", $e->getMessage(), 500);
+            return [
+                "status" => "error",
+                "message" => $e->getMessage()
+            ];
         }
     }
     
@@ -629,17 +644,31 @@ class Post extends GlobalMethods {
 
     public function updateAppointmentStatus($data) {
         try {
-            error_log("Updating appointment status: " . print_r($data, true));
+            error_log("Updating appointment status with data: " . print_r($data, true));
             
+            // Validate required fields
+            if (!isset($data->appointmentId) || !isset($data->status)) {
+                return [
+                    "status" => "error",
+                    "message" => "Missing required fields"
+                ];
+            }
+
             $sql = "UPDATE appointments 
-                    SET status = :status 
+                    SET status = :status,
+                        remarks = :remarks 
                     WHERE appointment_id = :appointment_id";
                     
             $stmt = $this->pdo->prepare($sql);
-            $result = $stmt->execute([
-                ':appointment_id' => $data->appointment_id,
-                ':status' => $data->status
-            ]);
+            $params = [
+                ':appointment_id' => $data->appointmentId,
+                ':status' => $data->status,
+                ':remarks' => $data->rejectionReason ?? null
+            ];
+            
+            error_log("Executing SQL with params: " . print_r($params, true));
+            
+            $result = $stmt->execute($params);
             
             if ($result) {
                 return [
@@ -647,13 +676,14 @@ class Post extends GlobalMethods {
                     "message" => "Appointment status updated successfully"
                 ];
             } else {
+                error_log("Update failed. PDO Error Info: " . print_r($stmt->errorInfo(), true));
                 return [
                     "status" => "error",
                     "message" => "Failed to update appointment status"
                 ];
             }
         } catch (PDOException $e) {
-            error_log("Error updating appointment status: " . $e->getMessage());
+            error_log("Database error: " . $e->getMessage());
             return [
                 "status" => "error",
                 "message" => $e->getMessage()

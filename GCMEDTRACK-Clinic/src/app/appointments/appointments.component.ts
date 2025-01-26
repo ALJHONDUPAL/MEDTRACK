@@ -9,12 +9,14 @@ interface Appointment {
   studentName: string;
   studentId: string;
   department: string;
+  program: string;
   date: string;
   time: string;
   purpose: string;
-  yearLevel: string;
+  yearLevel: string | number;
   avatar: string;
   status: string;
+  remarks?: string;
 }
 
 @Component({
@@ -60,16 +62,35 @@ export class AppointmentsComponent implements OnInit {
     this.apiService.getClinicAppointments().subscribe({
       next: (response) => {
         if (response.status === 'success') {
-          this.appointments = response.data;
+          console.log('Raw response:', response.data);
+          this.appointments = response.data.map((app: any) => {
+            return {
+              id: app.id,
+              studentName: app.studentName || 'N/A',
+              studentId: app.studentId || 'N/A',
+              department: app.department && app.program ? 
+                         `${app.department}/${app.program}` : 
+                         app.department || 'N/A',
+              program: app.program || 'N/A',
+              date: app.date || 'N/A',
+              time: app.time || 'N/A',
+              purpose: app.purpose || 'N/A',
+              yearLevel: app.yearLevel?.toString() || 'N/A',
+              avatar: app.avatar ? 
+                      `http://localhost/MEDTRACK/backend_php/api/${app.avatar}` : 
+                      'assets/default-avatar.png',
+              status: app.status || 'N/A',
+              remarks: app.remarks || null
+            };
+          });
           
           this.currentBookings = this.appointments.filter(app => 
             app.status !== 'Cancelled'
           ).length;
           
           this.getTotalSlots();
-          
           this.filterAppointments();
-          console.log('Loaded appointments:', this.appointments);
+          console.log('Processed appointments:', this.appointments);
         } else {
           console.error('Failed to load appointments:', response.message);
         }
@@ -99,20 +120,13 @@ export class AppointmentsComponent implements OnInit {
   }
 
   filterAppointments() {
-    console.log('Filtering with:', { year: this.selectedYear, department: this.selectedDepartment });
-    
     this.filteredAppointments = this.appointments.filter(appointment => {
-      const appointmentYear = appointment.yearLevel.split(' ')[0];
+      const yearMatch = this.selectedYear === 'All' || 
+                       appointment.yearLevel?.toString() === this.selectedYear;
       
-      const yearMatch = this.selectedYear === 'All' || appointmentYear === this.selectedYear;
-      const departmentMatch = this.selectedDepartment === 'All' || appointment.department === this.selectedDepartment;
-      
-      console.log('Appointment:', {
-        yearLevel: appointment.yearLevel,
-        extractedYear: appointmentYear,
-        yearMatch,
-        departmentMatch
-      });
+      const appointmentDept = appointment.department.split('/')[0];
+      const departmentMatch = this.selectedDepartment === 'All' || 
+                            appointmentDept === this.selectedDepartment;
       
       return yearMatch && departmentMatch;
     });
@@ -154,14 +168,22 @@ export class AppointmentsComponent implements OnInit {
       return;
     }
 
-    this.apiService.updateAppointmentStatus(this.selectedAppointment.id, 'Cancelled', this.rejectionReason).subscribe({
+    console.log('Submitting cancellation with reason:', this.rejectionReason);
+
+    this.apiService.updateAppointmentStatus(
+      this.selectedAppointment.id,
+      'Cancelled',
+      this.rejectionReason.trim()
+    ).subscribe({
       next: (response) => {
         if (response.status === 'success') {
           this.selectedAppointment!.status = 'Cancelled';
+          this.selectedAppointment!.remarks = this.rejectionReason;
           alert('Appointment cancelled successfully');
-          this.loadAppointments();
+          this.loadAppointments(); // Reload to get updated data
           this.closeRejectModal();
         } else {
+          console.error('Failed to cancel appointment:', response);
           alert(response.message || 'Failed to cancel appointment');
         }
       },

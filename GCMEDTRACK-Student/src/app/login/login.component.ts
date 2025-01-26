@@ -26,6 +26,8 @@ export class LoginComponent {
     domain_account: '',
     password: ''
   };
+  isSuccess: boolean = false;
+  successMessage: string = '';
 
   constructor(
     private authService: AuthService, 
@@ -45,17 +47,25 @@ export class LoginComponent {
           console.log('Login response:', response);
           if (response.status?.remarks === 'success' || response.status === 'success') {
             if (response.payload?.token || response.token) {
-              this.authStateService.resetLoginMessage();
-              this.router.navigate(['/home']);
+              this.isSuccess = true;
+              this.successMessage = 'Login successful! Redirecting...';
+              this.errorMessage = '';
+              setTimeout(() => {
+                this.authStateService.resetLoginMessage();
+                this.router.navigate(['/home']);
+              }, 1500);
             } else {
+              this.isSuccess = false;
               this.errorMessage = 'Login successful but no token received';
             }
           } else {
+            this.isSuccess = false;
             this.errorMessage = response.message || 'Invalid email or password';
           }
         },
         error: (error) => {
           console.error('Login error:', error);
+          this.isSuccess = false;
           this.errorMessage = error.error?.message || 'Login failed. Please check your email and password.';
         }
       });
@@ -75,22 +85,29 @@ export class LoginComponent {
 
       this.authService.register(this.registrationData).subscribe({
         next: (response) => {
-          if (response.status === 'success') {
-            alert('Registration successful! Please login.');
-            this.isLoginMode = true;
-            const savedEmail = this.registrationData.domain_account;
-            const savedPassword = this.registrationData.password;
-            this.resetForm();
-            this.registrationData.domain_account = savedEmail;
-            this.registrationData.password = savedPassword;
+          console.log('Registration response:', response);
+          if (response.status === 'success' || response.status?.remarks === 'success') {
+            this.isSuccess = true;
+            this.errorMessage = '';
+            this.successMessage = 'Registration successful! Redirecting to login...';
+            setTimeout(() => {
+              this.isLoginMode = true;
+              const savedEmail = this.registrationData.domain_account;
+              const savedPassword = this.registrationData.password;
+              this.resetForm();
+              this.registrationData.domain_account = savedEmail;
+              this.registrationData.password = savedPassword;
+              this.isSuccess = false;
+            }, 2000);
           } else {
-            alert(response.message || 'Registration failed');
+            this.isSuccess = false;
+            this.errorMessage = response.message || 'Registration failed';
           }
         },
         error: (error) => {
           console.error('Registration error:', error);
-          const errorMessage = error.error?.message || 'Registration failed. Please try again.';
-          alert(errorMessage);
+          this.isSuccess = false;
+          this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
         }
       });
     }

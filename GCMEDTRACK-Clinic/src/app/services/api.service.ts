@@ -147,43 +147,51 @@ deleteClinic(staffId: number): Observable<any> {
 
   getClinicAppointments(): Observable<any> {
     return this.http.get(`${this.baseUrl}/getClinicAppointments`).pipe(
+      tap(response => console.log('Raw API response:', response)), // Debug log
       map((response: any) => {
-        if (response.status === 'success') {
+        if (response.status === 'success' && Array.isArray(response.data)) {
           return {
             status: 'success',
             data: response.data.map((appointment: any) => ({
-              id: appointment.appointment_id,
-              studentName: `${appointment.name}`,
-              studentId: appointment.id_number,
+              id: appointment.id,
+              studentName: appointment.studentName,
+              studentId: appointment.studentId,
               department: appointment.department,
+              program: appointment.program,
               date: appointment.date,
-              time: `${appointment.start_time} - ${appointment.end_time}`,
+              time: appointment.time,
               purpose: appointment.purpose,
-              yearLevel: `${appointment.year_level}`,
-              avatar: this.getFullImageUrl(appointment.profile_image_path) || 'assets/default-avatar.png',
-              status: appointment.status
+              yearLevel: appointment.yearLevel,
+              avatar: appointment.avatar,
+              status: appointment.status,
+              remarks: appointment.remarks
             }))
           };
         }
         return response;
       }),
-      catchError(this.handleError)
+      catchError(error => {
+        console.error('API Error:', error);
+        return throwError(() => error);
+      })
     );
   }
   
   updateAppointmentStatus(appointmentId: number, status: string, rejectionReason?: string): Observable<any> {
     const payload = {
-      action: 'updateAppointmentStatus',
       appointmentId: appointmentId,
       status: status,
       rejectionReason: rejectionReason
     };
 
-    return this.http.post(`${this.baseUrl}/updateAppointmentStatus`, payload, {
-      headers: this.getHeaders()
-    }).pipe(
+    console.log('Sending update request with payload:', payload);
+
+    return this.http.post(`${this.baseUrl}/updateAppointmentStatus`, payload).pipe(
       tap(response => console.log('Update response:', response)),
-      catchError(this.handleError)
+      catchError(error => {
+        console.error('Error updating appointment:', error);
+        return throwError(() => error);
+      })
     );
   }
   

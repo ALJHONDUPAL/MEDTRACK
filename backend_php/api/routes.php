@@ -275,19 +275,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         "status" => "error",
                         "message" => "Missing required fields"
                     ]);
-                    http_response_code(400);
                     break;
-                    }
+                }
                 
-                    $updateData = (object)[
-                        'appointment_id' => intval($data->appointmentId),
-                        'status' => $data->status
-                    ];
+                $updateData = (object)[
+                    'appointmentId' => intval($data->appointmentId),
+                    'status' => $data->status,
+                    'rejectionReason' => $data->rejectionReason ?? null
+                ];
                 
-                    $result = $post->updateAppointmentStatus($updateData);
-                    echo json_encode($result);
-                    break;
-                
+                $result = $post->updateAppointmentStatus($updateData);
+                echo json_encode($result);
+                break;
+            
             case 'deleteTimeSlot':
                 echo json_encode($post->deleteTimeSlot($data));
                 break;

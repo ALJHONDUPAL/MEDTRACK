@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 26, 2025 at 03:40 PM
+-- Generation Time: Jan 26, 2025 at 07:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,8 +33,16 @@ CREATE TABLE `appointments` (
   `user_id` int(11) NOT NULL,
   `purpose` varchar(255) NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'Pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `remarks` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `appointments`
+--
+
+INSERT INTO `appointments` (`appointment_id`, `slot_id`, `user_id`, `purpose`, `status`, `created_at`, `remarks`) VALUES
+(13, 8, 21, 'Medical', 'Cancelled', '2025-01-26 17:02:49', 'asdfasdfasdf');
 
 -- --------------------------------------------------------
 
@@ -114,6 +122,13 @@ CREATE TABLE `time_slots` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `time_slots`
+--
+
+INSERT INTO `time_slots` (`slot_id`, `day_of_week`, `start_time`, `end_time`, `date`, `student_limit`, `created_at`, `updated_at`) VALUES
+(8, 'MONDAY', '09:03 AM', '11:03 AM', '2025-01-27', 5, '2025-01-26 16:09:02', '2025-01-26 16:09:02');
 
 -- --------------------------------------------------------
 
@@ -261,7 +276,7 @@ ALTER TABLE `vaccination_records`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `clinicstaff`
@@ -279,19 +294,19 @@ ALTER TABLE `medical_documents`
 -- AUTO_INCREMENT for table `time_slots`
 --
 ALTER TABLE `time_slots`
-  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `user_profiles`
 --
 ALTER TABLE `user_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `vaccination_records`

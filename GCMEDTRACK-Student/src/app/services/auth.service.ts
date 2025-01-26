@@ -25,6 +25,17 @@ export class AuthService {
   // Register user
   register(data: RegistrationData): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/userRegister`, data).pipe(
+      map(response => {
+        console.log('Raw registration response:', response); // Add this for debugging
+        // Handle both response formats
+        if (response.status?.remarks === 'success' || response.status === 'success') {
+          return {
+            status: 'success',
+            message: response.status?.message || response.message || 'Registration successful'
+          };
+        }
+        throw new Error(response.message || 'Registration failed');
+      }),
       catchError(error => {
         console.error('Registration error:', error);
         return throwError(() => error);

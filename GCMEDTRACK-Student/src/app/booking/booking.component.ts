@@ -7,8 +7,10 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 interface Appointment {
+  id: number;
   slotId: number;      
   userId: number;
+  studentId: string;
   purpose: string;
   status: string;
   time?: string;
@@ -16,8 +18,10 @@ interface Appointment {
   userImage: string;
   userName: string;
   department: string;
-  yearLevel: string;
+  program: string;
+  yearLevel: number;
   date: string;
+  remarks?: string;
 }
 
 interface TimeSlot {
@@ -49,19 +53,24 @@ export class BookingComponent implements OnInit {
   showSuccessAlert: boolean = false;
   
   newAppointment: Appointment = {
+    id: 0,
     slotId: 0,
     userId: 0,
+    studentId: '',
     purpose: '',
     status: 'Pending',
     userImage: '',
     userName: '',
     department: '',
-    yearLevel: '',
+    program: '',
+    yearLevel: 0,
     date: ''
   };
 
   appointments: Appointment[] = [];
   timeSlots: TimeSlot[] = [];
+  showRemarksModal = false;
+  selectedRemarks: string | null = null;
 
   constructor(
     private apiService: ApiService,
@@ -121,21 +130,30 @@ export class BookingComponent implements OnInit {
   private loadAppointments(): void {
     this.apiService.getAppointments(this.currentUserId).subscribe({
       next: (response: any) => {
+        console.log('Raw appointment response:', response);
         if (response.status === 'success' && Array.isArray(response.data)) {
           this.appointments = response.data.map((appointment: any) => ({
-            slotId: appointment.slot_id,
-            userId: appointment.user_id,
+            id: appointment.id,
+            slotId: appointment.slotId,
+            userId: appointment.userId,
+            studentId: appointment.studentId || 'N/A',
             purpose: appointment.purpose,
             status: appointment.status,
+            remarks: appointment.remarks,
             userName: appointment.userName,
-            userImage: appointment.userImage || 'assets/default-avatar.png',
+            userImage: appointment.userImage ? 
+                      `http://localhost/MEDTRACK/backend_php/api/${appointment.userImage}` : 
+                      'assets/default-avatar.png',
             department: appointment.department,
+            program: appointment.program,
             yearLevel: appointment.yearLevel,
-            date: this.formatDate(appointment.date),
-            time: `${appointment.start_time} - ${appointment.end_time}`,
-            day: appointment.day_of_week
+            date: appointment.date,
+            time: appointment.time,
+            day: appointment.day
           }));
+          console.log('Processed appointments:', this.appointments);
         } else {
+          console.error('Invalid response format:', response);
           this.appointments = [];
         }
       },
@@ -216,14 +234,17 @@ export class BookingComponent implements OnInit {
 
   resetForm() {
     this.newAppointment = {
+      id: 0,
       slotId: 0,
       userId: this.currentUserId,
+      studentId: '',
       purpose: '',
       status: 'Pending',
       userImage: '',
       userName: '',
       department: '',
-      yearLevel: '',
+      program: '',
+      yearLevel: 0,
       date: ''
     };
     this.selectedTimeSlot = null;
@@ -237,15 +258,28 @@ export class BookingComponent implements OnInit {
     this.showAppointmentModal = false;
     this.selectedTimeSlot = null;
     this.newAppointment = {
+      id: 0,
       slotId: 0,
       userId: this.currentUserId,
+      studentId: '',
       purpose: '',
       status: 'Pending',
       userImage: '',
       userName: '',
       department: '',
-      yearLevel: '',
+      program: '',
+      yearLevel: 0,
       date: ''
     };
+  }
+
+  openRemarksModal(remarks: string) {
+    this.selectedRemarks = remarks;
+    this.showRemarksModal = true;
+  }
+
+  closeRemarksModal() {
+    this.showRemarksModal = false;
+    this.selectedRemarks = null;
   }
 }

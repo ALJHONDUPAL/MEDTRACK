@@ -27,7 +27,7 @@
       <thead>
         <tr>
           <th>Student Name</th>
-          <th>Department</th>
+          <th>Department/Program</th>
           <th>Add Date</th>
           <th>Purpose</th>
           <th>Year Level</th>
@@ -38,7 +38,10 @@
         <tr *ngFor="let appointment of filteredAppointments">
           <td>
             <div class="student-info">
-              <img [src]="appointment.avatar" alt="Student avatar">
+              <img [src]="appointment.avatar" 
+                   (error)="appointment.avatar = 'assets/default-avatar.png'"
+                   alt="Student avatar"
+                   class="student-avatar">
               <div>
                 <div class="name">{{appointment.studentName}}</div>
                 <div class="id">{{appointment.studentId}}</div>
@@ -51,21 +54,27 @@
             <div class="time">{{appointment.time}}</div>
           </td>
           <td>{{appointment.purpose}}</td>
-          <td>{{appointment.yearLevel}} Year</td>
+          <td>
+            {{appointment.yearLevel && appointment.yearLevel !== 'N/A' ? 
+              appointment.yearLevel + ' Year' : 'N/A'}}
+          </td>
           <td class="action-buttons">
             <div *ngIf="appointment.status === 'Pending'">
               <button class="accept-btn" (click)="acceptAppointment(appointment)">
-                Accept
+                Approve
               </button>
               <button class="cancel-btn" (click)="cancelAppointment(appointment)">
-                Cancel
+                Decline
               </button>
             </div>
             <div *ngIf="appointment.status === 'Accepted'" class="status-accepted">
-              Accepted
+              Approved
             </div>
             <div *ngIf="appointment.status === 'Cancelled'" class="status-cancelled">
-              Cancelled
+              Declined
+              <div class="remarks" *ngIf="appointment.remarks">
+                <small>Reason: {{appointment.remarks}}</small>
+              </div>
             </div>
             <button class="delete-btn" (click)="deleteAppointment(appointment)">
               Delete
@@ -80,19 +89,19 @@
   <div class="modal" *ngIf="showRejectModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Cancel Appointment</h2>
+        <h2>Decline Appointment</h2>
         <button class="close-btn" (click)="closeRejectModal()">&times;</button>
       </div>
       <form (ngSubmit)="submitCancellation()">
         <div class="form-group">
-          <label for="rejectionReason">Reason for Cancellation</label>
+          <label for="rejectionReason">Reason for Declining</label>
           <textarea 
             id="rejectionReason"
             [(ngModel)]="rejectionReason"
             name="rejectionReason"
             class="form-control"
             rows="4"
-            placeholder="Please provide a reason for cancelling this appointment"
+            placeholder="Please provide a reason for declining this appointment"
             required></textarea>
         </div>
         <div class="modal-buttons">

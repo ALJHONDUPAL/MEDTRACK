@@ -61,25 +61,27 @@
     border-bottom: 1px solid #eee;
   }
   
-  .student-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .student-info img {
+  .student-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
   }
   
-  .student-info .name {
-    font-weight: 500;
+  .student-info {
+    display: flex;
+    align-items: center;
   }
   
-  .student-info .id {
-    color: #666;
+  .name {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  
+  .id {
     font-size: 0.9em;
+    color: #666;
   }
   
   .time {

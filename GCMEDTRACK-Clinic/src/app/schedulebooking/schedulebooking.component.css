@@ -1,5 +1,7 @@
 .schedule-container {
     padding: 20px;
+    height: calc(100vh - 100px); /* Adjust based on your layout */
+    overflow: hidden;
   }
   
   /* Weekday buttons styling */
@@ -491,5 +493,188 @@
   .available {
     color: #333;
     font-weight: bold;
+  }
+  
+  .calendar-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .calendar-field {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .time-slots {
+    margin-top: 20px;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .big-calendar-section {
+    display: grid;
+    grid-template-columns: auto 400px;
+    gap: 30px;
+    height: 100%;
+    margin-top: 20px;
+  }
+  
+  /* Calendar Styles */
+  .big-calendar {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    height: fit-content;
+  }
+  
+  /* Custom Calendar Styles */
+  ::ng-deep .mat-calendar {
+    width: 100% !important;
+    height: auto !important;
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  ::ng-deep .mat-calendar-header {
+    padding: 0.5em 8px !important;
+    background: linear-gradient(115deg, #233329, #355e3b);
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 15px;
+  }
+  
+  ::ng-deep .mat-calendar-controls {
+    margin: 2% 0 !important;
+  }
+  
+  ::ng-deep .mat-calendar-arrow {
+    fill: white !important;
+  }
+  
+  ::ng-deep .mat-calendar-previous-button,
+  ::ng-deep .mat-calendar-next-button,
+  ::ng-deep .mat-calendar-period-button {
+    color: white !important;
+  }
+  
+  ::ng-deep .mat-calendar-table-header {
+    color: #355e3b;
+    font-weight: 500;
+  }
+  
+  ::ng-deep .mat-calendar-table-header th {
+    padding: 10px 0 !important;
+    font-size: 13px;
+    text-transform: uppercase;
+  }
+  
+  ::ng-deep .mat-calendar-body-cell {
+    height: 40px !important;
+  }
+  
+  ::ng-deep .mat-calendar-body-cell-content {
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    font-size: 14px;
+    border-radius: 50% !important;
+    transition: all 0.2s ease;
+  }
+  
+  ::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+    border: 2px solid #4B6455 !important;
+  }
+  
+  ::ng-deep .mat-calendar-body-selected {
+    background: linear-gradient(115deg, #233329, #355e3b) !important;
+    color: white !important;
+  }
+  
+  ::ng-deep .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover > 
+  .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+    background-color: rgba(53, 94, 59, 0.1) !important;
+  }
+  
+  ::ng-deep .mat-calendar-body-disabled > .mat-calendar-body-cell-content {
+    color: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Time Slots Panel */
+  .time-slots-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow-y: auto;
+    height: 100%;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(53, 94, 59, 0.1);
+  }
+  
+  .section-header h3 {
+    color: #233329;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  
+  .slots-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .time-slot {
+    background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .big-calendar-section {
+      grid-template-columns: 1fr;
+    }
+    
+    .big-calendar {
+      max-height: none;
+    }
+
+    .time-slots-panel {
+      margin-top: 20px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .big-calendar {
+      padding: 15px;
+    }
+
+    .time-slots-panel {
+      padding: 15px;
+    }
+
+    ::ng-deep .mat-calendar-body-cell-content {
+      width: 32px !important;
+      height: 32px !important;
+      line-height: 32px !important;
+    }
   }
   

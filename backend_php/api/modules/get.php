@@ -358,15 +358,23 @@ public function getTimeSlots($dayOfWeek) {
 public function getAppointments($userId = null) {
     try {
         $sql = "SELECT 
-                a.*,
+                a.appointment_id,
+                a.slot_id,
+                a.user_id,
+                a.purpose,
+                a.status,
+                a.remarks,
                 t.start_time,
                 t.end_time,
                 t.day_of_week,
                 t.date,
-                up.name as userName,
-                up.profile_image_path as userImage,
+                up.first_name,
+                up.last_name,
                 up.department,
-                up.year_level as yearLevel
+                up.program,
+                up.year_level,
+                up.profile_image_path,
+                up.id_number as studentId
             FROM appointments a 
             JOIN time_slots t ON a.slot_id = t.slot_id
             JOIN user_profiles up ON a.user_id = up.user_id";
@@ -384,7 +392,30 @@ public function getAppointments($userId = null) {
             $stmt->execute();
         }
         
-        return array("status" => "success", "data" => $stmt->fetchAll(PDO::FETCH_ASSOC));
+        $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Format the appointments data
+        $formattedAppointments = array_map(function($appointment) {
+            return [
+                'id' => $appointment['appointment_id'],
+                'slotId' => $appointment['slot_id'],
+                'userId' => $appointment['user_id'],
+                'studentId' => $appointment['studentId'],
+                'purpose' => $appointment['purpose'],
+                'status' => $appointment['status'],
+                'remarks' => $appointment['remarks'],
+                'date' => $appointment['date'],
+                'time' => $appointment['start_time'] . ' - ' . $appointment['end_time'],
+                'day' => $appointment['day_of_week'],
+                'userName' => $appointment['first_name'] . ' ' . $appointment['last_name'],
+                'department' => $appointment['department'],
+                'program' => $appointment['program'],
+                'yearLevel' => $appointment['year_level'],
+                'userImage' => $appointment['profile_image_path'] ?? 'assets/default-avatar.png'
+            ];
+        }, $appointments);
+
+        return array("status" => "success", "data" => $formattedAppointments);
     } catch (PDOException $e) {
         return array("status" => "error", "message" => $e->getMessage());
     }
@@ -396,11 +427,14 @@ public function getClinicAppointments() {
                 a.appointment_id, 
                 a.purpose, 
                 a.status,
+                a.remarks,
                 ts.date,
                 ts.start_time,
                 ts.end_time,
-                up.name,
+                up.first_name,
+                up.last_name,
                 up.department,
+                up.program,
                 up.year_level,
                 up.id_number,
                 up.profile_image_path
@@ -413,9 +447,27 @@ public function getClinicAppointments() {
         $stmt->execute();
         $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // Format the appointments data
+        $formattedAppointments = array_map(function($appointment) {
+            return [
+                'id' => $appointment['appointment_id'],
+                'studentName' => $appointment['first_name'] . ' ' . $appointment['last_name'],
+                'studentId' => $appointment['id_number'],
+                'department' => $appointment['department'],
+                'program' => $appointment['program'],
+                'date' => $appointment['date'],
+                'time' => $appointment['start_time'] . ' - ' . $appointment['end_time'],
+                'purpose' => $appointment['purpose'],
+                'yearLevel' => $appointment['year_level'],
+                'avatar' => $appointment['profile_image_path'] ?? 'assets/default-avatar.png',
+                'status' => $appointment['status'],
+                'remarks' => $appointment['remarks']
+            ];
+        }, $appointments);
+
         return [
             "status" => "success",
-            "data" => $appointments
+            "data" => $formattedAppointments
         ];
     } catch (PDOException $e) {
         return [
@@ -441,6 +493,42 @@ public function getDocumentDistributionByDepartment() {
         return $this->sendPayload($distribution, "success", "Document distribution retrieved successfully", 200);
     } catch (PDOException $e) {
         return $this->sendPayload(null, "error", $e->getMessage(), 400);
+    }
+}
+
+public function getStudentAppointments($userId) {
+    try {
+        $sql = "SELECT a.appointment_id as id, a.slot_id as slotId, 
+                a.user_id as userId, a.purpose, a.status, a.remarks,
+                t.date, t.start_time, t.end_time, t.day_of_week as day,
+                u.name as userName, u.id_number as studentId,
+                up.department, up.program, up.year_level as yearLevel,
+                u.profile_image_path as userImage
+                FROM appointments a
+                JOIN time_slots t ON a.slot_id = t.slot_id
+                JOIN users u ON a.user_id = u.user_id
+                JOIN user_profiles up ON u.user_id = up.user_id
+                WHERE a.user_id = :user_id";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':user_id' => $userId]);
+        $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Format the time for each appointment
+        foreach ($appointments as &$appointment) {
+            $appointment['time'] = $appointment['start_time'] . ' - ' . $appointment['end_time'];
+            unset($appointment['start_time'], $appointment['end_time']);
+        }
+
+        return [
+            "status" => "success",
+            "data" => $appointments
+        ];
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => $e->getMessage()
+        ];
     }
 }
 

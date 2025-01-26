@@ -222,3 +222,123 @@
       opacity: 1;
     }
   }
+  
+  /* Alert Container */
+  .alert-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Base Alert Styles */
+  .alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    opacity: 0;
+    animation: slideDown 0.3s ease-out forwards;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Success Alert */
+  .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    animation: slideDown 0.3s ease-out forwards, pulse 1.5s infinite;
+  }
+  
+  /* Error Alert */
+  .alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+  
+  /* Icons */
+  .alert i {
+    margin-right: 10px;
+    font-size: 1.2em;
+  }
+  
+  .alert-success i {
+    color: #28a745;
+    animation: rotate 0.5s ease-in-out;
+  }
+  
+  .alert-danger i {
+    color: #dc3545;
+  }
+  
+  /* Animation */
+  @keyframes slideDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Fade out animation */
+  .alert.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
+  /* Add pulse animation for success message */
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+  }
+  
+  /* Add rotation animation for success icon */
+  @keyframes rotate {
+    0% {
+      transform: rotate(-180deg);
+    }
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .alert-container {
+      width: 95%;
+      top: 10px;
+    }
+    
+    .alert {
+      padding: 12px 15px;
+      font-size: 0.9em;
+    }
+  }

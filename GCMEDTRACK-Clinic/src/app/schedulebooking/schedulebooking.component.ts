@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { DateAdapter, NativeDateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 import { ApiService } from '../services/api.service';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
 interface Appointment {
   avatar: string;
@@ -44,7 +45,13 @@ export const MY_DATE_FORMATS = {
 @Component({
   selector: 'app-schedulebooking',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDatepickerModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    MatDatepickerModule,
+    MatFormFieldModule, 
+    MatInputModule
+  ],
   templateUrl: './schedulebooking.component.html',
   styleUrls: ['./schedulebooking.component.css'],
   providers: [
@@ -89,24 +96,50 @@ export class SchedulebookingComponent implements OnInit {
   // Update the editingSlotId type to handle undefined
   editingSlotId: number | null = null;
 
-  constructor(private apiService: ApiService) {}
+  minDate = new Date(); // Prevents selecting past dates
+  
+  constructor(private apiService: ApiService) {
+    // Initialize minDate to start of current day
+    this.minDate.setHours(0, 0, 0, 0);
+  }
   
   ngOnInit(): void {
+    if (!this.selectedDate) {
+      this.selectedDate = new Date();
+    }
     this.loadTimeSlots();
   }
+
+  onDateSelected(date: Date | null): void {
+    if (date) {
+      this.selectedDate = date;
+      const dayIndex = date.getDay();
+      this.selectedDay = this.weekDays[dayIndex];
+      this.loadTimeSlots();
+    }
+  }
+
   private loadTimeSlots(): void {
+    if (!this.selectedDate || !this.selectedDay) return;
+
     this.apiService.getTimeSlots(this.selectedDay).subscribe({
       next: (response: any) => {
         if (response.status === 'success' && Array.isArray(response.data)) {
-          this.timeSlots = response.data.map((slot: any) => ({
-            id: slot.slot_id,
-            dayOfWeek: slot.day_of_week,
-            startTime: slot.start_time,
-            endTime: slot.end_time,
-            date: slot.date,
-            studentLimit: slot.student_limit,
-            currentBookings: slot.current_bookings || 0
-          }));
+          const selectedDateStr = this.formatDateForBackend(this.selectedDate);
+          this.timeSlots = response.data
+            .filter((slot: any) => slot.date === selectedDateStr)
+            .map((slot: any) => ({
+              id: slot.slot_id,
+              dayOfWeek: slot.day_of_week,
+              startTime: slot.start_time,
+              endTime: slot.end_time,
+              date: slot.date,
+              studentLimit: slot.student_limit,
+              currentBookings: slot.current_bookings || 0
+            }));
+          this.filterTimeSlots();
+        } else {
+          this.timeSlots = [];
           this.filterTimeSlots();
         }
       },
@@ -118,56 +151,59 @@ export class SchedulebookingComponent implements OnInit {
     });
   }
 
-  selectDay(day: string): void {
-    this.selectedDay = day;
-    this.loadTimeSlots();
-  }
-
   saveSchedule(): void {
     if (!this.selectedDate || !this.selectedStartTime || !this.selectedEndTime || !this.studentLimit) {
-        // Show error message
-        return;
+      // Show error message
+      return;
     }
 
-    // Format the date to YYYY-MM-DD
-    const formattedDate = this.formatDateForBackend(this.selectedDate);
-
     const timeSlot: TimeSlot = {
-        dayOfWeek: this.selectedDay,
-        startTime: this.formatTimeWithPeriod(this.selectedStartTime),
-        endTime: this.formatTimeWithPeriod(this.selectedEndTime),
-        date: formattedDate,
-        studentLimit: this.studentLimit,
-        currentBookings: 0
+      dayOfWeek: this.selectedDay,
+      startTime: this.formatTimeWithPeriod(this.selectedStartTime),
+      endTime: this.formatTimeWithPeriod(this.selectedEndTime),
+      date: this.formatDateForBackend(this.selectedDate),
+      studentLimit: this.studentLimit,
+      currentBookings: 0
     };
 
-    // If we're editing, include the ID and use updateTimeSlot
     if (this.editingSlotId) {
-        timeSlot.id = this.editingSlotId;
-        this.apiService.updateTimeSlot(this.editingSlotId, timeSlot).subscribe({
-            next: (response) => {
-                if (response.status === 'success') {
-                    this.closeScheduleModal();
-                    this.loadTimeSlots();
-                }
-            },
-            error: (error) => {
-                console.error('Error updating schedule:', error);
-            }
-        });
+      this.apiService.updateTimeSlot(this.editingSlotId, timeSlot).subscribe({
+        next: (response) => {
+          if (response.status === 'success') {
+            this.closeScheduleModal();
+            // Force reload of time slots
+            setTimeout(() => {
+              this.loadTimeSlots();
+            }, 100);
+          }
+        },
+        error: (error) => {
+          console.error('Error updating schedule:', error);
+        },
+        complete: () => {
+          // Reload even if there's an error
+          this.loadTimeSlots();
+        }
+      });
     } else {
-        // If we're adding new, use addTimeSlot
-        this.apiService.addTimeSlot(timeSlot).subscribe({
-            next: (response) => {
-                if (response.status === 'success') {
-                    this.closeScheduleModal();
-                    this.loadTimeSlots();
-                }
-            },
-            error: (error) => {
-                console.error('Error saving schedule:', error);
-            }
-        });
+      this.apiService.addTimeSlot(timeSlot).subscribe({
+        next: (response) => {
+          if (response.status === 'success') {
+            this.closeScheduleModal();
+            // Force reload of time slots
+            setTimeout(() => {
+              this.loadTimeSlots();
+            }, 100);
+          }
+        },
+        error: (error) => {
+          console.error('Error saving schedule:', error);
+        },
+        complete: () => {
+          // Reload even if there's an error
+          this.loadTimeSlots();
+        }
+      });
     }
   }
   
@@ -189,6 +225,9 @@ export class SchedulebookingComponent implements OnInit {
     this.filteredTimeSlots = this.timeSlots.filter(slot => 
       slot.dayOfWeek === this.selectedDay
     );
+
+    // Force change detection
+    this.filteredTimeSlots = [...this.filteredTimeSlots];
   }
 
   @HostListener('document:click', ['$event'])
@@ -331,7 +370,10 @@ export class SchedulebookingComponent implements OnInit {
     this.showTimePicker = true;
   }
 
-  private formatDateForBackend(date: Date): string {
+  private formatDateForBackend(date: Date | null): string {
+    if (!date) {
+      return '';
+    }
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
