@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthStateService } from '../services/auth-state.service';
 
 @Component({
   selector: 'app-home',
@@ -9,13 +10,20 @@ import { CommonModule } from '@angular/common';
 })
 export class HomeComponent implements OnInit {
   selectedImage: string | null = null;
-  showSuccessMessage: boolean = true;
+  showSuccessMessage: boolean = false;
+
+  constructor(private authStateService: AuthStateService) {}
 
   ngOnInit() {
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      this.showSuccessMessage = false;
-    }, 3000);
+    // Only show message if it hasn't been shown before
+    this.showSuccessMessage = this.authStateService.shouldShowLoginMessage();
+    if (this.showSuccessMessage) {
+      this.authStateService.setLoginMessageShown();
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        this.showSuccessMessage = false;
+      }, 3000);
+    }
   }
 
   openModal(image: string) {

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { AuthStateService } from '../services/auth-state.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +27,11 @@ export class LoginComponent {
     password: ''
   };
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private authStateService: AuthStateService
+  ) {}
 
   onSubmit() {
     if (this.isLoginMode) {
@@ -40,6 +45,7 @@ export class LoginComponent {
           console.log('Login response:', response);
           if (response.status?.remarks === 'success' || response.status === 'success') {
             if (response.payload?.token || response.token) {
+              this.authStateService.resetLoginMessage();
               this.router.navigate(['/home']);
             } else {
               this.errorMessage = 'Login successful but no token received';
