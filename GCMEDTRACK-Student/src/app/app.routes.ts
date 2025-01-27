@@ -5,7 +5,7 @@ import { AuthGuard } from './services/auth.guard';
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { BookingComponent } from './booking/booking.component';
-import { AnnouncementComponent } from './announcement/announcement.component';
+// import { AnnouncementComponent } from './announcement/announcement.component';
 
 export const routes: Routes = [
   { 
@@ -37,11 +37,11 @@ export const routes: Routes = [
         component: BookingComponent,
         canActivate: [AuthGuard]
       },
-      {
-        path: 'announcement',
-        component: AnnouncementComponent,
-        canActivate: [AuthGuard]
-      },
+      // {
+      //   path: 'announcement',
+      //   component: AnnouncementComponent,
+      //   canActivate: [AuthGuard]
+      // },
     ]
   },
   { 

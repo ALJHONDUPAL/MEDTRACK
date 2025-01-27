@@ -99,23 +99,32 @@ export class SchedulebookingComponent implements OnInit {
   minDate = new Date(); // Prevents selecting past dates
   
   constructor(private apiService: ApiService) {
-    // Initialize minDate to start of current day
+    this.minDate = new Date();
     this.minDate.setHours(0, 0, 0, 0);
+    this.selectedDate = new Date();
+    this.updateSelectedDay(this.selectedDate);
   }
   
   ngOnInit(): void {
-    if (!this.selectedDate) {
-      this.selectedDate = new Date();
-    }
     this.loadTimeSlots();
   }
 
   onDateSelected(date: Date | null): void {
     if (date) {
-      this.selectedDate = date;
+      // Create a new Date object to avoid reference issues
+      const newDate = new Date(date);
+      // Set time to midnight to ensure consistent date comparison
+      newDate.setHours(0, 0, 0, 0);
+      this.selectedDate = newDate;
+      this.updateSelectedDay(newDate);
+      this.loadTimeSlots();
+    }
+  }
+
+  private updateSelectedDay(date: Date): void {
+    if (date) {
       const dayIndex = date.getDay();
       this.selectedDay = this.weekDays[dayIndex];
-      this.loadTimeSlots();
     }
   }
 

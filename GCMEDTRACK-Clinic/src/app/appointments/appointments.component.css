@@ -240,42 +240,200 @@
     box-shadow: 0 0 0 2px rgba(75, 100, 85, 0.1);
   }
 
-  .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.5rem;
+  .modal-body {
+    padding: 1rem 0;
+    text-align: center;
+    color: #333;
+    font-size: 1.1rem;
   }
 
-  .modal-buttons button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
   }
 
   .modal-buttons .cancel-btn {
     background: #f5f5f5;
     border: 1px solid #ddd;
     color: #666;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
   }
 
   .modal-buttons .cancel-btn:hover {
     background: #eee;
   }
 
-  .modal-buttons .save-btn {
-    background: #4B6455;
+  .modal-buttons .delete-btn {
+    background: #ff4444;
+    border: none;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .modal-buttons .delete-btn:hover {
+    background: #cc0000;
+  }
+
+  .alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .alert-success {
+    background-color: #E8F5E9;
+    border: 1px solid #81C784;
+    color: #2E7D32;
+  }
+
+  .alert-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .alert-content i {
+    font-size: 1.2rem;
+  }
+
+  .alert-close {
+    background: none;
+    border: none;
+    color: #2E7D32;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .alert-close:hover {
+    color: #1B5E20;
+  }
+
+  @keyframes slideIn {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+  }
+
+  .delete-modal {
+    max-width: 400px !important;
+    padding: 1.5rem !important;
+  }
+
+  .delete-modal .modal-header {
+    text-align: center;
+    border-bottom: none;
+    margin-bottom: 1rem;
+  }
+
+  .delete-modal .modal-header h2 {
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: 600;
+  }
+
+  .delete-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+
+  .warning-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #fff3e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .warning-icon i {
+    font-size: 2rem;
+    color: #ff9800;
+  }
+
+  .delete-modal .modal-body p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .delete-modal .modal-body small {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .delete-modal .modal-buttons {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+
+  .delete-modal .modal-buttons button {
+    min-width: 120px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .delete-modal .modal-buttons button i {
+    font-size: 1rem;
+  }
+
+  .delete-modal .cancel-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+  }
+
+  .delete-modal .cancel-btn:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+  }
+
+  .delete-modal .delete-btn {
+    background: #dc3545;
     border: none;
     color: white;
   }
 
-  .modal-buttons .save-btn:hover {
-    background: #3d5244;
-  }
-
-  .modal-buttons .save-btn:disabled {
-    background: #a5b5a2;
-    cursor: not-allowed;
+  .delete-modal .delete-btn:hover {
+    background: #c82333;
   }

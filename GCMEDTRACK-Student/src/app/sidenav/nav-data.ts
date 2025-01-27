@@ -16,9 +16,9 @@ export const navbarData: INavbarData[] = [
         icon: 'fas fa-calendar-check',
         label: 'Booking'
     },
-    {
-        routeLink: 'announcement',
-        icon: 'fas fa-bell',
-        label: 'Announcement'
-    },
+    // {
+    //     routeLink: 'announcement',
+    //     icon: 'fas fa-bell',
+    //     label: 'Announcement'
+    // },
 ];

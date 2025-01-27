@@ -164,11 +164,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
   navigateToBooking(): void {
     this.selectedNavItem = 'booking';
     this.router.navigate(['/booking']);
-  }
+  // }
 
-  navigateToAnnouncement(): void {
-    this.selectedNavItem = 'announcement';
-    this.router.navigate(['/announcement']);
+  // navigateToAnnouncement(): void {
+  //   this.selectedNavItem = 'announcement';
+  //   this.router.navigate(['/announcement']);
   }
 
   logout() {

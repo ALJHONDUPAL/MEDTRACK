@@ -3,12 +3,15 @@
     
     <!-- Big Calendar Section -->
     <div class="big-calendar-section">
-      <mat-calendar 
-        [(selected)]="selectedDate"
-        (selectedChange)="onDateSelected($event)"
-        [minDate]="minDate"
-        class="big-calendar">
-      </mat-calendar>
+      <div class="big-calendar">
+        <mat-calendar 
+          [(selected)]="selectedDate"
+          (selectedChange)="onDateSelected($event)"
+          (yearSelected)="onDateSelected($event)"
+          (monthSelected)="onDateSelected($event)"
+          [minDate]="minDate">
+        </mat-calendar>
+      </div>
 
       <!-- Time Slots Section -->
       <div class="time-slots-panel">

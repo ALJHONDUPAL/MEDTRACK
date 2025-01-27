@@ -31,8 +31,12 @@ export class AppointmentsComponent implements OnInit {
   totalSlots: number = 0;
   currentBookings: number = 0;
   showRejectModal: boolean = false;
+  showDeleteModal: boolean = false;
   rejectionReason: string = '';
   selectedAppointment: Appointment | null = null;
+  showSuccessAlert: boolean = false;
+  alertMessage: string = '';
+  alertTimeout: any;
 
   get studentSlot(): string {
     return `${this.currentBookings}/${this.totalSlots}`;
@@ -145,17 +149,37 @@ export class AppointmentsComponent implements OnInit {
       next: (response) => {
         if (response.status === 'success') {
           appointment.status = 'Accepted';
-          alert('Appointment accepted successfully');
+          this.showAlert('Appointment accepted successfully');
           this.loadAppointments();
         } else {
-          alert(response.message || 'Failed to accept appointment');
+          this.showAlert(response.message || 'Failed to accept appointment');
         }
       },
       error: (error) => {
         console.error('Error accepting appointment:', error);
-        alert('Failed to accept appointment: ' + error);
+        this.showAlert('Failed to accept appointment: ' + error);
       }
     });
+  }
+
+  showAlert(message: string): void {
+    // Clear any existing timeout
+    if (this.alertTimeout) {
+      clearTimeout(this.alertTimeout);
+    }
+    
+    this.alertMessage = message;
+    this.showSuccessAlert = true;
+    
+    // Auto hide after 3 seconds
+    this.alertTimeout = setTimeout(() => {
+      this.closeAlert();
+    }, 3000);
+  }
+
+  closeAlert(): void {
+    this.showSuccessAlert = false;
+    this.alertMessage = '';
   }
 
   cancelAppointment(appointment: Appointment): void {
@@ -201,21 +225,32 @@ export class AppointmentsComponent implements OnInit {
   }
 
   deleteAppointment(appointment: Appointment): void {
-    if (confirm('Are you sure you want to delete this appointment?')) {
-      this.apiService.deleteAppointment(appointment.id).subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            alert('Appointment deleted successfully');
-            this.loadAppointments();
-          } else {
-            alert(response.message || 'Failed to delete appointment');
-          }
-        },
-        error: (error) => {
-          console.error('Error deleting appointment:', error);
-          alert('Failed to delete appointment: ' + error);
+    this.selectedAppointment = appointment;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.selectedAppointment = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.selectedAppointment) return;
+
+    this.apiService.deleteAppointment(this.selectedAppointment.id).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          this.showAlert('Appointment deleted successfully');
+          this.loadAppointments();
+          this.closeDeleteModal();
+        } else {
+          this.showAlert(response.message || 'Failed to delete appointment');
         }
-      });
-    }
+      },
+      error: (error) => {
+        console.error('Error deleting appointment:', error);
+        this.showAlert('Failed to delete appointment: ' + error);
+      }
+    });
   }
 }

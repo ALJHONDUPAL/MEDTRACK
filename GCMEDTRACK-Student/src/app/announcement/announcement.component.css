@@ -1,4 +1,4 @@
-/* Main Container Styles */
+/* Main Container Styles
 .announcements-container {
     max-width: 900px;
     margin: 2rem auto;
@@ -22,7 +22,7 @@
 }
 
 /* Announcement Cards */
-.announcements-list {
+/* .announcements-list {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -39,10 +39,10 @@
 .announcement-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
+} */
 
 /* Announcement Header */
-.announcement-header {
+/* .announcement-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -79,10 +79,10 @@
     gap: 1rem;
     color: #6c757d;
     font-size: 0.9rem;
-}
+} */
 
 /* Announcement Content */
-.announcement-content {
+/* .announcement-content {
     padding: 1.5rem;
 }
 
@@ -96,10 +96,10 @@
     color: #6c757d;
     margin-bottom: 1.2rem;
     line-height: 1.5;
-}
+} */
 
 /* Appointment Info */
-.appointment-info {
+/* .appointment-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
@@ -117,10 +117,10 @@
 
 .info-item i {
     color: #4CAF50;
-}
+} */
 
 /* Rejection Styles */
-.rejection-reason {
+/* .rejection-reason {
     background: #fff5f5;
     border-left: 4px solid #dc3545;
     padding: 1rem;
@@ -156,10 +156,10 @@
 .action-required li {
     color: #6c757d;
     margin-bottom: 0.5rem;
-}
+} */
 
 /* Responsive Design */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
     .announcements-container {
         margin: 1rem;
         padding: 0 1rem;
@@ -172,4 +172,4 @@
     .appointment-info {
         grid-template-columns: 1fr;
     }
-}
+} */ 
