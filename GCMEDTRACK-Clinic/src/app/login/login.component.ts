@@ -72,6 +72,7 @@ export class ClinicLoginComponent {
         if (isSuccess && response.payload) {
           localStorage.setItem('clinicAuthToken', response.payload.token);
           localStorage.setItem('staff', JSON.stringify(response.payload.staff));
+          localStorage.setItem('showLoginSuccess', 'true');
           this.router.navigate(['/dashboard']);
         } else {
           // Fallback to different ways of getting error message
@@ -85,7 +86,7 @@ export class ClinicLoginComponent {
       },
       error: (error) => {
         console.error('Detailed login error:', error);
-        this.errorMessage = error.message || 'Invalid credentials';
+        this.errorMessage = 'Please check your Email or Password';
         this.isLoading = false;
       }
     });

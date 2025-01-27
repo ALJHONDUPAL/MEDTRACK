@@ -125,22 +125,43 @@ h1 {
 }
 
 /* View Medical Button */
-.mat-raised-button.mat-primary {
-  background: linear-gradient(115deg, #233329, #4B6455);
-  color: white;
+.view-medical-btn {
+  background: #2E8B57 !important;
+  color: white !important;
   border: none;
-  padding: 8px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  padding: 10px 24px !important;
+  border-radius: 30px !important;
+  font-weight: 400;
+  letter-spacing: 0.3px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(46, 139, 87, 0.15);
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  font-size: 0.95rem;
 }
 
-.mat-raised-button.mat-primary:hover {
-  background: linear-gradient(115deg, #1a2820, #3d5044);
+.view-medical-btn i {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.view-medical-btn:hover {
+  background: #3CB371 !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(46, 139, 87, 0.2);
+}
+
+.view-medical-btn:active {
+  transform: translateY(1px);
+  background: #2E8B57 !important;
+  box-shadow: 0 2px 4px rgba(46, 139, 87, 0.1);
+}
+
+/* Remove old button styles */
+.mat-raised-button.mat-primary {
+  display: none;
 }
 
 /* Responsive Design */

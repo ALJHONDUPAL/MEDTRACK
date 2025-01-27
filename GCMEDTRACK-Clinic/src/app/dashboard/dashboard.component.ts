@@ -57,9 +57,7 @@ interface Student {
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-
- 
-
+  showSuccessAlert: boolean = false;
 
   @ViewChild('appointmentsChart') appointmentsChartRef!: ElementRef;
   @ViewChild('documentsChart') documentsChartRef!: ElementRef;
@@ -76,6 +74,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   constructor(private apiService: ApiService,  private router: Router) {}
 
   ngOnInit(): void {
+    if (localStorage.getItem('showLoginSuccess') === 'true') {
+      this.showSuccessAlert = true;
+      localStorage.removeItem('showLoginSuccess');
+      
+      // Auto-hide the alert after 3 seconds
+      setTimeout(() => {
+        this.showSuccessAlert = false;
+      }, 3000);
+    }
     this.fetchAllProfiles();
   }
 

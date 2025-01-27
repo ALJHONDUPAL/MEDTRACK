@@ -111,8 +111,9 @@
         <ng-container matColumnDef="action">
           <th mat-header-cell *matHeaderCellDef> Action </th>
           <td mat-cell *matCellDef="let student">
-            <button mat-raised-button color="primary" (click)="goToMedicalDetails(student.user_id)">
-              View Medical
+            <button mat-raised-button class="view-medical-btn" (click)="goToMedicalDetails(student.user_id)">
+              <i class="fas fa-file-medical"></i>
+              <span>View Medical</span>
             </button>
           </td>
         </ng-container>
