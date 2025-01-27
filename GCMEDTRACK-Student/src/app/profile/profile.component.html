@@ -6,48 +6,53 @@
 </div>
 
 <div class="profile-container">
-  <div class="profile-header">
-    <div class="profile-image">
-      <img 
-        [src]="getProfileImageUrl()"
-        [alt]="getFullName() + '\'s profile picture'"
-        (error)="handleImageError()"
-      >
-    </div>
-
-    <!-- Add student info display -->
-    <div class="student-info">
-      <h2>{{ getFullName() }}</h2>
-      <div class="info-row">
-        <span class="info-label">Student ID:</span>
-        <span class="info-value">{{ profileData.id_number }}</span>
-      </div>
-      <div class="info-row" *ngIf="profileData.department || profileData.program">
-        <span class="info-label">Department:</span>
-        <span class="info-value">
-          {{ profileData.department || 'Not set' }}
-          <ng-container *ngIf="profileData.program">
-            - {{ profileData.program }}
-          </ng-container>
-        </span>
-      </div>
-      <div class="info-row" *ngIf="profileData.year_level">
-        <span class="info-label">Year Level:</span>
-        <span class="info-value">{{ getYearLevelDisplay(profileData.year_level) }} Year</span>
-      </div>
-      <div class="info-row" *ngIf="profileData.contact_number">
-        <span class="info-label">Contact Number:</span>
-        <span class="info-value">{{ profileData.contact_number }}</span>
+  <div class="profile-card">
+    <div class="profile-left">
+      <div class="profile-image">
+        <img 
+          [src]="getProfileImageUrl()"
+          [alt]="getFullName() + '\'s profile picture'"
+          (error)="handleImageError()"
+        >
       </div>
     </div>
+    
+    <div class="profile-right">
+      <div class="profile-name">
+        <h2>{{ getFullName() }}</h2>
+        <button 
+          class="edit-profile-btn" 
+          (click)="openModal()" 
+          aria-label="Edit profile details"
+        >
+          <i class="fas fa-edit"></i> Edit profile
+        </button>
+      </div>
 
-    <button 
-      class="edit-profile-btn" 
-      (click)="openModal()" 
-      aria-label="Edit profile details"
-    >
-      <i class="fas fa-edit"></i> Edit profile
-    </button>
+      <div class="profile-grid">
+        <div class="grid-item">
+          <div class="info-label">ID Number:</div>
+          <div class="info-value">{{ profileData.id_number }}</div>
+        </div>
+        <div class="grid-item">
+          <div class="info-label">Department:</div>
+          <div class="info-value">{{ profileData.department }}</div>
+        </div>
+        <div class="grid-item">
+          <div class="info-label">Program:</div>
+          <div class="info-value">{{ profileData.program }}</div>
+        </div>
+        <div class="grid-item">
+          <div class="info-label">Year Level:</div>
+          <div class="info-value">{{ getYearLevelDisplay(profileData.year_level) }}</div>
+        </div>
+      </div>
+
+      <div class="contact-info">
+        <div class="info-label">Contact Number:</div>
+        <div class="info-value">{{ profileData.contact_number }}</div>
+      </div>
+    </div>
   </div>
     
   <!-- Documents Table -->
