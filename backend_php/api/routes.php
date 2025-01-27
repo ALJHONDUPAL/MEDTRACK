@@ -85,7 +85,16 @@ switch ($_SERVER['REQUEST_METHOD']) {
                                 "message" => "Invalid or missing user ID."
                             ]);
                         }
-                        break;        
+                        break;     
+                
+                        case 'getListStudentProfiles':
+                            $department = $_GET['department'] ?? null;
+                            $year = $_GET['year'] ?? null;
+                        
+                            echo json_encode($get->getListStudentProfiles($department, $year));
+                            break;
+                       
+                        
 
             // Get user profile by domain account (email or username)
             case 'getProfileByDomainAccount':

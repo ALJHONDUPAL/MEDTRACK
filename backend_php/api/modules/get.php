@@ -332,6 +332,11 @@ public function getStudentBasicDetails($userId)
     }
 }
 
+
+
+
+
+
 public function getTimeSlots($dayOfWeek) {
     try {
         $sql = "SELECT t.*, 
@@ -531,5 +536,97 @@ public function getStudentAppointments($userId) {
         ];
     }
 }
+
+
+//clinic for dashboard 
+public function getListStudentProfiles($department = null, $year = null) {
+    try {
+        $sql = "
+        SELECT 
+            up.user_id,
+            up.first_name,
+            up.last_name,
+            up.middle_name,
+            up.department,
+            up.program,
+            up.year_level AS yearLevel,
+            up.id_number AS idNumber,
+            
+       
+            IFNULL(JSON_ARRAYAGG(
+                DISTINCT JSON_OBJECT(
+                    'user_id', md.user_id,
+                    'document_type', md.document_type,
+                    'date', md.date,
+                    'status', md.status,
+                    'location', md.location,
+                    'uploaded_at', md.uploaded_at
+                )
+            ), '[]') AS medical_documents,
+
+            
+            IFNULL(JSON_ARRAYAGG(
+                DISTINCT JSON_OBJECT(
+                    'user_id', vr.user_id,
+                    'first_dose_type', vr.first_dose_type,
+                    'first_dose_date', vr.first_dose_date,
+                    'second_dose_type', vr.second_dose_type,
+                    'second_dose_date', vr.second_dose_date,
+                    'booster_type', vr.booster_type,
+                    'booster_date', vr.booster_date,
+                    'status', vr.status,
+                    'uploaded_at', vr.uploaded_at
+                )
+            ), '[]') AS vaccination_records
+        FROM user_profiles up
+        LEFT JOIN medical_documents md ON md.user_id = up.user_id
+        LEFT JOIN vaccination_records vr ON vr.user_id = up.user_id
+        WHERE 1=1
+        ";
+        
+        $params = [];
+
+        // Add filters
+        if (!empty($department)) {
+            $sql .= " AND up.department = :department";
+            $params[':department'] = $department;
+        }
+        if (!empty($year)) {
+            $sql .= " AND up.year_level = :year";
+            $params[':year'] = $year;
+        }
+
+        // Group results by user_id for proper aggregation
+        $sql .= " GROUP BY up.user_id, up.first_name, up.last_name, up.middle_name, up.department, up.program, up.year_level, up.id_number";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            "status" => "success",
+            "data" => $profiles
+        ];
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ];
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

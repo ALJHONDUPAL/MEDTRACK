@@ -145,6 +145,43 @@ deleteClinic(staffId: number): Observable<any> {
   }
 
 
+  getListStudentProfiles(department?: string, program?: string, year?: string): Observable<any> {
+    const params = new HttpParams()
+      .set('department', department || '')
+      .set('program', program || '')
+      .set('year', year || '');
+  
+    return this.http.get(`${this.baseUrl}/getAllStudentProfiles`, { params }).pipe(
+      tap(response => {
+        console.log('Response from API: ', response); // Check if `userId` is present
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   getClinicAppointments(): Observable<any> {
     return this.http.get(`${this.baseUrl}/getClinicAppointments`).pipe(
       tap(response => console.log('Raw API response:', response)), // Debug log
