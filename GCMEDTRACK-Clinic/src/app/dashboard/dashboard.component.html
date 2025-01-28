@@ -19,70 +19,69 @@
 
 
   <div class="documents-container">
-    <h1>Student Medical Documents</h1>
+    <h1>Student Medical Reports</h1>
     
-    <!-- Search controls outside container -->
+    <!-- Search controls -->
     <div class="search-controls">
-      <div class="dropdown">
-        <select
-          [(ngModel)]="selectedDepartment"
-          (ngModelChange)="onDepartmentChange()"
-          class="form-select"
-        >
-          <option value="">All Departments</option>
-          <option value="CAHS">CAHS</option>
-          <option value="CBA">CBA</option>
-          <option value="CEAS">CEAS</option>
-          <option value="CHTM-Tourism">CHTM-Tourism</option>
-          <option value="CHTM-Hospitality">CHTM-Hospitality</option>
-          <option value="CCS">CCS</option>
-        </select>
-      </div>
-    
-      <div class="dropdown">
-        <select
-          [(ngModel)]="selectedProgram"
-          (ngModelChange)="onProgramChange()"
-          class="form-select"
-        >
-          <option value="">All Programs</option>
-          <option
-            *ngFor="let program of selectedPrograms[selectedDepartment] || []"
-            [value]="program"
+      <div class="search-controls-left">
+        <div class="dropdown">
+          <select
+            [(ngModel)]="selectedDepartment"
+            (ngModelChange)="onDepartmentChange()"
+            class="form-select"
           >
-            {{ program }}
-          </option>
-        </select>
+            <option value="">All Departments</option>
+            <option value="CAHS">CAHS</option>
+            <option value="CBA">CBA</option>
+            <option value="CEAS">CEAS</option>
+            <option value="CHTM">CHTM</option>
+            <option value="CCS">CCS</option>
+          </select>
+        </div>
+      
+        <div class="dropdown">
+          <select
+            [(ngModel)]="selectedProgram"
+            (ngModelChange)="onProgramChange()"
+            class="form-select"
+          >
+            <option value="">All Programs</option>
+            <option
+              *ngFor="let program of selectedPrograms[selectedDepartment] || []"
+              [value]="program"
+            >
+              {{ program }}
+            </option>
+          </select>
+        </div>
+      
+        <div class="dropdown">
+          <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
+            <option value="">All Years</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
+        </div>
+      
+        <div class="search-box">
+          <input
+            type="text"
+            placeholder="Search by ID or Name"
+            [(ngModel)]="searchQuery"
+            (input)="onSearchChange()"
+          />
+        </div>
       </div>
-    
-      <div class="dropdown">
-        <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
-          <option value="">All Years</option>
-          <option value="1">1st Year</option>
-          <option value="2">2nd Year</option>
-          <option value="3">3rd Year</option>
-          <option value="4">4th Year</option>
-        </select>
-      </div>
-    
-      <div class="search-box">
-        <input
-          type="text"
-          placeholder="Student I.D or Student Name"
-          [(ngModel)]="searchQuery"
-          (input)="onSearchChange()"
-        />
-        <button class="search-button">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
+      
       <button class="download-button" (click)="downloadExcel()">
-        Download Excel
+        <i class="fas fa-download"></i> Download Excel
       </button>
     </div>
     
     <div class="table-container mat-elevation-z8">
-      <table mat-table [dataSource]="filteredStudents" class="mat-table">
+      <table mat-table [dataSource]="filteredStudents" class="mat-elevation-z8">
     
         <!-- First Name Column -->
         <ng-container matColumnDef="firstName">
@@ -99,7 +98,7 @@
         <!-- ID Number Column -->
         <ng-container matColumnDef="idNumber">
           <th mat-header-cell *matHeaderCellDef> ID Number </th>
-          <td mat-cell *matCellDef="let student"> {{ student.idNumber }} </td>
+          <td mat-cell *matCellDef="let student"> {{ student.id_number }} </td>
         </ng-container>
     
         <!-- Department Column -->
@@ -117,46 +116,37 @@
         <!-- Year Level Column -->
         <ng-container matColumnDef="yearLevel">
           <th mat-header-cell *matHeaderCellDef> Year Level </th>
-          <td mat-cell *matCellDef="let student"> {{ student.yearLevel }} </td>
+          <td mat-cell *matCellDef="let student"> {{ student.year_level }} </td>
         </ng-container>
     
-      <!-- Medical Documents Column -->
-<ng-container matColumnDef="medicalDocuments">
-  <th mat-header-cell *matHeaderCellDef> Medical Documents </th>
-  <td mat-cell *matCellDef="let student">
-    <div *ngIf="student.medical_documents?.length; else noDocuments">
-      <ul>
-        <li *ngFor="let doc of student.medical_documents">
-          {{ doc.document_type }} ({{ doc.date }}) - {{ doc.status }}
-        </li>
-      </ul>
-    </div>
-    <ng-template #noDocuments>No Documents</ng-template>
-  </td>
-</ng-container>
-
-<!-- Vaccination Records Column -->
-<ng-container matColumnDef="vaccinationRecords">
-  <th mat-header-cell *matHeaderCellDef> Vaccination Records </th>
-  <td mat-cell *matCellDef="let student">
-    <div *ngIf="student.vaccination_records?.length; else noRecords">
-      <ul>
-        <li *ngFor="let record of student.vaccination_records">
-          {{ record.first_dose_type }} (1st: {{ record.first_dose_date }}), 
-          {{ record.second_dose_type }} (2nd: {{ record.second_dose_date }}), 
-          Booster: {{ record.booster_type }} ({{ record.booster_date }}) - {{ record.status }}
-        </li>
-      </ul>
-    </div>
-    <ng-template #noRecords>No Records</ng-template>
-  </td>
-</ng-container>
-
+        <!-- Medical Documents Column -->
+        <ng-container matColumnDef="medicalDocuments">
+          <th mat-header-cell *matHeaderCellDef> Medical Documents </th>
+          <td mat-cell *matCellDef="let student"> 
+            {{ student.submitted_documents }}/{{ student.required_documents }}
+          </td>
+        </ng-container>
+    
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let student" 
+              [ngClass]="{'completed': student.status === 'Completed', 'incomplete': student.status !== 'Completed'}">
+            {{ student.status }}
+          </td>
+        </ng-container>
     
         <!-- Header and Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+            [routerLink]="[ row.user_id]"
+            class="clickable-row"></tr>
       </table>
+
+      <!-- No Data Message -->
+      <div *ngIf="!filteredStudents.length" class="no-data-message">
+        No students found matching the criteria
+      </div>
     </div>
     
   </div>

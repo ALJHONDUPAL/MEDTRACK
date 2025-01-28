@@ -159,29 +159,6 @@ deleteClinic(staffId: number): Observable<any> {
     );
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   getClinicAppointments(): Observable<any> {
     return this.http.get(`${this.baseUrl}/getClinicAppointments`).pipe(
       tap(response => console.log('Raw API response:', response)), // Debug log
@@ -242,6 +219,34 @@ deleteClinic(staffId: number): Observable<any> {
   
   getDocumentDistributionByDepartment(): Observable<any> {
     return this.http.get(`${this.baseUrl}/getDocumentDistributionByDepartment`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getAllStudentMedicalReports(): Observable<any> {
+    const url = `${this.baseUrl}/getAllStudentMedicalReports`;
+    console.log('Making API request to:', url);
+    
+    return this.http.get(url).pipe(
+      tap(response => {
+        console.log('API Response:', response);
+      }),
+      catchError(error => {
+        console.error('API Error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
+  getStudentMedicalReportsForExcel(filters: any): Observable<any> {
+    return this.http.get(`${this.baseUrl}/getStudentMedicalReportsForExcel`, {
+      params: {
+        department: filters.department || '',
+        program: filters.program || '',
+        year: filters.year || '',
+        search: filters.search || ''
+      }
+    }).pipe(
       catchError(this.handleError)
     );
   }

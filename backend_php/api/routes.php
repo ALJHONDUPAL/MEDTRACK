@@ -48,6 +48,11 @@ if (isset($_REQUEST['request'])) {
     exit();
 }
 
+// At the start of the file, after the headers
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+header('Content-Type: application/json');
+
 // Handle requests based on HTTP method
 switch ($_SERVER['REQUEST_METHOD']) {
 
@@ -86,15 +91,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                             ]);
                         }
                         break;     
-                
-                        case 'getListStudentProfiles':
-                            $department = $_GET['department'] ?? null;
-                            $year = $_GET['year'] ?? null;
-                        
-                            echo json_encode($get->getListStudentProfiles($department, $year));
-                            break;
-                       
-                        
+                                 
 
             // Get user profile by domain account (email or username)
             case 'getProfileByDomainAccount':
@@ -169,6 +166,26 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
             case 'getDocumentDistributionByDepartment':
                 echo json_encode($get->getDocumentDistributionByDepartment());
+                break;
+
+            case 'getAllStudentMedicalReports':
+                error_log("Received request for getAllStudentMedicalReports");
+                try {
+                    $result = $get->getAllStudentMedicalReports();
+                    error_log("API Response: " . json_encode($result));
+                    header('Content-Type: application/json');
+                    echo json_encode($result);
+                } catch (Exception $e) {
+                    error_log("Error in route: " . $e->getMessage());
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ]);
+                }
+                break;
+
+            case 'getStudentMedicalReportsForExcel':
+                echo json_encode($get->getStudentMedicalReportsForExcel());
                 break;
 
     break;

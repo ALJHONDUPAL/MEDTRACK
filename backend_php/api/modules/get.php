@@ -537,96 +537,209 @@ public function getStudentAppointments($userId) {
     }
 }
 
-
-//clinic for dashboard 
-public function getListStudentProfiles($department = null, $year = null) {
+public function getAllStudentMedicalReports() {
     try {
-        $sql = "
-        SELECT 
-            up.user_id,
-            up.first_name,
-            up.last_name,
-            up.middle_name,
-            up.department,
-            up.program,
-            up.year_level AS yearLevel,
-            up.id_number AS idNumber,
-            
-       
-            IFNULL(JSON_ARRAYAGG(
-                DISTINCT JSON_OBJECT(
-                    'user_id', md.user_id,
-                    'document_type', md.document_type,
-                    'date', md.date,
-                    'status', md.status,
-                    'location', md.location,
-                    'uploaded_at', md.uploaded_at
-                )
-            ), '[]') AS medical_documents,
-
-            
-            IFNULL(JSON_ARRAYAGG(
-                DISTINCT JSON_OBJECT(
-                    'user_id', vr.user_id,
-                    'first_dose_type', vr.first_dose_type,
-                    'first_dose_date', vr.first_dose_date,
-                    'second_dose_type', vr.second_dose_type,
-                    'second_dose_date', vr.second_dose_date,
-                    'booster_type', vr.booster_type,
-                    'booster_date', vr.booster_date,
-                    'status', vr.status,
-                    'uploaded_at', vr.uploaded_at
-                )
-            ), '[]') AS vaccination_records
-        FROM user_profiles up
-        LEFT JOIN medical_documents md ON md.user_id = up.user_id
-        LEFT JOIN vaccination_records vr ON vr.user_id = up.user_id
-        WHERE 1=1
-        ";
+        error_log("Starting getAllStudentMedicalReports");
         
-        $params = [];
-
-        // Add filters
-        if (!empty($department)) {
-            $sql .= " AND up.department = :department";
-            $params[':department'] = $department;
-        }
-        if (!empty($year)) {
-            $sql .= " AND up.year_level = :year";
-            $params[':year'] = $year;
-        }
-
-        // Group results by user_id for proper aggregation
-        $sql .= " GROUP BY up.user_id, up.first_name, up.last_name, up.middle_name, up.department, up.program, up.year_level, up.id_number";
-
+        $sql = "SELECT 
+                up.*,
+                (SELECT COUNT(*) FROM medical_documents md 
+                 WHERE md.user_id = up.user_id 
+                 AND md.status = 'Submitted') as medical_docs_count,
+                (SELECT COUNT(*) FROM vaccination_records vr 
+                 WHERE vr.user_id = up.user_id 
+                 AND vr.status = 'Submitted') as vaccination_docs_count
+                FROM user_profiles up";
+                
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-        $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log("Found " . count($students) . " students");
 
-        return [
+        $formattedStudents = array_map(function($student) {
+            // Get required documents count based on department and year level
+            $requiredDocs = $this->getRequiredDocumentsCount(
+                $student['department'], 
+                $student['program'], 
+                $student['year_level']
+            );
+            
+            // Count total submitted documents (medical + vaccination)
+            $submittedDocs = intval($student['medical_docs_count']) + intval($student['vaccination_docs_count']);
+            
+            return [
+                'user_id' => $student['user_id'],
+                'first_name' => $student['first_name'],
+                'last_name' => $student['last_name'],
+                'id_number' => $student['id_number'],
+                'department' => $student['department'],
+                'program' => $student['program'],
+                'year_level' => $student['year_level'],
+                'submitted_documents' => $submittedDocs,
+                'required_documents' => $requiredDocs,
+                'status' => $submittedDocs >= $requiredDocs ? 'Completed' : 'Not Complete Yet'
+            ];
+        }, $students);
+
+        $response = [
             "status" => "success",
-            "data" => $profiles
+            "data" => $formattedStudents
         ];
-    } catch (PDOException $e) {
+        
+        return $response;
+        
+    } catch (Exception $e) {
+        error_log("Error in getAllStudentMedicalReports: " . $e->getMessage());
         return [
             "status" => "error",
-            "message" => "Database error: " . $e->getMessage()
+            "message" => $e->getMessage()
         ];
     }
 }
 
+private function getRequiredDocumentsCount($department, $program, $yearLevel) {
+    // Base requirements for all departments
+    $count = 4; // CBC, Urinalysis, Chest X-ray, COVID-19 Vaccination
 
+    // For CAHS department
+    if ($department === 'CAHS') {
+        $count += 3; // Anti HBS, Hepatitis B Vaccine, Flu Vaccine
 
+        if ($yearLevel === '1') {
+            $count += 1; // Hepatitis screening
+        }
 
+        if (in_array($yearLevel, ['2', '3', '4'])) {
+            $count += 1; // Drug Test
+        }
+    }
 
+    // For BSHM program in CHTM
+    if ($department === 'CHTM' && $program === 'BSHM') {
+        $count += 2; // Anti HAV, Fecalysis
+    }
 
+    return $count;
+}
 
+public function getStudentMedicalReportsForExcel() {
+    try {
+        // Get filter parameters
+        $department = $_GET['department'] ?? '';
+        $program = $_GET['program'] ?? '';
+        $year = $_GET['year'] ?? '';
+        $search = $_GET['search'] ?? '';
 
+        // Build the base query
+        $sql = "SELECT * FROM user_profiles up WHERE 1=1";
+        $params = [];
 
+        // Add filters
+        if ($department) {
+            $sql .= " AND department = :department";
+            $params[':department'] = $department;
+        }
+        if ($program) {
+            $sql .= " AND program = :program";
+            $params[':program'] = $program;
+        }
+        if ($year) {
+            $sql .= " AND year_level = :year";
+            $params[':year'] = $year;
+        }
+        if ($search) {
+            $sql .= " AND (first_name LIKE :search OR last_name LIKE :search OR id_number LIKE :search)";
+            $params[':search'] = "%$search%";
+        }
 
+        $sql .= " ORDER BY last_name";
 
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        $formattedStudents = array_map(function($student) {
+            // Get medical documents for this student
+            $medDocsSQL = "SELECT 
+                document_type,
+                date,
+                location
+                FROM medical_documents 
+                WHERE user_id = :user_id";
+            $medStmt = $this->pdo->prepare($medDocsSQL);
+            $medStmt->execute([':user_id' => $student['user_id']]);
+            $medicalDocs = $medStmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Get vaccination details
+            $vacSQL = "SELECT 
+                first_dose_type,
+                first_dose_date,
+                second_dose_type,
+                second_dose_date,
+                booster_type,
+                booster_date
+                FROM vaccination_records 
+                WHERE user_id = :user_id";
+            $vacStmt = $this->pdo->prepare($vacSQL);
+            $vacStmt->execute([':user_id' => $student['user_id']]);
+            $vaccination = $vacStmt->fetch(PDO::FETCH_ASSOC);
 
+            // Format medical documents details
+            $medDocsDetails = array_map(function($doc) {
+                return sprintf(
+                    "%s (Date: %s, Location: %s)",
+                    $doc['document_type'],
+                    $doc['date'] ?? 'N/A',
+                    $doc['location'] ?? 'N/A'
+                );
+            }, $medicalDocs);
+
+            // Format vaccination details
+            $vaccinationDetails = $vaccination ? sprintf(
+                "First Dose: %s (Date: %s)\nSecond Dose: %s (Date: %s)\nBooster: %s (Date: %s)",
+                $vaccination['first_dose_type'] ?? 'N/A',
+                $vaccination['first_dose_date'] ?? 'N/A',
+                $vaccination['second_dose_type'] ?? 'N/A',
+                $vaccination['second_dose_date'] ?? 'N/A',
+                $vaccination['booster_type'] ?? 'N/A',
+                $vaccination['booster_date'] ?? 'N/A'
+            ) : 'No vaccination record';
+
+            // Get required documents count
+            $requiredDocs = $this->getRequiredDocumentsCount(
+                $student['department'], 
+                $student['program'], 
+                $student['year_level']
+            );
+
+            return [
+                'First Name' => $student['first_name'],
+                'Last Name' => $student['last_name'],
+                'ID Number' => $student['id_number'],
+                'Department' => $student['department'],
+                'Program' => $student['program'],
+                'Year Level' => $student['year_level'],
+                'Required Documents' => $requiredDocs,
+                'Medical Documents' => empty($medDocsDetails) ? 
+                    'No medical documents submitted' : 
+                    implode("\n", $medDocsDetails),
+                'Vaccination Details' => $vaccinationDetails
+            ];
+        }, $students);
+
+        return [
+            "status" => "success",
+            "data" => $formattedStudents
+        ];
+        
+    } catch (Exception $e) {
+        error_log("Error in getStudentMedicalReportsForExcel: " . $e->getMessage());
+        return [
+            "status" => "error",
+            "message" => $e->getMessage()
+        ];
+    }
+}
 
 }

@@ -7,52 +7,38 @@ import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 Chart.register(...registerables);
 Chart.register(DataLabelsPlugin);
 
-type DepartmentKeys = 'CSS' | 'CEAS' | 'CAHS' | 'CHTM-Tourism' | 'CHTM-Hospitality' | 'CBA';
+type DepartmentKeys = 'CSS' | 'CEAS' | 'CAHS' | 'CHTM' | 'CBA';
 
-
-interface Student {
+interface StudentMedicalReport {
   user_id: string;
   first_name: string;
-  middle_name: string;
   last_name: string;
-  department: DepartmentKeys;
+  id_number: string;
+  department: string;
   program: string;
-  yearLevel: string;
-  idNumber: string;
-  profile_image_path?: string;
-
-  // Fields related to Medical Documents
-  medical_documents?: {
-    document_type: string;
-    date: string;
-    status: string;
-    location: string;
-    uploaded_at: string;
-  }[];
-
-  // Fields related to Vaccination Records
-  vaccination_records?: {
-    first_dose_type: string;
-    first_dose_date: string;
-    second_dose_type: string;
-    second_dose_date: string;
-    booster_type: string;
-    booster_date: string;
-    status: string;
-    uploaded_at: string;
-  }[];
+  year_level: string;
+  submitted_documents: number;
+  required_documents: number;
+  status: string;
 }
-
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, FormsModule, MatTableModule, MatButtonModule, MatIconModule],
+  standalone: true,
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    MatTableModule,
+    MatButtonModule, 
+    MatIconModule,
+    RouterModule
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -71,9 +57,69 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     data: [5, 12, 8, 15, 10, 7, 3]
   };
 
+  displayedColumns: string[] = [
+    'firstName',
+    'lastName',
+    'idNumber',
+    'department',
+    'program',
+    'yearLevel',
+    'medicalDocuments',
+    'status'
+  ];
+  
+  filteredStudents: StudentMedicalReport[] = [];
+  searchQuery: string = '';
+  selectedDepartment: string = ''; // Allow empty for "All Departments"
+  selectedProgram: string = ''; // Allow empty for "All Programs"
+  selectedYear: string = ''; // Allow empty for "All Years"
+  students: StudentMedicalReport[] = [];
+  selectedPrograms: { [key: string]: string[] } = {
+    'CAHS': ['BSN', 'BSM'],
+    'CBA': [
+      'BSA',
+      'BSBA-Financial Management',
+      'BSBA-Human Resource Management',
+      'BSBA-Marketing Management',
+      'BSCA',
+    ],
+    'CCS': ['BSIT', 'BSCS', 'BSEMC'],
+    'CEAS': [
+      'BACOM',
+      'BECE',
+      'BCAE',
+      'BPED',
+      'BSED-English',
+      'BSED-Filipino',
+      'BSED-Mathematics',
+      'BSED-Social Studies',
+      'BSED-Sciences',
+    ],
+    'CHTM': ['BSHM', 'BSTM'],
+  };
+
+  styles: string[] = [
+    `.completed {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .incomplete {
+      color: #f44336;
+      font-weight: bold;
+    }
+    .clickable-row {
+      cursor: pointer;
+    }
+    .clickable-row:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    `
+  ];
+
   constructor(private apiService: ApiService,  private router: Router) {}
 
   ngOnInit(): void {
+    console.log('DashboardComponent initialized');
     if (localStorage.getItem('showLoginSuccess') === 'true') {
       this.showSuccessAlert = true;
       localStorage.removeItem('showLoginSuccess');
@@ -83,7 +129,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.showSuccessAlert = false;
       }, 3000);
     }
-    this.fetchAllProfiles();
+    this.fetchAllStudentMedicalReports();
   }
 
   ngAfterViewInit(): void {
@@ -222,83 +268,36 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
-
-
-
-
-
-  //for table 
-  displayedColumns: string[] = [
-    'firstName',
-    'lastName',
-    'idNumber',
-    'department',
-    'program',
-    'yearLevel',
-    'medicalDocuments',
-    'vaccinationRecords',
-  ];
-  
-  filteredStudents: Student[] = [];
-  searchQuery: string = '';
-  selectedDepartment: string = ''; // Allow empty for "All Departments"
-  selectedProgram: string = ''; // Allow empty for "All Programs"
-  selectedYear: string = ''; // Allow empty for "All Years"
-  students: Student[] = [];
-  selectedPrograms: { [key: string]: string[] } = {
-    'CAHS': ['BSN', 'BSM'],
-    'CBA': [
-      'BSA',
-      'BSBA-Financial Management',
-      'BSBA-Human Resource Management',
-      'BSBA-Marketing Management',
-      'BSCA',
-    ],
-    'CCS': ['BSIT', 'BSCS', 'BSEMC'],
-    'CEAS': [
-      'BACOM',
-      'BECE',
-      'BCAE',
-      'BPED',
-      'BSED-English',
-      'BSED-Filipino',
-      'BSED-Mathematics',
-      'BSED-Social Studies',
-      'BSED-Sciences',
-    ],
-    'CHTM-Hospitality': ['BSHM'],
-    'CHTM-Tourism': ['BSTM'],
-  };
-
-  fetchAllProfiles(): void {
-  this.apiService.getListStudentProfiles(this.selectedDepartment, this.selectedYear).subscribe({
-    next: (response) => {
-      if (response.status === 'success') {
-        this.students = response.data.map((student: any) => ({
-          ...student,
-          // Parsing the JSON arrays (medical_documents and vaccination_records)
-          medical_documents: student.medical_documents ? JSON.parse(student.medical_documents) : [],
-          vaccination_records: student.vaccination_records ? JSON.parse(student.vaccination_records) : []
-        }));
-
-        console.log('Fetched and parsed students:', this.students);
-        this.applyFilters();
-      } else {
-        console.error('Error fetching profiles:', response.message);
+  fetchAllStudentMedicalReports(): void {
+    console.log('Fetching student medical reports...');
+    this.apiService.getAllStudentMedicalReports().subscribe({
+      next: (response) => {
+        console.log('Raw API response:', response);
+        if (response && response.status === 'success') {
+          if (Array.isArray(response.data)) {
+            this.students = response.data;
+            this.filteredStudents = [...this.students];
+            console.log('Students loaded:', this.students.length);
+            console.log('First student:', this.students[0]);
+          } else {
+            console.error('Response data is not an array:', response.data);
+            this.students = [];
+            this.filteredStudents = [];
+          }
+        } else {
+          console.error('Invalid response:', response);
+          this.students = [];
+          this.filteredStudents = [];
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching student medical reports:', error);
+        this.students = [];
+        this.filteredStudents = [];
       }
-    },
-    error: (error) => {
-      console.error('API Error:', error);
-    }
-  });
-}
+    });
+  }
 
-  
-  
-  
-  
-  
-  
   onDepartmentChange(): void {
     // Clear the selected program when department changes
     this.selectedProgram = '';
@@ -318,60 +317,104 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   applyFilters(): void {
-    console.log('Unfiltered students:', this.students);
-  
     this.filteredStudents = this.students.filter(student => {
       const matchesDepartment = this.selectedDepartment ? student.department === this.selectedDepartment : true;
       const matchesProgram = this.selectedProgram ? student.program === this.selectedProgram : true;
-      const matchesYear = this.selectedYear ? student.yearLevel === this.selectedYear : true;
+      const matchesYear = this.selectedYear ? student.year_level === this.selectedYear : true;
       const matchesSearchQuery = this.searchQuery
         ? (
-          student.idNumber.includes(this.searchQuery) ||
+          student.id_number.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           student.first_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           student.last_name.toLowerCase().includes(this.searchQuery.toLowerCase())
         )
         : true;
-  
+
       return matchesDepartment && matchesProgram && matchesYear && matchesSearchQuery;
     });
-  
-    console.log('Filtered students:', this.filteredStudents);
   }
   
-
   downloadExcel(): void {
-    const exportData = this.filteredStudents.map(student => {
-      const { profile_image_path, medical_documents, vaccination_records, ...studentWithoutImage } = student;
-  
-      // Ensure medical_documents and vaccination_records are defined (default to empty arrays if undefined)
-      const flattenedMedicalDocs = (medical_documents ?? [])
-        .map(doc => `${doc.document_type} (${doc.date}) - ${doc.status}`)
-        .join(', ') || 'No Documents';
-  
-      const flattenedVaccRecords = (vaccination_records ?? [])
-        .map(record => `${record.first_dose_type} (1st Dose: ${record.first_dose_date}), ${record.second_dose_type} (2nd Dose: ${record.second_dose_date}), ${record.booster_type} (Booster: ${record.booster_date}) - ${record.status}`)
-        .join(', ') || 'No Records';
-  
-      return {
-        ...studentWithoutImage,
-        medical_documents: flattenedMedicalDocs,
-        vaccination_records: flattenedVaccRecords,
-      };
-    });
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Student Data': worksheet },
-      SheetNames: ['Student Data'],
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    console.log('Starting Excel download...');
     
-    saveAs(blob, 'StudentData.xlsx');
+    // Pass the current filters to the API
+    const filters = {
+      department: this.selectedDepartment,
+      program: this.selectedProgram,
+      year: this.selectedYear,
+      search: this.searchQuery
+    };
+    
+    this.apiService.getStudentMedicalReportsForExcel(filters).subscribe({
+      next: (response) => {
+        if (response.status === 'success' && Array.isArray(response.data)) {
+          // Create worksheet
+          const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(response.data);
+
+          // Auto-size columns
+          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+          for (let C = range.s.c; C <= range.e.c; ++C) {
+            let max_width = 0;
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+              const cell = ws[XLSX.utils.encode_cell({r: R, c: C})];
+              if (cell && cell.v) {
+                const text = cell.v.toString();
+                if (C === 7 || C === 8) { // Medical Documents and Vaccination Details columns
+                  max_width = Math.max(max_width, 100);
+                } else {
+                  max_width = Math.max(max_width, text.length);
+                }
+              }
+            }
+            ws['!cols'] = ws['!cols'] || [];
+            ws['!cols'][C] = { width: max_width + 2 };
+          }
+
+          // Set row heights for better readability
+          ws['!rows'] = [];
+          for (let R = range.s.r; R <= range.e.r; ++R) {
+            ws['!rows'][R] = { hpt: 30 };
+          }
+
+          // Style the header row
+          const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+          for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+            const headerCell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
+            if (headerCell) {
+              headerCell.s = {
+                font: { bold: true },
+                fill: { fgColor: { rgb: "CCCCCC" } }
+              };
+            }
+          }
+
+          // Create workbook
+          const wb: XLSX.WorkBook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Student Medical Reports');
+
+          // Generate Excel file
+          const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          
+          // Convert buffer to Blob
+          const blob = new Blob([excelBuffer], { 
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+          });
+
+          // Get current date for filename
+          const date = new Date();
+          const dateStr = date.toISOString().split('T')[0];
+          const fileName = `student_medical_reports_${dateStr}.xlsx`;
+
+          // Save file using file-saver
+          saveAs(blob, fileName);
+
+          console.log('Excel file downloaded successfully');
+        } else {
+          console.error('Invalid response format:', response);
+        }
+      },
+      error: (error) => {
+        console.error('Error downloading excel:', error);
+      }
+    });
   }
-  
-  
-  
-  
 }
