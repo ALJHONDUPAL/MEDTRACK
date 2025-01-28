@@ -52,8 +52,7 @@ export class AppointmentsComponent implements OnInit {
     'CBA',
     'CAHS',
     'CEAH',
-    'CHTM-Tourism',
-    'CHTM-Hospitality'
+    'CHTM',
   ];
 
   constructor(private apiService: ApiService) {}
