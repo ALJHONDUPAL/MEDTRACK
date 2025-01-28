@@ -227,6 +227,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             font: {
               size: 16
             }
+          },
+          datalabels: {
+            color: '#FFFFFF',
+            anchor: 'center',
+            align: 'center',
+            font: {
+              weight: 'bold'
+            },
+            formatter: (value) => {
+              return value || '';
+            }
           }
         }
       }
@@ -338,12 +349,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 private createDepartmentChart(): void {
     const ctx = this.departmentChartRef.nativeElement.getContext('2d');
     
-    // If a chart already exists, destroy it before creating a new one
     if (this.departmentChart) {
-      this.departmentChart.destroy(); // Destroy the previous chart instance
+      this.departmentChart.destroy();
     }
 
-    // Create a new chart instance and store it in this.departmentChart
     this.departmentChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -372,6 +381,17 @@ private createDepartmentChart(): void {
             text: 'Total Students per Department',
             font: {
               size: 16
+            }
+          },
+          datalabels: {
+            color: '#FFFFFF',
+            anchor: 'center',
+            align: 'center',
+            font: {
+              weight: 'bold'
+            },
+            formatter: (value) => {
+              return value || '';
             }
           }
         }
