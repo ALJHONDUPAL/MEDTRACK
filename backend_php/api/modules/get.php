@@ -742,4 +742,55 @@ public function getStudentMedicalReportsForExcel() {
     }
 }
 
+//for clinic dashboard bar graph 
+
+public function getStudentLimit() {
+    try {
+        $sql = "SELECT day_of_week, SUM(student_limit) as total_student_limit 
+                FROM time_slots 
+                GROUP BY day_of_week 
+                ORDER BY FIELD(day_of_week, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $limits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            "status" => "success",
+            "data" => $limits
+        ];
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => $e->getMessage()
+        ];
+    }
+}
+
+
+public function getDepartmentTotal() {
+    try {
+        // SQL query to get the count of students grouped by department
+        $sql = "SELECT department, COUNT(*) as total_students 
+                FROM user_profiles
+                GROUP BY department";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $totals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            "status" => "success",
+            "data" => $totals
+        ];
+    } catch (PDOException $e) {
+        return [
+            "status" => "error",
+            "message" => $e->getMessage()
+        ];
+    }
+}
+
+
+
 }

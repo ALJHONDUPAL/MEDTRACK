@@ -47,15 +47,23 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   @ViewChild('appointmentsChart') appointmentsChartRef!: ElementRef;
   @ViewChild('documentsChart') documentsChartRef!: ElementRef;
-  
+  @ViewChild('departmentChart') departmentChartRef!: ElementRef;
+
   appointmentsChart: Chart | undefined;
   documentsChart: Chart | undefined;
-
+  departmentChart: Chart | undefined; // Store the Chart instance
   // Mock data for appointments per day
-  appointmentsData = {
+  appointmentsData: { labels: string[]; data: number[] } = {
     labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    data: [5, 12, 8, 15, 10, 7, 3]
+    data: [] // An array of numbers
   };
+
+  departmentData: { labels: string[]; data: number[] } = {
+    labels: ['CAHS', 'CBA', 'CCS', 'CEAS', 'CHTM'], // Predefined department names
+    data: [] // An array of total students corresponding to each department
+};
+
+
 
   displayedColumns: string[] = [
     'firstName',
@@ -130,11 +138,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       }, 3000);
     }
     this.fetchAllStudentMedicalReports();
+    this.fetchStudentLimitData(); // Fetch student limit data and update the chart
+    this.fetchDepartmentTotalData();
   }
 
   ngAfterViewInit(): void {
     this.createAppointmentsChart();
     this.loadDocumentDistribution();
+    this.createDepartmentChart();
   }
 
   private loadDocumentDistribution(): void {
@@ -153,16 +164,46 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private fetchStudentLimitData(): void {
+    this.apiService.getStudentLimit().subscribe(
+      response => {
+        console.log('API Response:', response);
+  
+        // Map and normalize the data to match labels
+        const normalizedData = this.appointmentsData.labels.map(label => {
+          const matchingDay = response.find(
+            (d: any) => d.dayOfWeek.toUpperCase() === label.toUpperCase()
+          );
+          return matchingDay ? Number(matchingDay.totalStudentLimit) : 0;
+        });
+  
+        this.appointmentsData.data = normalizedData;
+  
+        console.log('Mapped Data for Chart:', this.appointmentsData.data);
+        this.createAppointmentsChart(); // Create the chart after updating data
+      },
+      error => {
+        console.error('Error fetching student limits:', error);
+      }
+    );
+  }
+  
+  
+
+ 
   private createAppointmentsChart(): void {
     const ctx = this.appointmentsChartRef.nativeElement.getContext('2d');
     
+    if (this.appointmentsChart) {
+      this.appointmentsChart.destroy(); // Destroy any previous chart instance
+    }
+
     this.appointmentsChart = new Chart(ctx, {
       type: 'bar',
-      plugins: [DataLabelsPlugin],
       data: {
         labels: this.appointmentsData.labels,
         datasets: [{
-          label: 'Appointments per Day',
+          label: 'Student Limit per Day',
           data: this.appointmentsData.data,
           backgroundColor: '#009F6B',
           borderColor: '#00a8e8',
@@ -182,14 +223,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         plugins: {
           title: {
             display: true,
-            text: 'Weekly Appointments Distribution',
+            text: 'Student Limit per Day',
             font: {
               size: 16
             }
-          },
-          // @ts-ignore
-          datalabels: {
-            display: false
           }
         }
       }
@@ -267,6 +304,102 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       } as any // Type assertion to avoid strict type checking for chart options
     });
   }
+
+
+  private fetchDepartmentTotalData(): void {
+    this.apiService.getDepartmentTotal().subscribe(
+      response => {
+        console.log('API Response:', response);
+        
+        // Initialize the department data as zero by default
+        const departmentTotals: { [key: string]: number } = {
+          'CAHS': 0, 'CBA': 0, 'CCS': 0, 'CEAS': 0, 'CHTM': 0
+        };
+        
+        // Process the API response to populate the totals for known departments
+        response.forEach((item: any) => {
+          if (departmentTotals.hasOwnProperty(item.department)) {
+            departmentTotals[item.department] = item.totalStudents;
+          }
+        });
+        
+        // Populate the departmentData with the totals corresponding to the predefined labels
+        this.departmentData.data = this.departmentData.labels.map(label => departmentTotals[label]);
+
+        console.log('Mapped Data for Chart:', this.departmentData.data);
+        this.createDepartmentChart(); // Create the chart after updating data
+      },
+      error => {
+        console.error('Error fetching department totals:', error);
+      }
+    );
+}
+
+private createDepartmentChart(): void {
+    const ctx = this.departmentChartRef.nativeElement.getContext('2d');
+    
+    // If a chart already exists, destroy it before creating a new one
+    if (this.departmentChart) {
+      this.departmentChart.destroy(); // Destroy the previous chart instance
+    }
+
+    // Create a new chart instance and store it in this.departmentChart
+    this.departmentChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: this.departmentData.labels,
+        datasets: [{
+          label: 'Total Students per Department',
+          data: this.departmentData.data,
+          backgroundColor: '#009F6B',
+          borderColor: '#00a8e8',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Total Students per Department',
+            font: {
+              size: 16
+            }
+          }
+        }
+      }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   fetchAllStudentMedicalReports(): void {
     console.log('Fetching student medical reports...');

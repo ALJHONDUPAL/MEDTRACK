@@ -188,6 +188,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($get->getStudentMedicalReportsForExcel());
                 break;
 
+                     //for clinic graph dashboard
+                     case 'getStudentLimit':
+                        echo json_encode($get->getStudentLimit());
+                        break;
+                        case 'getDepartmentTotal':
+                            echo json_encode($get->getDepartmentTotal());
+                            break;
+                        
+
     break;
             
             default:
@@ -341,6 +350,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 echo json_encode($post->updateDocumentStatus($data));
                 break;
+
                 
         }
         break;

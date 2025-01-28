@@ -250,6 +250,42 @@ deleteClinic(staffId: number): Observable<any> {
       catchError(this.handleError)
     );
   }
+
+
+
+  //for clinic dashboard graph
+  getStudentLimit(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/getStudentLimit`).pipe(
+      map((response: any) => {
+        if (response.status === 'success' && Array.isArray(response.data)) {
+          return response.data.map((item: any) => ({
+            dayOfWeek: item.day_of_week,
+            totalStudentLimit: item.total_student_limit
+          }));
+        }
+        throw new Error('Invalid response format');
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  getDepartmentTotal(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/getDepartmentTotal`).pipe(
+      map((response: any) => {
+        if (response.status === 'success' && Array.isArray(response.data)) {
+          return response.data.map((item: any) => ({
+            department: item.department,
+            totalStudents: item.total_students
+          }));
+        }
+        throw new Error('Invalid response format');
+      }),
+      catchError(this.handleError)
+    );
+}
+
+  
+
   
   private handleError(error: HttpErrorResponse) {
     console.error('API Error:', error);
